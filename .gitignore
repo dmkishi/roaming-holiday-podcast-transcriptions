@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+.venv/
+
+# Build outputs
+dist/
+
+# OS
+.DS_Store
+
+# Project outputs
+transcriptions/*
+!transcriptions/.gitkeep

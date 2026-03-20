@@ -1,0 +1,26 @@
+{
+  "name": "roaming-holiday-podcast-transcriptions",
+  "author": "",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "transcribe": "tsx bin/transcribe.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "packageManager": "pnpm@10.24.0",
+  "devDependencies": {
+    "@dmkishi/markdownlint-cli2.yaml": "^0.0.3",
+    "@types/cli-progress": "^3.11.6",
+    "@types/minimist": "^1.2.5",
+    "@types/node": "^25.5.0",
+    "cli-progress": "^3.12.0",
+    "fast-xml-parser": "^5.2.0",
+    "minimist": "^1.2.8",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.1"
+  }
+}
