@@ -1,5 +1,5 @@
 import { resolve, join, basename } from 'node:path';
-import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
 import { pluralize, handelize, formatDate, formatNumber, formatEpisodeNumber } from '../lib/strings.js';
@@ -8,10 +8,10 @@ import { downloadMp3 } from '../lib/transcribe/download.js';
 import { transcribe } from '../lib/transcribe/whisper.js';
 import { computeTranscriptionStats, type Transcription } from '../lib/transcribe/stats.js';
 import { summarizeEpisode } from '../lib/summarize/summarizeEpisode.js';
+import { createLogger } from '../lib/logger.js';
 
 const DEFAULT_MODEL = 'base';
 const OUTPUT_DIR = resolve(import.meta.dirname, '../transcriptions');
-const LOG_DIR = resolve(import.meta.dirname, '../logs');
 
 const argv = minimist(process.argv.slice(2), {
   string: ['model', 'summary-model'],
@@ -29,12 +29,7 @@ main();
 
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
-  mkdirSync(LOG_DIR, { recursive: true });
-
-  // Set up log file
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
-  const logPath = join(LOG_DIR, `transcribe-${timestamp}.log`);
-  const log = createLogger(logPath);
+  const log = createLogger();
 
   log.info(`${pluralize(episodeNumbers.length, 'Episode')}: ${episodeNumbers.join(', ')}`);
   log.info(`Model: ${pc.blue(argv.model)}`);
@@ -241,21 +236,3 @@ function formatTimestamp(totalSeconds: number): string {
   return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-function createLogger(logPath: string) {
-  const write = (level: string, msg: string) => {
-    const line = `${msg}`;
-    if (level === 'error' || level === 'warn') {
-      console.error(line);
-    } else {
-      console.log(line);
-    }
-    // Strip ANSI color codes before writing to log file
-    appendFileSync(logPath, line.replace(/\x1b\[[0-9;]*m/g, '') + '\n');
-  };
-
-  return {
-    info: (msg: string) => write('info', msg),
-    warn: (msg: string) => write('warn', `[WARN] ${msg}`),
-    error: (msg: string) => write('error', `[ERROR] ${msg}`),
-  };
-}
