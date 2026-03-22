@@ -12,5 +12,5 @@
       "@lib/*": ["lib/*"]
     }
   },
-  "include": ["bin", "lib"]
+  "include": ["bin", "lib", "tests"]
 }

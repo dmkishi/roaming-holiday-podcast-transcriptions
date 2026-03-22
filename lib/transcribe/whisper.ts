@@ -3,6 +3,7 @@ import { existsSync, renameSync } from 'node:fs';
 import { resolve, basename, join } from 'node:path';
 import { SingleBar, Presets } from 'cli-progress';
 import { BASE_PROMPT } from '@lib/config/prompts.js';
+import { parseDuration } from '@lib/duration.js';
 
 const VENV_WHISPER = resolve(import.meta.dirname, '../../.venv/bin/whisper');
 
@@ -77,7 +78,7 @@ export async function transcribe(
       for (const line of lines) {
         const match = line.match(timestampRegex);
         if (match) {
-          const endSec = parseTimestamp(match[1]);
+          const endSec = parseDuration(match[1]).seconds;
           bar.update(Math.min(Math.round(endSec), durationSeconds));
         }
       }
@@ -109,11 +110,4 @@ export async function transcribe(
     outputPath: finalOutput,
     wallTimeSeconds,
   };
-}
-
-function parseTimestamp(ts: string): number {
-  const parts = ts.split(':').map(Number);
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  return parts[0];
 }

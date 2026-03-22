@@ -6,7 +6,8 @@
   "scripts": {
     "transcribe": "tsx bin/transcribe.ts",
     "summarize": "tsx --env-file=.env bin/summarize.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "keywords": [],
   "packageManager": "pnpm@10.24.0",
@@ -19,7 +20,8 @@
     "fast-xml-parser": "^5.2.0",
     "minimist": "^1.2.8",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   },
   "dependencies": {
     "openai": "^6.32.0",

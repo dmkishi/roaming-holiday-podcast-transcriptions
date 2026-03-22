@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { parseDuration } from '@lib/duration.js';
 
 const RSS_URL = 'https://keithcourage.com/rh/rss/rss.xml';
 
@@ -47,13 +48,15 @@ export async function fetchEpisodes(): Promise<Episode[]> {
     const episodeNumber = parseEpisodeNumber(item.guid);
     if (episodeNumber === null) continue;
 
+    const dur = parseDuration(item['itunes:duration']);
+
     episodes.push({
       episodeNumber,
       title: item.title,
       pubDate: new Date(item.pubDate),
       description: (item.description ?? '').trim(),
-      duration: normalizeDuration(item['itunes:duration']),
-      durationSeconds: parseDurationSeconds(item['itunes:duration']),
+      duration: dur.timestamp,
+      durationSeconds: dur.seconds,
       imageUrl: item['itunes:image']?.['@_href'] ?? '',
       mp3Url: item.enclosure?.['@_url'] ?? item.guid,
     });
@@ -95,26 +98,3 @@ function parseEpisodeNumber(guid: string): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
-/**
- * Parses a colon-separated duration string (e.g. "1:23:45") into total seconds.
- */
-function parseDurationSeconds(duration: string): number {
-  const parts = duration.split(':').map(Number);
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  return parts[0];
-}
-
-/**
- * Normalizes a duration string to "H:MM:SS" format, zero-padding as needed.
- */
-function normalizeDuration(duration: string): string {
-  const parts = duration.split(':');
-  if (parts.length === 2) {
-    return `0:${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
-  }
-  if (parts.length === 3) {
-    return `${parts[0]}:${parts[1].padStart(2, '0')}:${parts[2].padStart(2, '0')}`;
-  }
-  return duration;
-}

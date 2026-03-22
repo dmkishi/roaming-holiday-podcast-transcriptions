@@ -3,6 +3,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
 import { pluralize, handelize, formatDate, formatNumber, formatEpisodeNumber } from '@lib/strings.js';
+import { fromSeconds } from '@lib/duration.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
@@ -193,7 +194,9 @@ async function main() {
   for (const r of results) {
     const pct = Math.round((r.wallTimeSeconds / r.episode.durationSeconds) * 100);
     log.info(`#${r.episode.episodeNumber} [${formatDate(r.episode.pubDate)}] "${r.episode.title}"`);
-    log.info(`  Transcription time:  ${formatDuration(r.wallTimeSeconds)} (${pct}% of ${formatTimestamp(r.episode.durationSeconds)})`);
+    const wall = fromSeconds(r.wallTimeSeconds);
+    const total = fromSeconds(r.episode.durationSeconds);
+    log.info(`  Transcription time:  ${wall.human} (${pct}% of ${total.timestamp})`);
     log.info(`  Output:              "${basename(r.outputPath)}"`);
   }
 
@@ -212,27 +215,4 @@ async function main() {
   }
 }
 
-/**
- * Formats seconds into a human-readable duration string, e.g. "1h 23m 45s".
- */
-function formatDuration(totalSeconds: number): string {
-  const hrs = Math.floor(totalSeconds / 3600);
-  const mins = Math.floor((totalSeconds % 3600) / 60);
-  const secs = Math.round(totalSeconds % 60);
-  const parts: string[] = [];
-  if (hrs > 0) parts.push(`${hrs}h`);
-  if (mins > 0 || hrs > 0) parts.push(`${mins}m`);
-  parts.push(`${secs}s`);
-  return parts.join(' ');
-}
-
-/**
- * Formats seconds into a timestamp string, e.g. "1:23:45".
- */
-function formatTimestamp(totalSeconds: number): string {
-  const hrs = Math.floor(totalSeconds / 3600);
-  const mins = Math.floor((totalSeconds % 3600) / 60);
-  const secs = Math.round(totalSeconds % 60);
-  return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
 
