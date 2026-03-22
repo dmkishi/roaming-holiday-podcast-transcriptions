@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      openai:
+        specifier: ^6.32.0
+        version: 6.32.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -249,6 +252,18 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
+  openai@6.32.0:
+    resolution: {integrity: sha512-j3k+BjydAf8yQlcOI7WUQMQTbbF5GEIMAE2iZYCOzwwB3S2pCheaWYp+XZRNAch4jWVc52PMDGRRjutao3lLCg==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
   path-expression-matcher@1.2.0:
     resolution: {integrity: sha512-DwmPWeFn+tq7TiyJ2CxezCAirXjFxvaiD03npak3cRjlP9+OjTmSy1EpIrEbh+l6JgUundniloMLDQ/6VTdhLQ==}
     engines: {node: '>=14.0.0'}
@@ -432,6 +447,8 @@ snapshots:
   is-fullwidth-code-point@3.0.0: {}
 
   minimist@1.2.8: {}
+
+  openai@6.32.0: {}
 
   path-expression-matcher@1.2.0: {}
 

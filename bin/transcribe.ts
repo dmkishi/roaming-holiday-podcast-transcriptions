@@ -1,24 +1,26 @@
 import { resolve, join, basename } from 'node:path';
-import { existsSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
 import { pluralize } from '../lib/strings.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '../lib/transcribe/rss.js';
 import { downloadMp3 } from '../lib/transcribe/download.js';
 import { transcribe } from '../lib/transcribe/whisper.js';
+import { computeTranscriptionStats, type Transcription } from '../lib/transcribe/stats.js';
+import { summarizeEpisode } from '../lib/summarize/summarizeEpisode.js';
 
 const DEFAULT_MODEL = 'base';
 const OUTPUT_DIR = resolve(import.meta.dirname, '../transcriptions');
 
 const argv = minimist(process.argv.slice(2), {
   string: ['model'],
-  boolean: ['force'],
-  default: { model: DEFAULT_MODEL, force: false },
+  boolean: ['force', 'summarize'],
+  default: { model: DEFAULT_MODEL, force: false, summarize: false },
 });
 
 const episodeNumbers = argv._.map(Number).filter((n) => !isNaN(n));
 if (episodeNumbers.length === 0) {
-  console.error('Usage: pnpm transcribe <episode-numbers...> [--model base] [--force]');
+  console.error('Usage: pnpm transcribe <episode-numbers...> [--model base] [--force] [--summarize]');
   process.exit(1);
 }
 
@@ -135,12 +137,52 @@ async function main() {
         title: episode.title,
         description: episode.description,
       });
+      // Compute and write transcription stats
+      const raw = readFileSync(result.outputPath, 'utf-8');
+      const transcription = JSON.parse(raw) as Transcription;
+      const stats = computeTranscriptionStats(transcription);
+      const statsPath = join(OUTPUT_DIR, `${stem}.stats.json`);
+      writeFileSync(statsPath, JSON.stringify(stats, null, 2) + '\n');
+      log.info(`  Stats: ${stats.wordCount} words, ${stats.characterCount} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);
+
       results.push({ episode, ...result });
       log.info(`  Output: "${basename(result.outputPath)}"`);
     } catch (err) {
       const msg = (err as Error).message;
       log.error(`  Transcription failed: ${msg}`);
       transcribeFailures.push({ episode, error: msg });
+    }
+  }
+
+  // Phase 3: Summarize transcriptions (optional)
+  if (argv.summarize && results.length > 0) {
+    log.info('');
+    log.info(`=== Summarizing ${results.length} ${pluralize(results.length, 'episode')} ===`);
+
+    for (const r of results) {
+      const stem = buildOutputStem(r.episode);
+      const summaryPath = join(OUTPUT_DIR, `${stem}.summary.json`);
+
+      log.info('');
+      log.info(`#${r.episode.episodeNumber} "${r.episode.title}"`);
+
+      try {
+        const { skipped } = await summarizeEpisode({
+          transcriptionPath: r.outputPath,
+          summaryPath,
+          episodeNumber: r.episode.episodeNumber,
+          title: r.episode.title,
+          description: r.episode.description,
+          force: argv.force,
+          log: (msg) => log.info(`  ${msg}`),
+        });
+
+        if (skipped) {
+          log.warn(`Skipping summary for episode ${r.episode.episodeNumber}: already exists (use --force)`);
+        }
+      } catch (err) {
+        log.error(`  Summarization failed: ${(err as Error).message}`);
+      }
     }
   }
 

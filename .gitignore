@@ -5,6 +5,9 @@ node_modules/
 # Build outputs
 dist/
 
+# Secrets
+.env
+
 # OS
 .DS_Store
 
