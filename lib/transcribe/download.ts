@@ -28,7 +28,7 @@ export async function downloadMp3(
   try {
     const stat = statSync(destPath);
     if (contentLength > 0 && stat.size === contentLength) {
-      const sizeMB = (stat.size / BYTES_PER_MB).toFixed(1);
+      const sizeMB = Math.round(stat.size / BYTES_PER_MB);
       console.log(pc.yellow(`Already downloaded: "${destPath}" (${sizeMB} MB)`));
       return destPath;
     }
@@ -80,7 +80,7 @@ export async function downloadMp3(
 
   bar.stop();
 
-  const sizeMB = (downloaded / BYTES_PER_MB).toFixed(1);
+  const sizeMB = Math.round(downloaded / BYTES_PER_MB);
   console.log(`Downloaded: ${destPath} (${sizeMB} MB)`);
   return destPath;
 }
