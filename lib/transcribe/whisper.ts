@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, renameSync } from 'node:fs';
 import { resolve, basename, join } from 'node:path';
 import { SingleBar, Presets } from 'cli-progress';
-import { BASE_PROMPT } from '../config/prompts.js';
+import { BASE_PROMPT } from '@lib/config/prompts.js';
 
 const VENV_WHISPER = resolve(import.meta.dirname, '../../.venv/bin/whisper');
 

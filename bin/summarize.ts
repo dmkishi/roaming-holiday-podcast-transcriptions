@@ -2,8 +2,8 @@ import { resolve, join } from 'node:path';
 import { readdirSync, readFileSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
-import { summarizeEpisode } from '../lib/summarize/summarizeEpisode.js';
-import { pluralize, handelize, formatEpisodeNumber } from '../lib/strings.js';
+import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
+import { pluralize, handelize, formatEpisodeNumber } from '@lib/strings.js';
 
 const DEFAULT_TRANSCRIPTION_MODEL = 'base';
 const DEFAULT_SUMMARY_MODEL = 'gpt-4o';

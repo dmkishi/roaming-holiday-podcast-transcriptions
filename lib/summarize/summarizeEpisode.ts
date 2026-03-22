@@ -1,5 +1,5 @@
 import { basename } from 'node:path';
-import { formatNumber } from '../strings.js';
+import { formatNumber } from '@lib/strings.js';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { summarize, type SummaryResult } from './llm.js';
 

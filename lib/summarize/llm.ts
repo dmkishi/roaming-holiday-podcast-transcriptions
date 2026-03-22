@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { formatNumber } from '../strings.js';
-import { SYSTEM_PROMPT } from '../config/prompts.js';
+import { formatNumber } from '@lib/strings.js';
+import { SYSTEM_PROMPT } from '@lib/config/prompts.js';
 
 export interface SummaryResult {
   episodeNumber: number;
