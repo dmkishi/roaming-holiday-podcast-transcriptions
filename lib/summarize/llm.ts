@@ -47,6 +47,7 @@ const summarySchema = {
 export async function summarize(
   text: string,
   context: { episodeNumber: number; title: string; description: string },
+  model = 'gpt-4o',
 ): Promise<SummaryResult> {
   const client = new OpenAI();
 
@@ -60,7 +61,7 @@ export async function summarize(
   ].join('\n');
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMessage },

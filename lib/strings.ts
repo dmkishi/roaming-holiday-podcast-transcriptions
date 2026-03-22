@@ -20,6 +20,13 @@ export function handelize(str: string): string {
 }
 
 /**
+ * Date → YYYY-MM-DD
+ */
+export function formatDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/**
  * `1_234_567` → "1,234,567".
  */
 export function formatNumber(n: number): string {

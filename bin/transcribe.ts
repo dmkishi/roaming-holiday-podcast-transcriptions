@@ -2,7 +2,7 @@ import { resolve, join, basename } from 'node:path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
-import { pluralize } from '../lib/strings.js';
+import { pluralize, handelize, formatDate } from '../lib/strings.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '../lib/transcribe/rss.js';
 import { downloadMp3 } from '../lib/transcribe/download.js';
 import { transcribe } from '../lib/transcribe/whisper.js';
@@ -13,14 +13,14 @@ const DEFAULT_MODEL = 'base';
 const OUTPUT_DIR = resolve(import.meta.dirname, '../transcriptions');
 
 const argv = minimist(process.argv.slice(2), {
-  string: ['model'],
+  string: ['model', 'summary-model'],
   boolean: ['force', 'summarize'],
-  default: { model: DEFAULT_MODEL, force: false, summarize: false },
+  default: { model: DEFAULT_MODEL, 'summary-model': 'gpt-4o', force: false, summarize: false },
 });
 
 const episodeNumbers = argv._.map(Number).filter((n) => !isNaN(n));
 if (episodeNumbers.length === 0) {
-  console.error('Usage: pnpm transcribe <episode-numbers...> [--model base] [--force] [--summarize]');
+  console.error('Usage: pnpm transcribe <episode-numbers...> [--model base] [--force] [--summarize] [--summary-model gpt-4o]');
   process.exit(1);
 }
 
@@ -67,8 +67,8 @@ async function main() {
   // Check for existing transcriptions
   const toProcess: Episode[] = [];
   for (const ep of found) {
-    const stem = buildOutputStem(ep);
-    const transcriptionPath = join(OUTPUT_DIR, `${stem}--${argv.model}.json`);
+    const num = formatEpisodeNumber(ep.episodeNumber);
+    const transcriptionPath = join(OUTPUT_DIR, `${num}.transcription__${argv.model}.json`);
     if (existsSync(transcriptionPath) && !argv.force) {
       log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(transcriptionPath)} already exists (use --force to overwrite)`);
     } else {
@@ -93,8 +93,8 @@ async function main() {
     log.info(`#${ep.episodeNumber} [${formatDate(ep.pubDate)}] "${ep.title}" (${ep.duration})`);
 
     // Write metadata sidecar
-    const stem = buildOutputStem(ep);
-    const metaPath = join(OUTPUT_DIR, `${stem}.meta.json`);
+    const num = formatEpisodeNumber(ep.episodeNumber);
+    const metaPath = join(OUTPUT_DIR, `${num}.episode-meta.json`);
     const metadata = {
       episodeNumber: ep.episodeNumber,
       title: ep.title,
@@ -127,12 +127,12 @@ async function main() {
 
   for (const { episode, mp3Path } of downloaded) {
     log.info('');
-    log.info(`#${episode.episodeNumber} [${formatDate(episode.pubDate)}] "${episode.title}"`);
+    log.info(`#${episode.episodeNumber} [${episode.pubDate.toISOString().slice(0, 10)}] "${episode.title}"`);
 
-    const stem = buildOutputStem(episode);
+    const num = formatEpisodeNumber(episode.episodeNumber);
 
     try {
-      const result = await transcribe(mp3Path, OUTPUT_DIR, episode.durationSeconds, stem, {
+      const result = await transcribe(mp3Path, OUTPUT_DIR, episode.durationSeconds, num, {
         model: argv.model,
         title: episode.title,
         description: episode.description,
@@ -141,7 +141,7 @@ async function main() {
       const raw = readFileSync(result.outputPath, 'utf-8');
       const transcription = JSON.parse(raw) as Transcription;
       const stats = computeTranscriptionStats(transcription);
-      const statsPath = join(OUTPUT_DIR, `${stem}.stats.json`);
+      const statsPath = join(OUTPUT_DIR, `${num}.transcription__${argv.model}.stats.json`);
       writeFileSync(statsPath, JSON.stringify(stats, null, 2) + '\n');
       log.info(`  Stats: ${stats.wordCount} words, ${stats.characterCount} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);
 
@@ -159,9 +159,10 @@ async function main() {
     log.info('');
     log.info(`=== Summarizing ${results.length} ${pluralize(results.length, 'episode')} ===`);
 
+    const summaryModel = argv['summary-model'];
     for (const r of results) {
-      const stem = buildOutputStem(r.episode);
-      const summaryPath = join(OUTPUT_DIR, `${stem}.summary.json`);
+      const num = formatEpisodeNumber(r.episode.episodeNumber);
+      const summaryPath = join(OUTPUT_DIR, `${num}.transcription__${argv.model}.summary__${handelize(summaryModel)}.json`);
 
       log.info('');
       log.info(`#${r.episode.episodeNumber} "${r.episode.title}"`);
@@ -173,6 +174,7 @@ async function main() {
           episodeNumber: r.episode.episodeNumber,
           title: r.episode.title,
           description: r.episode.description,
+          summaryModel,
           force: argv.force,
           log: (msg) => log.info(`  ${msg}`),
         });
@@ -216,18 +218,8 @@ async function main() {
   log.info(`Log: ${logPath}`);
 }
 
-/**
- * Date → YYYY-MM-DD
- */
-function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function buildOutputStem(ep: Episode): string {
-  const num = String(ep.episodeNumber).padStart(4, '0');
-  const date = formatDate(ep.pubDate);
-  const safeTitle = ep.title.replace(/[/\\:*?"<>|]/g, '-');
-  return `${num} [${date}] ${safeTitle}`;
+function formatEpisodeNumber(n: number): string {
+  return String(n).padStart(3, '0');
 }
 
 function formatSeconds(totalSeconds: number): string {

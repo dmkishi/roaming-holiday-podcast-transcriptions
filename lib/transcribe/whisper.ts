@@ -108,7 +108,7 @@ export async function transcribe(
   // Rename Whisper output to the desired filename
   const whisperOutputName = basename(audioPath).replace(/\.[^.]+$/, '') + '.json';
   const whisperOutput = join(outputDir, whisperOutputName);
-  const finalOutput = join(outputDir, `${outputStem}--${options.model}.json`);
+  const finalOutput = join(outputDir, `${outputStem}.transcription__${options.model}.json`);
 
   if (existsSync(whisperOutput)) {
     renameSync(whisperOutput, finalOutput);
