@@ -11,6 +11,7 @@ import { summarizeEpisode } from '../lib/summarize/summarizeEpisode.js';
 
 const DEFAULT_MODEL = 'base';
 const OUTPUT_DIR = resolve(import.meta.dirname, '../transcriptions');
+const LOG_DIR = resolve(import.meta.dirname, '../logs');
 
 const argv = minimist(process.argv.slice(2), {
   string: ['model', 'summary-model'],
@@ -28,10 +29,11 @@ main();
 
 async function main() {
   mkdirSync(OUTPUT_DIR, { recursive: true });
+  mkdirSync(LOG_DIR, { recursive: true });
 
   // Set up log file
   const timestamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
-  const logPath = join(OUTPUT_DIR, `transcribe-${timestamp}.log`);
+  const logPath = join(LOG_DIR, `transcribe-${timestamp}.log`);
   const log = createLogger(logPath);
 
   log.info(`${pluralize(episodeNumbers.length, 'Episode')}: ${episodeNumbers.join(', ')}`);
