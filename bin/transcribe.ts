@@ -2,7 +2,7 @@ import { resolve, join, basename } from 'node:path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
-import { pluralize, handelize, formatDate } from '../lib/strings.js';
+import { pluralize, handelize, formatDate, formatNumber } from '../lib/strings.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '../lib/transcribe/rss.js';
 import { downloadMp3 } from '../lib/transcribe/download.js';
 import { transcribe } from '../lib/transcribe/whisper.js';
@@ -90,7 +90,7 @@ async function main() {
 
   for (const ep of toProcess) {
     log.info('');
-    log.info(`#${ep.episodeNumber} [${formatDate(ep.pubDate)}] "${ep.title}" (${ep.duration})`);
+    log.info(`#${ep.episodeNumber} [${formatDate(ep.pubDate)}] "${ep.title}"`);
 
     // Write metadata sidecar
     const num = formatEpisodeNumber(ep.episodeNumber);
@@ -106,6 +106,7 @@ async function main() {
       mp3Url: ep.mp3Url,
     };
     writeFileSync(metaPath, JSON.stringify(metadata, null, 2) + '\n');
+    log.info(`  Length: "${ep.duration}"`);
     log.info(`  Metadata: "${basename(metaPath)}"`);
 
     try {
@@ -143,7 +144,7 @@ async function main() {
       const stats = computeTranscriptionStats(transcription);
       const statsPath = join(OUTPUT_DIR, `${num}.transcription__${argv.model}.stats.json`);
       writeFileSync(statsPath, JSON.stringify(stats, null, 2) + '\n');
-      log.info(`  Stats: ${stats.wordCount} words, ${stats.characterCount} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);
+      log.info(`  Stats: ${formatNumber(stats.wordCount)} words, ${formatNumber(stats.characterCount)} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);
 
       results.push({ episode, ...result });
       log.info(`  Output: "${basename(result.outputPath)}"`);
@@ -193,10 +194,9 @@ async function main() {
   log.info('=== Summary ===');
 
   for (const r of results) {
-    const wallTime = formatSeconds(r.wallTimeSeconds);
-    log.info(`[${r.episode.episodeNumber}] ${r.episode.title}`);
-    log.info(`  Episode duration:    ${r.episode.duration}`);
-    log.info(`  Transcription time:  ${wallTime}`);
+    const pct = Math.round((r.wallTimeSeconds / r.episode.durationSeconds) * 100);
+    log.info(`#${r.episode.episodeNumber} [${formatDate(r.episode.pubDate)}] "${r.episode.title}"`);
+    log.info(`  Transcription time:  ${formatDuration(r.wallTimeSeconds)} (${pct}% of ${formatSeconds(r.episode.durationSeconds)})`);
     log.info(`  Output:              "${basename(r.outputPath)}"`);
   }
 
@@ -213,19 +213,28 @@ async function main() {
       log.warn(f);
     }
   }
-
-  log.info('');
-  log.info(`Log: ${logPath}`);
 }
 
 function formatEpisodeNumber(n: number): string {
   return String(n).padStart(3, '0');
 }
 
-function formatSeconds(totalSeconds: number): string {
-  const mins = Math.floor(totalSeconds / 60);
+function formatDuration(totalSeconds: number): string {
+  const hrs = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
   const secs = Math.round(totalSeconds % 60);
-  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  const parts: string[] = [];
+  if (hrs > 0) parts.push(`${hrs}h`);
+  if (mins > 0 || hrs > 0) parts.push(`${mins}m`);
+  parts.push(`${secs}s`);
+  return parts.join(' ');
+}
+
+function formatSeconds(totalSeconds: number): string {
+  const hrs = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
+  const secs = Math.round(totalSeconds % 60);
+  return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 function createLogger(logPath: string) {
