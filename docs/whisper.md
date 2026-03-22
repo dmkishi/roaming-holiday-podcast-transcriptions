@@ -14,7 +14,7 @@ Whisper is conditioned with a three-part prompt to improve transcription
 accuracy for proper nouns and place names:
 
 1. **Base prompt** — general podcast context (author name, location, etc.) Edit
-   the `BASE_PROMPT` constant in `scripts/whisper.ts` to change this.
+   the `BASE_PROMPT` constant in `lib/config/prompts.ts` to change this.
 2. **Episode title** — from the RSS feed.
 3. **Episode description** — from the RSS feed (typically lists area names
    discussed.)

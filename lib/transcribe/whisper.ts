@@ -2,18 +2,9 @@ import { spawn } from 'node:child_process';
 import { existsSync, renameSync } from 'node:fs';
 import { resolve, basename, join } from 'node:path';
 import { SingleBar, Presets } from 'cli-progress';
+import { BASE_PROMPT } from '../config/prompts.js';
 
 const VENV_WHISPER = resolve(import.meta.dirname, '../../.venv/bin/whisper');
-
-/**
- * The Whisper prompt is not instructional but instead provides context about
- * the style and speech patterns of the podcast. Here, we include proper nouns
- * and names to help Whisper recognize and spell them correctly.
- */
-const BASE_PROMPT = `
-  "Roaming Holiday" is a travel podcast by Keith McNally of Fredericton, New
-  Brunswick. He travels through Asia, mainly Japan, South Korea, and Taiwan.
-`.trim();
 
 export interface TranscribeOptions {
   model: string;
