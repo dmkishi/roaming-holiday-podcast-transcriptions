@@ -24,9 +24,8 @@ export function buildPrompt(title: string, description: string): string {
 
 export async function transcribe(
   audioPath: string,
-  outputDir: string,
+  outputPath: string,
   durationSeconds: number,
-  outputStem: string,
   options: TranscribeOptions,
 ): Promise<TranscribeResult> {
   if (!existsSync(VENV_WHISPER)) {
@@ -44,7 +43,7 @@ export async function transcribe(
     audioPath,
     '--model', options.model,
     '--output_format', 'json',
-    '--output_dir', outputDir,
+    '--output_dir', join(outputPath, '..'),
     '--language', 'en',
     '--verbose', 'True',
     '--initial_prompt', prompt,
@@ -98,16 +97,16 @@ export async function transcribe(
   }
 
   // Rename Whisper output to the desired filename
+  const outputDir = join(outputPath, '..');
   const whisperOutputName = basename(audioPath).replace(/\.[^.]+$/, '') + '.json';
   const whisperOutput = join(outputDir, whisperOutputName);
-  const finalOutput = join(outputDir, `${outputStem}.transcription__${options.model}.json`);
 
   if (existsSync(whisperOutput)) {
-    renameSync(whisperOutput, finalOutput);
+    renameSync(whisperOutput, outputPath);
   }
 
   return {
-    outputPath: finalOutput,
+    outputPath,
     wallTimeSeconds,
   };
 }

@@ -1,13 +1,12 @@
-import { resolve, join } from 'node:path';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
-import { pluralize, handelize, formatEpisodeNumber } from '@lib/strings.js';
+import { pluralize } from '@lib/strings.js';
+import { episodePaths, findTranscription } from '@lib/paths.js';
 
 const DEFAULT_TRANSCRIPTION_MODEL = 'base';
 const DEFAULT_SUMMARY_MODEL = 'gpt-4o';
-const TRANSCRIPTIONS_DIR = resolve(import.meta.dirname, '../transcriptions');
 
 const argv = minimist(process.argv.slice(2), {
   string: ['model', 'summary-model'],
@@ -29,32 +28,30 @@ async function main() {
   console.log('');
 
   for (const epNum of episodeNumbers) {
-    const num = formatEpisodeNumber(epNum);
-
     // Find the transcription file
-    const transcriptionFile = findFile(num, `.transcription__${argv.model}.json`);
+    const transcriptionFile = findTranscription(epNum, argv.model);
     if (!transcriptionFile) {
-      console.error(pc.red(`Episode ${epNum}: no transcription found (looked for ${num}.transcription__${argv.model}.json)`));
+      console.error(pc.red(`Episode ${epNum}: no transcription found for model "${argv.model}"`));
       continue;
     }
 
-    // Derive summary output path
-    const summaryPath = join(TRANSCRIPTIONS_DIR, `${num}.transcription__${argv.model}.summary__${handelize(summaryModel)}.json`);
+    const paths = episodePaths({ episode: epNum, model: argv.model, summaryModel });
 
     // Load metadata for context
-    const metaFile = findFile(num, '.episode-meta.json');
     let title = '';
     let description = '';
-    if (metaFile) {
-      const meta = JSON.parse(readFileSync(metaFile, 'utf-8'));
+    try {
+      const meta = JSON.parse(readFileSync(paths.meta, 'utf-8'));
       title = meta.title ?? '';
       description = meta.description ?? '';
+    } catch {
+      // metadata file may not exist
     }
 
     try {
       const { skipped, result } = await summarizeEpisode({
         transcriptionPath: transcriptionFile,
-        summaryPath,
+        summaryPath: paths.summary!,
         episodeNumber: epNum,
         title,
         description,
@@ -78,8 +75,3 @@ async function main() {
   }
 }
 
-function findFile(num: string, suffix: string): string | undefined {
-  const files = readdirSync(TRANSCRIPTIONS_DIR);
-  const match = files.find((f) => f.startsWith(num) && f.endsWith(suffix));
-  return match ? join(TRANSCRIPTIONS_DIR, match) : undefined;
-}

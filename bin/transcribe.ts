@@ -1,9 +1,10 @@
-import { resolve, join, basename } from 'node:path';
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { basename } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
-import { pluralize, handelize, formatDate, formatNumber, formatEpisodeNumber } from '@lib/strings.js';
+import { pluralize, formatDate, formatNumber } from '@lib/strings.js';
 import { fromSeconds } from '@lib/duration.js';
+import { episodePaths, transcriptionExists, TRANSCRIPTIONS_DIR } from '@lib/paths.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
@@ -12,7 +13,6 @@ import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
 import { createLogger } from '@lib/logger.js';
 
 const DEFAULT_MODEL = 'base';
-const OUTPUT_DIR = resolve(import.meta.dirname, '../transcriptions');
 
 const argv = minimist(process.argv.slice(2), {
   string: ['model', 'summary-model'],
@@ -29,7 +29,7 @@ if (episodeNumbers.length === 0) {
 main();
 
 async function main() {
-  mkdirSync(OUTPUT_DIR, { recursive: true });
+  mkdirSync(TRANSCRIPTIONS_DIR, { recursive: true });
   const log = createLogger();
 
   log.info(`${pluralize(episodeNumbers.length, 'Episode')}: ${episodeNumbers.join(', ')}`);
@@ -65,10 +65,9 @@ async function main() {
   // Check for existing transcriptions
   const toProcess: Episode[] = [];
   for (const ep of found) {
-    const num = formatEpisodeNumber(ep.episodeNumber);
-    const transcriptionPath = join(OUTPUT_DIR, `${num}.transcription__${argv.model}.json`);
-    if (existsSync(transcriptionPath) && !argv.force) {
-      log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(transcriptionPath)} already exists (use --force to overwrite)`);
+    if (!argv.force && transcriptionExists({ episode: ep.episodeNumber, model: argv.model })) {
+      const paths = episodePaths({ episode: ep.episodeNumber, model: argv.model });
+      log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(paths.transcription)} already exists (use --force to overwrite)`);
     } else {
       toProcess.push(ep);
     }
@@ -91,8 +90,7 @@ async function main() {
     log.info(`#${ep.episodeNumber} [${formatDate(ep.pubDate)}] "${ep.title}"`);
 
     // Write metadata sidecar
-    const num = formatEpisodeNumber(ep.episodeNumber);
-    const metaPath = join(OUTPUT_DIR, `${num}.episode-meta.json`);
+    const paths = episodePaths({ episode: ep.episodeNumber, model: argv.model });
     const metadata = {
       episodeNumber: ep.episodeNumber,
       title: ep.title,
@@ -103,9 +101,9 @@ async function main() {
       imageUrl: ep.imageUrl,
       mp3Url: ep.mp3Url,
     };
-    writeFileSync(metaPath, JSON.stringify(metadata, null, 2) + '\n');
+    writeFileSync(paths.meta, JSON.stringify(metadata, null, 2) + '\n');
     log.info(`  Length: "${ep.duration}"`);
-    log.info(`  Metadata: "${basename(metaPath)}"`);
+    log.info(`  Metadata: "${basename(paths.meta)}"`);
 
     try {
       const mp3Path = await downloadMp3(ep.mp3Url, ep.episodeNumber);
@@ -128,10 +126,10 @@ async function main() {
     log.info('');
     log.info(`#${episode.episodeNumber} [${episode.pubDate.toISOString().slice(0, 10)}] "${episode.title}"`);
 
-    const num = formatEpisodeNumber(episode.episodeNumber);
+    const paths = episodePaths({ episode: episode.episodeNumber, model: argv.model });
 
     try {
-      const result = await transcribe(mp3Path, OUTPUT_DIR, episode.durationSeconds, num, {
+      const result = await transcribe(mp3Path, paths.transcription, episode.durationSeconds, {
         model: argv.model,
         title: episode.title,
         description: episode.description,
@@ -140,8 +138,7 @@ async function main() {
       const raw = readFileSync(result.outputPath, 'utf-8');
       const transcription = JSON.parse(raw) as Transcription;
       const stats = computeTranscriptionStats(transcription);
-      const statsPath = join(OUTPUT_DIR, `${num}.transcription__${argv.model}.stats.json`);
-      writeFileSync(statsPath, JSON.stringify(stats, null, 2) + '\n');
+      writeFileSync(paths.stats, JSON.stringify(stats, null, 2) + '\n');
       log.info(`  Stats: ${formatNumber(stats.wordCount)} words, ${formatNumber(stats.characterCount)} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);
 
       results.push({ episode, ...result });
@@ -160,8 +157,7 @@ async function main() {
 
     const summaryModel = argv['summary-model'];
     for (const r of results) {
-      const num = formatEpisodeNumber(r.episode.episodeNumber);
-      const summaryPath = join(OUTPUT_DIR, `${num}.transcription__${argv.model}.summary__${handelize(summaryModel)}.json`);
+      const paths = episodePaths({ episode: r.episode.episodeNumber, model: argv.model, summaryModel });
 
       log.info('');
       log.info(`#${r.episode.episodeNumber} "${r.episode.title}"`);
@@ -169,7 +165,7 @@ async function main() {
       try {
         const { skipped } = await summarizeEpisode({
           transcriptionPath: r.outputPath,
-          summaryPath,
+          summaryPath: paths.summary!,
           episodeNumber: r.episode.episodeNumber,
           title: r.episode.title,
           description: r.episode.description,
