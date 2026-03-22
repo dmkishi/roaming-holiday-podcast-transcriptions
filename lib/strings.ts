@@ -27,6 +27,13 @@ export function formatDate(date: Date): string {
 }
 
 /**
+ * `7` → "007"
+ */
+export function formatEpisodeNumber(n: number): string {
+  return String(n).padStart(3, '0');
+}
+
+/**
  * `1_234_567` → "1,234,567".
  */
 export function formatNumber(n: number): string {

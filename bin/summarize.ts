@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
 import { summarizeEpisode } from '../lib/summarize/summarizeEpisode.js';
-import { pluralize, handelize } from '../lib/strings.js';
+import { pluralize, handelize, formatEpisodeNumber } from '../lib/strings.js';
 
 const DEFAULT_TRANSCRIPTION_MODEL = 'base';
 const DEFAULT_SUMMARY_MODEL = 'gpt-4o';
@@ -76,10 +76,6 @@ async function main() {
 
     console.log('');
   }
-}
-
-function formatEpisodeNumber(n: number): string {
-  return String(n).padStart(3, '0');
 }
 
 function findFile(num: string, suffix: string): string | undefined {

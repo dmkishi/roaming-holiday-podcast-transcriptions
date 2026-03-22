@@ -2,7 +2,7 @@ import { resolve, join, basename } from 'node:path';
 import { existsSync, readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import minimist from 'minimist';
 import pc from 'picocolors';
-import { pluralize, handelize, formatDate, formatNumber } from '../lib/strings.js';
+import { pluralize, handelize, formatDate, formatNumber, formatEpisodeNumber } from '../lib/strings.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '../lib/transcribe/rss.js';
 import { downloadMp3 } from '../lib/transcribe/download.js';
 import { transcribe } from '../lib/transcribe/whisper.js';
@@ -196,7 +196,7 @@ async function main() {
   for (const r of results) {
     const pct = Math.round((r.wallTimeSeconds / r.episode.durationSeconds) * 100);
     log.info(`#${r.episode.episodeNumber} [${formatDate(r.episode.pubDate)}] "${r.episode.title}"`);
-    log.info(`  Transcription time:  ${formatDuration(r.wallTimeSeconds)} (${pct}% of ${formatSeconds(r.episode.durationSeconds)})`);
+    log.info(`  Transcription time:  ${formatDuration(r.wallTimeSeconds)} (${pct}% of ${formatTimestamp(r.episode.durationSeconds)})`);
     log.info(`  Output:              "${basename(r.outputPath)}"`);
   }
 
@@ -215,10 +215,9 @@ async function main() {
   }
 }
 
-function formatEpisodeNumber(n: number): string {
-  return String(n).padStart(3, '0');
-}
-
+/**
+ * Formats seconds into a human-readable duration string, e.g. "1h 23m 45s".
+ */
 function formatDuration(totalSeconds: number): string {
   const hrs = Math.floor(totalSeconds / 3600);
   const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -230,7 +229,10 @@ function formatDuration(totalSeconds: number): string {
   return parts.join(' ');
 }
 
-function formatSeconds(totalSeconds: number): string {
+/**
+ * Formats seconds into a timestamp string, e.g. "1:23:45".
+ */
+function formatTimestamp(totalSeconds: number): string {
   const hrs = Math.floor(totalSeconds / 3600);
   const mins = Math.floor((totalSeconds % 3600) / 60);
   const secs = Math.round(totalSeconds % 60);
