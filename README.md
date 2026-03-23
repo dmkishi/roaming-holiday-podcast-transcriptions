@@ -27,7 +27,7 @@ The command reads the RSS feed, locates the episode, downloads the MP3 to
 # Transcribe a single or multiple episodes
 pnpm transcribe 101 [102 103]
 
-# Use a different Whisper model
+# Use a different Whisper transcription model
 pnpm transcribe 101 --model small
 
 # Overwrite existing transcriptions
@@ -52,20 +52,27 @@ Speed" figures below are from an Apple M1 machine transcribing a 1 hour episode.
 | Model    | Params | Disk    | Time        | Accuracy        |
 | -------- | ------ | ------- | ----------- | --------------- |
 | tiny     |  39 M  |  ~75 MB |  8 m (7.5×) | Not bad         |
-| base     |  74 M  | ~140 MB | 15 m (4×)   | Good enough     |
+| base*    |  74 M  | ~140 MB | 15 m (4×)   | Good enough     |
 | small    | 244 M  | ~460 MB | 50 m (1.2×) | Not much better |
 | medium   | 769 M  | ~1.5 GB |  ?          | ?               |
 | large-v3 | 1.5 B  | ~3.0 GB |  ?          | ?               |
 
-### Summarization Models (OpenAI)
-| Model        | Input 1M | Output 1M | Tokens 1h  | Cost 1h | Accuracy  |
-| ------------ | -------- | --------- | ---------- | ------- | --------- |
-| GPT-4o       |    $2.50 |    $10.00 | 11,240/201 |  $0.030 | Decent    |
-| GPT-4o-mini  |    $0.15 |     $0.60 | "          |  $0.018 |           |
-| GPT-4.1      |    $2.00 |     $8.00 | "          |  $0.024 |           |
-| GPT-4.1-mini |    $0.40 |     $1.60 | "          |  $0.005 | Very good |
+*Default model
 
-See <https://developers.openai.com/api/docs/pricing>
+### Summarization Models (OpenAI)
+Estimated costs per select models at one million tokens. Evaluated with episode #179 where its transcript consisted of about 47,000 characters. With a careful
+prompt, token consumption was input of ~12,000 and output of ~400.
+
+| Model        | Input | Output |  Cost |  200x | Quality   |
+| ------------ | ----- | ------ | ----- | ----- | --------- |
+| gpt-5.4-mini | $0.75 |  $4.50 |  ¢1.1 | $2.20 | Very good |
+| gpt-4.1*     | $2.00 |  $8.00 |  ¢2.7 | $5.40 | Very good |
+| gpt-4o       | $2.50 | $10.00 |  ¢3.0 | $6.00 | Decent    |
+| gpt-4.1-mini | $0.40 |  $1.60 |  ¢0.6 | $1.20 | Decent    |
+
+*Default model
+
+Compare [pricing](https://developers.openai.com/api/docs/pricing) and [models](https://developers.openai.com/api/docs/models).
 
 Output Files
 --------------------------------------------------------------------------------
