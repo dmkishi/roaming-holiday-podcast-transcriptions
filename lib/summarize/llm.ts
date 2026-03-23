@@ -27,7 +27,7 @@ const summarySchema = {
 export async function summarize(
   text: string,
   context: { episodeNumber: number; title: string; description: string },
-  model = 'gpt-4o',
+  model: string,
 ): Promise<SummaryResult> {
   const client = new OpenAI();
 

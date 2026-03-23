@@ -9,7 +9,7 @@ export interface SummarizeEpisodeOptions {
   episodeNumber: number;
   title: string;
   description: string;
-  summaryModel?: string;
+  summaryModel: string;
   force?: boolean;
   log?: (msg: string) => void;
 }
@@ -40,13 +40,12 @@ export async function summarizeEpisode(
   const text = (JSON.parse(raw) as { text: string }).text.trim();
   log(`Text length: ${formatNumber(text.length)} characters`);
 
-  const summaryModel = opts.summaryModel ?? 'gpt-4o';
-  log(`Sending to ${summaryModel} for summarization...`);
+  log(`Sending to ${opts.summaryModel} for summarization...`);
   const result = await summarize(text, {
     episodeNumber: opts.episodeNumber,
     title: opts.title,
     description: opts.description,
-  }, summaryModel);
+  }, opts.summaryModel);
 
   writeFileSync(opts.summaryPath, JSON.stringify(result, null, 2) + '\n');
   log(`Written: "${basename(opts.summaryPath)}"`);
