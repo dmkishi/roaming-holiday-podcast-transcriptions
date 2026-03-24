@@ -44,9 +44,6 @@ export async function downloadMp3(
   const bar = new SingleBar(
     {
       format: 'Downloading [{bar}] {percentage}% | {value}/{total} MB',
-      barCompleteChar: '\u2588',
-      barIncompleteChar: '\u2591',
-      hideCursor: true,
     },
     Presets.shades_classic,
   );

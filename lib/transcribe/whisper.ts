@@ -59,9 +59,6 @@ export async function transcribe(
   const bar = new SingleBar(
     {
       format: 'Transcribing [{bar}] {percentage}% | {value}s / {total}s',
-      barCompleteChar: '\u2588',
-      barIncompleteChar: '\u2591',
-      hideCursor: true,
     },
     Presets.shades_classic,
   );
