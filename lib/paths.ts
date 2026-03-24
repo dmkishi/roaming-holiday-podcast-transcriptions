@@ -23,7 +23,7 @@ export function episodePaths(params: EpisodePathParams): EpisodePaths {
   const num = formatEpisodeNumber(params.episode);
   const model = handleize(params.model);
   return {
-    meta: join(TRANSCRIPTS_DIR, `${num}.episode-meta.json`),
+    meta: join(TRANSCRIPTS_DIR, `${num}.rss.json`),
     transcript: join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.json`),
     stats: join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.stats.json`),
     summary: params.summaryModel
