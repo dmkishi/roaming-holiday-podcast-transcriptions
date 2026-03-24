@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import { runTranscriptionPipeline } from '@lib/pipeline.js';
+import { runTranscribePipeline } from '@lib/pipeline.js';
 import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models.js';
 
 const argv = minimist(process.argv.slice(2), {
@@ -21,7 +21,7 @@ if (episodes.length === 0) {
   process.exit(1);
 }
 
-const result = await runTranscriptionPipeline({
+const result = await runTranscribePipeline({
   episodes,
   model: argv.model,
   force: argv.force,

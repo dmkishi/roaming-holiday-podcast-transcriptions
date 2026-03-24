@@ -15,7 +15,7 @@ import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models
 // =============================================================================
 // Types
 // =============================================================================
-export interface TranscriptionOptions {
+export interface TranscribeOptions {
   episodes: number[];
   model?: string;
   force?: boolean;
@@ -39,7 +39,7 @@ export type EpisodeOutcome =
       summarized: boolean;
     };
 
-export interface TranscriptionResult {
+export interface TranscribeResult {
   outcomes: EpisodeOutcome[];
 }
 
@@ -61,9 +61,9 @@ export interface SummarizeResult {
 }
 
 // =============================================================================
-// Transcription pipeline
+// Transcribe pipeline
 // =============================================================================
-export async function runTranscriptionPipeline(opts: TranscriptionOptions): Promise<TranscriptionResult> {
+export async function runTranscribePipeline(opts: TranscribeOptions): Promise<TranscribeResult> {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
   const force = opts.force ?? false;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
@@ -275,7 +275,7 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
 }
 
 // =============================================================================
-// Summarization pipeline
+// Summarize pipeline
 // =============================================================================
 export async function runSummarizePipeline(opts: SummarizeOptions): Promise<SummarizeResult> {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
