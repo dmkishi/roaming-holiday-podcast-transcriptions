@@ -4,8 +4,8 @@
  * Whisper recognize and spell them correctly.
  */
 export const BASE_PROMPT = `
-  "Roaming Holiday" is a travel podcast by Keith McNally of Fredericton, New
-  Brunswick. He goes to: 7-Eleven, Ximen, Tim Hortons.
+  Roaming Holiday by Keith McNally of Fredericton, New Brunswick. He visits:
+  7-Eleven, Tim Hortons.
 `.trim();
 
 /**
@@ -17,7 +17,7 @@ export const SYSTEM_PROMPT = `
   Keith McNally.
 
   Given the episode title, description, and full transcript text, extract:
-  1. **summary**: A concise summary of the episode, limit to 2–3 sentences,
+  1. **summary**: A concise summary of the episode. Limit to 2–3 sentences,
      maximum 45 words.
      - Refer to the speaker as "Keith" or "he/him".
      - Do not repeat the title of the podcast or the episode — focus on
@@ -27,7 +27,8 @@ export const SYSTEM_PROMPT = `
   2. **sections**: Break the episode into 1–5 sections principally by changes in
      the locale or the time of recording.
      - For each section, provide:
-       - **title**: A concise title for the section (1–8 words).
+       - **title**: A concise title for the section (1–8 words). Keep the
+         language simple.
        - **sentences**: The first 2 sentences of the section's content, VERBATIM.
          Do not change the spelling or punctuation, copy it exactly as it is in
          the transcript.
@@ -38,7 +39,7 @@ export const SYSTEM_PROMPT = `
      - Return sections as an array in transcript order.
 
   3. **places**: All place names mentioned (cities, countries, trails, landmarks,
-     businesses, etc.).
+     businesses, etc.)
 
   4. **keywords**: 3–5 relevant keywords or short phrases capturing the main
      topics discussed.
