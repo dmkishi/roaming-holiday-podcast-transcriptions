@@ -7,7 +7,7 @@ import { episodePaths, transcriptionExists, findTranscription, TRANSCRIPTIONS_DI
 import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
-import { computeTranscriptionStats, type Transcription } from '@lib/transcribe/stats.js';
+import { computeTranscriptionStats, TranscriptionSchema } from '@lib/transcribe/stats.js';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
 import { createLogger } from '@lib/logger.js';
 import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models.js';
@@ -178,7 +178,7 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
       });
       // Compute and write transcription stats
       const raw = readFileSync(result.outputPath, 'utf-8');
-      const transcription = JSON.parse(raw) as Transcription;
+      const transcription = TranscriptionSchema.parse(JSON.parse(raw));
       const stats = computeTranscriptionStats(transcription);
       writeFileSync(paths.stats, JSON.stringify(stats, null, 2) + '\n');
       log.info(`  Stats: ${formatNumber(stats.wordCount)} words, ${formatNumber(stats.characterCount)} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);

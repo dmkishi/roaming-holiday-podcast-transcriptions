@@ -1,21 +1,25 @@
-interface TranscriptionSegment {
-  id: number;
-  seek: number;
-  start: number;
-  end: number;
-  text: string;
-  tokens: number[];
-  temperature: number;
-  avg_logprob: number;
-  compression_ratio: number;
-  no_speech_prob: number;
-}
+import { z } from 'zod';
 
-export interface Transcription {
-  text: string;
-  segments: TranscriptionSegment[];
-  language: string;
-}
+const TranscriptionSegmentSchema = z.object({
+  id: z.number(),
+  seek: z.number(),
+  start: z.number(),
+  end: z.number(),
+  text: z.string(),
+  tokens: z.array(z.number()),
+  temperature: z.number(),
+  avg_logprob: z.number(),
+  compression_ratio: z.number(),
+  no_speech_prob: z.number(),
+});
+
+export const TranscriptionSchema = z.object({
+  text: z.string(),
+  segments: z.array(TranscriptionSegmentSchema),
+  language: z.string(),
+});
+
+export type Transcription = z.infer<typeof TranscriptionSchema>;
 
 interface TranscriptionStats {
   characterCount: number;

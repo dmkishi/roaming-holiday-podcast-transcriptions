@@ -2,6 +2,7 @@ import { basename } from 'node:path';
 import { formatNumber } from '@lib/strings.js';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { summarize, type SummaryResult } from './llm.js';
+import { TranscriptionSchema } from '@lib/transcribe/stats.js';
 
 export interface SummarizeEpisodeOptions {
   transcriptionPath: string;
@@ -36,7 +37,7 @@ export async function summarizeEpisode(
 
   log(`Extracting text from "${basename(opts.transcriptionPath)}"...`);
   const raw = readFileSync(opts.transcriptionPath, 'utf-8');
-  const text = (JSON.parse(raw) as { text: string }).text.trim();
+  const text = TranscriptionSchema.parse(JSON.parse(raw)).text.trim();
   log(`Text length: ${formatNumber(text.length)} characters`);
 
   log(`Sending to ${opts.summaryModel} for summarization...`);
