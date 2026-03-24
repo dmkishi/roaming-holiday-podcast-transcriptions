@@ -4,14 +4,14 @@ import { z } from 'zod';
 import { formatNumber } from '@lib/strings.js';
 import { SYSTEM_PROMPT } from '@lib/config/prompts.js';
 
-const SummarySchema = z.object({
+const SummaryResultSchema = z.object({
   summary: z.string(),
   sections: z.array(z.object({ title: z.string(), sentences: z.string() })),
   places: z.array(z.string()),
   keywords: z.array(z.string()),
 });
 
-export type SummaryResult = z.infer<typeof SummarySchema>;
+export type SummaryResult = z.infer<typeof SummaryResultSchema>;
 
 export async function summarize(
   text: string,
@@ -35,7 +35,7 @@ export async function summarize(
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMessage },
     ],
-    response_format: zodResponseFormat(SummarySchema, 'episode_summary'),
+    response_format: zodResponseFormat(SummaryResultSchema, 'episode_summary'),
   });
 
   if (response.usage) {
@@ -50,5 +50,5 @@ export async function summarize(
     throw new Error('Empty response from OpenAI');
   }
 
-  return SummarySchema.parse(JSON.parse(content));
+  return SummaryResultSchema.parse(JSON.parse(content));
 }
