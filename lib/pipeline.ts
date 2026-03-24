@@ -108,7 +108,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   // Check for existing transcripts
   const toProcess: Episode[] = [];
   for (const ep of found) {
-    if (!force && transcriptExists({ episode: ep.episodeNumber, model })) {
+    if (!force && transcriptExists(ep.episodeNumber, model)) {
       const paths = episodePaths({ episode: ep.episodeNumber, model });
       log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(paths.transcript)} already exists (use --force to overwrite)`);
       outcomes.push({ status: 'skipped', episode: ep.episodeNumber, reason: 'transcript already exists' });

@@ -35,8 +35,8 @@ export function episodePaths(params: EpisodePathParams): EpisodePaths {
 /**
  * Checks whether a transcript file already exists on disk.
  */
-export function transcriptExists(params: { episode: number; model: string }): boolean {
-  return existsSync(episodePaths(params).transcript);
+export function transcriptExists(episode: number, model: string): boolean {
+  return existsSync(episodePaths({ episode, model }).transcript);
 }
 
 /**
