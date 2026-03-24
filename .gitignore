@@ -12,6 +12,6 @@ dist/
 .DS_Store
 
 # Project outputs
-logs/
+LOG
 transcripts/*
 !transcripts/.gitkeep

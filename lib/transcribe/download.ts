@@ -24,10 +24,10 @@ export async function downloadMp3(
 
   const contentLength = Number(response.headers.get('content-length') ?? 0);
 
-  // Skip download if file already exists with matching size.
   try {
     const stat = statSync(destPath);
     if (contentLength > 0 && stat.size === contentLength) {
+      // Skip download if file already exists with matching size.
       const sizeMB = Math.round(stat.size / BYTES_PER_MB);
       console.log(pc.yellow(`Already downloaded: "${destPath}" (${sizeMB} MB)`));
       return destPath;

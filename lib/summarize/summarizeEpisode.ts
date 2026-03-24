@@ -1,7 +1,7 @@
 import { basename } from 'node:path';
 import { formatNumber } from '@lib/strings.js';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { summarize, type SummaryResult } from './llm.js';
+import { summarize, type SummaryResult, type TokenUsage } from './llm.js';
 import { TranscriptSchema } from '@lib/transcribe/stats.js';
 
 export interface SummarizeEpisodeOptions {
@@ -11,18 +11,19 @@ export interface SummarizeEpisodeOptions {
   description: string;
   summaryModel: string;
   force?: boolean;
-  log?: (msg: string) => void;
+  log: (msg: string) => void;
 }
 
 export interface SummarizeEpisodeResult {
   skipped: boolean;
   result?: SummaryResult;
+  usage?: TokenUsage;
 }
 
 export async function summarizeEpisode(
   opts: SummarizeEpisodeOptions
 ): Promise<SummarizeEpisodeResult> {
-  const log = opts.log ?? (() => {});
+  const { log } = opts;
 
   // Skip if summary already exists (unless --force is set.)
   if (existsSync(opts.summaryPath) && !opts.force) {
@@ -37,7 +38,7 @@ export async function summarizeEpisode(
 
   // Call LLM to summarize.
   log(`Sending to ${opts.summaryModel} for summarization...`);
-  const result = await summarize(text, {
+  const { result, usage } = await summarize(text, {
     title: opts.title,
     description: opts.description,
   }, opts.summaryModel);
@@ -46,5 +47,5 @@ export async function summarizeEpisode(
   writeFileSync(opts.summaryPath, JSON.stringify(result, null, 2) + '\n');
   log(`Written: "${basename(opts.summaryPath)}"`);
 
-  return { skipped: false, result };
+  return { skipped: false, result, usage };
 }

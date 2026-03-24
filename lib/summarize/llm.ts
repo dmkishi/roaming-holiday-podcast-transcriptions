@@ -13,6 +13,11 @@ const SummaryResultSchema = z.object({
 
 export type SummaryResult = z.infer<typeof SummaryResultSchema>;
 
+export type TokenUsage = {
+  prompt: number;
+  completion: number;
+};
+
 /**
  * Requests an OpenAI model to summarize a podcast episode transcript and
  * returns a structured object.
@@ -21,7 +26,10 @@ export async function summarize(
   text: string,
   context: { title: string; description: string },
   model: string,
-): Promise<SummaryResult> {
+): Promise<{
+  result: SummaryResult;
+  usage?: TokenUsage;
+}> {
   const client = new OpenAI();
 
   const userMessage = [
@@ -43,9 +51,10 @@ export async function summarize(
   });
 
   if (response.usage) {
-    const { prompt_tokens, completion_tokens, total_tokens } = response.usage;
+    const { prompt_tokens, completion_tokens } = response.usage;
+    console.log();
     console.log(
-      `  LLM usage: ${formatNumber(prompt_tokens)} prompt + ${formatNumber(completion_tokens)} completion = ${formatNumber(total_tokens)} total tokens`,
+      `  Tokens: input ${formatNumber(prompt_tokens)} / output ${formatNumber(completion_tokens)}`,
     );
   }
 
@@ -54,5 +63,13 @@ export async function summarize(
     throw new Error('Empty response from OpenAI');
   }
 
-  return SummaryResultSchema.parse(JSON.parse(content));
+  return {
+    result: SummaryResultSchema.parse(JSON.parse(content)),
+    usage: response.usage
+      ? {
+          prompt: response.usage.prompt_tokens,
+          completion: response.usage.completion_tokens
+        }
+      : undefined,
+  };
 }

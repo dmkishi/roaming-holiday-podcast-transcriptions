@@ -75,31 +75,33 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   log.info(`Whisper Model: ${pc.blue(model)}`);
   log.info('');
 
-  // Fetch RSS feed
   log.info('Fetching RSS feed...');
   let allEpisodes: Episode[];
   try {
     allEpisodes = await fetchEpisodes();
   } catch (err) {
-    log.error(`Failed to fetch RSS feed: ${(err as Error).message}`);
+    const msg = `Failed to fetch RSS feed: ${(err as Error).message}`;
+    log.error(msg);
+    log.record('error', msg);
     return { outcomes: opts.episodes.map((ep) => ({ status: 'not_found' as const, episode: ep })) };
   }
   log.info(pc.green(`Found ${allEpisodes.length} episodes`));
+  log.record('info', `Fetched RSS feed (${allEpisodes.length} episodes)`);
 
-  // Look up requested episodes
+  // Find requested episodes
   const { found, notFound } = findEpisodes(opts.episodes, allEpisodes);
   const outcomes: EpisodeOutcome[] = [];
-
   if (notFound.length > 0) {
     const range = allEpisodes.map((ep) => ep.episodeNumber);
     const min = Math.min(...range);
     const max = Math.max(...range);
-    log.warn(`Episodes not found: ${notFound.join(', ')} (feed has episodes ${min}\u2013${max})`);
+    const msg = `Episodes not found: ${notFound.join(', ')} (feed has episodes ${min}-${max})`;
+    log.warn(msg);
+    log.record('warn', msg);
     for (const n of notFound) {
       outcomes.push({ status: 'not_found', episode: n });
     }
   }
-
   if (found.length === 0) {
     log.error('No valid episodes to process.');
     return { outcomes };
@@ -110,7 +112,9 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   for (const ep of found) {
     if (!force && findTranscript(ep.episodeNumber, model)) {
       const paths = episodePaths({ episode: ep.episodeNumber, model });
-      log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(paths.transcript)} already exists (use --force to overwrite)`);
+      const msg = `Skipped episode ${ep.episodeNumber}: "${basename(paths.transcript)}" already exists`;
+      log.warn(`${msg} (use --force to overwrite)`);
+      log.record('warn', msg);
       outcomes.push({ status: 'skipped', episode: ep.episodeNumber, reason: 'transcript already exists' });
     } else {
       toProcess.push(ep);
@@ -145,16 +149,22 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       mp3Url: ep.mp3Url,
     };
     writeFileSync(paths.meta, JSON.stringify(metadata, null, 2) + '\n');
-    log.info(`  Length: "${ep.duration}"`);
+    log.info(`  Length: ${ep.duration}`);
     log.info(`  Metadata: "${basename(paths.meta)}"`);
+    log.record('info', `Saved RSS metadata: "${basename(paths.meta)}"`, {
+      'Title': `"${ep.title}"`,
+      'Publish Date': ep.pubDate.toISOString().slice(0, 10),
+      'Length': ep.duration,
+    });
 
     try {
       const mp3Path = await downloadMp3(ep.mp3Url, ep.episodeNumber);
       downloaded.push({ episode: ep, mp3Path });
     } catch (err) {
-      const msg = (err as Error).message;
-      log.error(`  Download failed: ${msg}`);
-      outcomes.push({ status: 'download_failed', episode: ep.episodeNumber, error: msg });
+      const error = (err as Error).message;
+      log.error(`  Download failed: ${error}`);
+      log.record('error', `Download failed for episode ${ep.episodeNumber}: ${error}`);
+      outcomes.push({ status: 'download_failed', episode: ep.episodeNumber, error });
     }
   }
 
@@ -185,10 +195,21 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
 
       transcribed.push({ episode, ...result });
       log.info(`  Output: "${basename(result.outputPath)}"`);
+
+      const wall = fromSeconds(result.wallTimeSeconds);
+      const total = fromSeconds(episode.durationSeconds);
+      const pct = Math.round((result.wallTimeSeconds / episode.durationSeconds) * 100);
+      log.record('info', `Saved transcription: "${basename(result.outputPath)}"`, {
+        'Model': model,
+        'Transcription time': `${wall.human} (${pct}% of ${total.timestamp})`,
+        'Characters': formatNumber(stats.characterCount),
+        'Words': formatNumber(stats.wordCount),
+      });
     } catch (err) {
-      const msg = (err as Error).message;
-      log.error(`  Transcription failed: ${msg}`);
-      outcomes.push({ status: 'transcribe_failed', episode: episode.episodeNumber, error: msg });
+      const error = (err as Error).message;
+      log.error(`  Transcription failed: ${error}`);
+      log.record('error', `Transcription failed for episode ${episode.episodeNumber}: ${error}`);
+      outcomes.push({ status: 'transcribe_failed', episode: episode.episodeNumber, error });
     }
   }
 
@@ -206,7 +227,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       log.info(`#${r.episode.episodeNumber} "${r.episode.title}"`);
 
       try {
-        const { skipped } = await summarizeEpisode({
+        const { skipped, usage } = await summarizeEpisode({
           transcriptPath: r.outputPath,
           summaryPath: paths.summary!,
           title: r.episode.title,
@@ -220,9 +241,15 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
           log.warn(`Skipping summary for episode ${r.episode.episodeNumber}: already exists (use --force)`);
         } else {
           summarized.add(r.episode.episodeNumber);
+          const details: Record<string, string> = { 'Model': summaryModel };
+          if (usage) {
+            details['Tokens'] = `input ${formatNumber(usage.prompt)} / output ${formatNumber(usage.completion)}`;
+          }
+          log.record('info', `Saved summary: "${basename(paths.summary!)}"`, details);
         }
       } catch (err) {
         log.error(`  Summarization failed: ${(err as Error).message}`);
+        log.record('error', `Summarization failed for episode ${r.episode.episodeNumber}: ${(err as Error).message}`);
         outcomes.push({ status: 'summarize_failed', episode: r.episode.episodeNumber, error: (err as Error).message });
       }
     }
@@ -291,7 +318,9 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
   for (const epNum of opts.episodes) {
     const transcriptFile = findTranscript(epNum, model);
     if (!transcriptFile) {
-      log.error(pc.red(`Episode ${epNum}: no transcription found for model "${model}"`));
+      const msg = `Episode ${epNum}: no transcription found for model "${model}"`;
+      log.error(pc.red(msg));
+      log.record('error', msg);
       outcomes.push({ status: 'no_transcript', episode: epNum });
       continue;
     }
@@ -310,7 +339,7 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
     }
 
     try {
-      const { skipped, result } = await summarizeEpisode({
+      const { skipped, result, usage } = await summarizeEpisode({
         transcriptPath: transcriptFile,
         summaryPath: paths.summary!,
         title,
@@ -324,13 +353,16 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
         log.info(pc.yellow(`Episode ${epNum}: summary already exists (use --force to overwrite)`));
         outcomes.push({ status: 'skipped', episode: epNum });
       } else if (result) {
-        log.info(`  Summary: ${result.summary.slice(0, 100)}...`);
-        log.info(`  Places: ${result.places.join(', ')}`);
-        log.info(`  Keywords: ${result.keywords.join(', ')}`);
+        const details: Record<string, string> = { 'Model': summaryModel };
+        if (usage) {
+          details['Tokens'] = `input ${formatNumber(usage.prompt)} / output ${formatNumber(usage.completion)}`;
+        }
+        log.record('info', `Saved summary: "${basename(paths.summary!)}"`, details);
         outcomes.push({ status: 'completed', episode: epNum, result });
       }
     } catch (err) {
       log.error(pc.red(`  Summarization failed: ${(err as Error).message}`));
+      log.record('error', `Summarization failed for episode ${epNum}: ${(err as Error).message}`);
       outcomes.push({ status: 'failed', episode: epNum, error: (err as Error).message });
     }
 
