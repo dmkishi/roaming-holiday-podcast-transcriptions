@@ -1,15 +1,15 @@
-import { basename } from 'node:path';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { basename } from 'node:path';
 import pc from 'picocolors';
-import { pluralize, formatDate, formatNumber } from '@lib/strings.js';
+import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models.js';
 import { fromSeconds } from '@lib/duration.js';
+import { createLogger } from '@lib/logger.js';
 import { episodePaths, findTranscript, TRANSCRIPTS_DIR } from '@lib/paths.js';
-import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
+import { pluralize, formatDate, formatNumber } from '@lib/strings.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
+import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
-import { createLogger } from '@lib/logger.js';
-import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models.js';
 
 // =============================================================================
 // Types

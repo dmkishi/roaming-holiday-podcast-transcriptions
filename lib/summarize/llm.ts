@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
-import { formatNumber } from '@lib/strings.js';
 import { SYSTEM_PROMPT } from '@lib/config/prompts.js';
+import { formatNumber } from '@lib/strings.js';
 
 const SummaryResultSchema = z.object({
   summary: z.string(),

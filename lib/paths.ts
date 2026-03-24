@@ -1,5 +1,5 @@
-import { resolve, join } from 'node:path';
 import { readdirSync } from 'node:fs';
+import { resolve, join } from 'node:path';
 
 export const TRANSCRIPTS_DIR = resolve(import.meta.dirname, '../transcripts');
 
