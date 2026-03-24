@@ -2,7 +2,7 @@ import { basename } from 'node:path';
 import { formatNumber } from '@lib/strings.js';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { summarize, type SummaryResult, type TokenUsage } from './llm.js';
-import { TranscriptSchema } from '@lib/transcribe/stats.js';
+import { TranscriptSchema } from '@lib/transcribe/schema.js';
 
 export interface SummarizeEpisodeOptions {
   transcriptPath: string;

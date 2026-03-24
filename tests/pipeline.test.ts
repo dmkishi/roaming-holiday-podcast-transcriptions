@@ -45,11 +45,6 @@ vi.mock('@lib/transcribe/whisper.js', () => ({
   transcribe: vi.fn(),
 }));
 
-vi.mock('@lib/transcribe/stats.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@lib/transcribe/stats.js')>();
-  return { ...actual };
-});
-
 vi.mock('@lib/summarize/summarizeEpisode.js', () => ({
   summarizeEpisode: vi.fn(),
 }));
@@ -59,7 +54,6 @@ vi.mock('@lib/paths.js', () => ({
   episodePaths: vi.fn(() => ({
     meta: '/tmp/test-transcripts/042.rss.json',
     transcript: '/tmp/test-transcripts/042.transcript__base.json',
-    stats: '/tmp/test-transcripts/042.transcript__base.stats.json',
     summary: '/tmp/test-transcripts/042.transcript__base.summary__gpt-4o.json',
   })),
   findTranscript: vi.fn(),

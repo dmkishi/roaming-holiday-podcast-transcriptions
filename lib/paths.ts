@@ -12,7 +12,6 @@ export interface EpisodePathParams {
 export interface EpisodePaths {
   meta: string;
   transcript: string;
-  stats: string;
   summary: string | null;
 }
 
@@ -25,7 +24,6 @@ export function episodePaths(params: EpisodePathParams): EpisodePaths {
   return {
     meta: join(TRANSCRIPTS_DIR, `${num}.rss.json`),
     transcript: join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.json`),
-    stats: join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.stats.json`),
     summary: params.summaryModel
       ? join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`)
       : null,
@@ -37,7 +35,7 @@ export function findTranscript(episode: number, model: string): string | undefin
   const suffix = `.transcript__${handleize(model)}.json`;
   const files = readdirSync(TRANSCRIPTS_DIR);
   const match = files.find((f) =>
-    f.startsWith(num) && f.includes(suffix) && !f.includes('.stats') && !f.includes('.summary__'),
+    f.startsWith(num) && f.includes(suffix) && !f.includes('.summary__'),
   );
   return match ? join(TRANSCRIPTS_DIR, match) : undefined;
 }

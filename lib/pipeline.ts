@@ -7,7 +7,6 @@ import { episodePaths, findTranscript, TRANSCRIPTS_DIR } from '@lib/paths.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
-import { computeTranscriptStats, TranscriptSchema } from '@lib/transcribe/stats.js';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
 import { createLogger } from '@lib/logger.js';
 import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models.js';
@@ -186,12 +185,11 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
         title: episode.title,
         description: episode.description,
       });
-      // Compute and write transcription stats
-      const raw = readFileSync(result.outputPath, 'utf-8');
-      const transcript = TranscriptSchema.parse(JSON.parse(raw));
-      const stats = computeTranscriptStats(transcript);
-      writeFileSync(paths.stats, JSON.stringify(stats, null, 2) + '\n');
-      log.info(`  Stats: ${formatNumber(stats.wordCount)} words, ${formatNumber(stats.characterCount)} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);
+
+      const text = readFileSync(result.outputPath, 'utf-8');
+      const wordCount = text.split(/\s+/).filter(Boolean).length;
+      const charCount = text.length;
+      log.info(`  Stats: ${formatNumber(wordCount)} words, ${formatNumber(charCount)} chars`);
 
       transcribed.push({ episode, ...result });
       log.info(`  Output: "${basename(result.outputPath)}"`);
@@ -202,8 +200,8 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       log.record('info', `Saved transcription: "${basename(result.outputPath)}"`, {
         'Model': model,
         'Transcription time': `${wall.human} (${pct}% of ${total.timestamp})`,
-        'Characters': formatNumber(stats.characterCount),
-        'Words': formatNumber(stats.wordCount),
+        'Characters': formatNumber(charCount),
+        'Words': formatNumber(wordCount),
       });
     } catch (err) {
       const error = (err as Error).message;
