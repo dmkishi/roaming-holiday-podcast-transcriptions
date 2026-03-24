@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import { SYSTEM_PROMPT } from '@lib/config/prompts.js';
+import { print } from '@lib/print.js';
 import { formatNumber } from '@lib/strings.js';
 
 const SummaryResultSchema = z.object({
@@ -52,8 +53,8 @@ export async function summarize(
 
   if (response.usage) {
     const { prompt_tokens, completion_tokens } = response.usage;
-    console.log();
-    console.log(
+    print.info();
+    print.info(
       `  Tokens: input ${formatNumber(prompt_tokens)} / output ${formatNumber(completion_tokens)}`,
     );
   }

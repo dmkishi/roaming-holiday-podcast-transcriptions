@@ -3,7 +3,8 @@ import { basename } from 'node:path';
 import pc from 'picocolors';
 import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models.js';
 import { fromSeconds } from '@lib/duration.js';
-import { createLogger } from '@lib/logger.js';
+import { log } from '@lib/logger.js';
+import { print } from '@lib/print.js';
 import { episodePaths, findTranscript, TRANSCRIPTS_DIR } from '@lib/paths.js';
 import { pluralize, formatDate, formatNumber } from '@lib/strings.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
@@ -68,24 +69,23 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
 
   mkdirSync(TRANSCRIPTS_DIR, { recursive: true });
-  const log = createLogger();
 
-  log.info(`${pluralize(opts.episodes.length, 'Episode')}: ${opts.episodes.join(', ')}`);
-  log.info(`Whisper Model: ${pc.blue(model)}`);
-  log.info('');
+  print.info(`${pluralize(opts.episodes.length, 'Episode')}: ${opts.episodes.join(', ')}`);
+  print.info(`Whisper Model: ${pc.blue(model)}`);
+  print.info();
 
-  log.info('Fetching RSS feed...');
+  print.info('Fetching RSS feed...');
   let allEpisodes: Episode[];
   try {
     allEpisodes = await fetchEpisodes();
   } catch (err) {
     const msg = `Failed to fetch RSS feed: ${(err as Error).message}`;
+    print.error(msg);
     log.error(msg);
-    log.record('error', msg);
     return { outcomes: opts.episodes.map((ep) => ({ status: 'not_found' as const, episode: ep })) };
   }
-  log.info(pc.green(`Found ${allEpisodes.length} episodes`));
-  log.record('info', `Fetched RSS feed (${allEpisodes.length} episodes)`);
+  print.info(pc.green(`Found ${allEpisodes.length} episodes`));
+  log.info(`Fetched RSS feed (${allEpisodes.length} episodes)`);
 
   // Find requested episodes
   const { found, notFound } = findEpisodes(opts.episodes, allEpisodes);
@@ -95,14 +95,14 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
     const min = Math.min(...range);
     const max = Math.max(...range);
     const msg = `Episodes not found: ${notFound.join(', ')} (feed has episodes ${min}-${max})`;
+    print.warn(msg);
     log.warn(msg);
-    log.record('warn', msg);
     for (const n of notFound) {
       outcomes.push({ status: 'not_found', episode: n });
     }
   }
   if (found.length === 0) {
-    log.error('No valid episodes to process.');
+    print.error('No valid episodes to process.');
     return { outcomes };
   }
 
@@ -112,8 +112,8 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
     if (!force && findTranscript(ep.episodeNumber, model)) {
       const paths = episodePaths({ episode: ep.episodeNumber, model });
       const msg = `Skipped episode ${ep.episodeNumber}: "${basename(paths.transcript)}" already exists`;
-      log.warn(`${msg} (use --force to overwrite)`);
-      log.record('warn', msg);
+      print.warn(`${msg} (use --force to overwrite)`);
+      log.warn(msg);
       outcomes.push({ status: 'skipped', episode: ep.episodeNumber, reason: 'transcript already exists' });
     } else {
       toProcess.push(ep);
@@ -121,19 +121,19 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   }
 
   if (toProcess.length === 0) {
-    log.info('Nothing to do — all transcripts already exist.');
+    print.info('Nothing to do — all transcripts already exist.');
     return { outcomes };
   }
 
   // Phase 1: Download all MP3s
-  log.info('');
-  log.info(`=== Downloading ${toProcess.length} ${pluralize(toProcess.length, 'episode')} ===`);
+  print.info();
+  print.info(`=== Downloading ${toProcess.length} ${pluralize(toProcess.length, 'episode')} ===`);
 
   const downloaded: { episode: Episode; mp3Path: string }[] = [];
 
   for (const ep of toProcess) {
-    log.info('');
-    log.info(`#${ep.episodeNumber} [${formatDate(ep.pubDate)}] "${ep.title}"`);
+    print.info();
+    print.info(`#${ep.episodeNumber} [${formatDate(ep.pubDate)}] "${ep.title}"`);
 
     // Write metadata sidecar
     const paths = episodePaths({ episode: ep.episodeNumber, model });
@@ -148,9 +148,9 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       mp3Url: ep.mp3Url,
     };
     writeFileSync(paths.rss, JSON.stringify(metadata, null, 2) + '\n');
-    log.info(`  Length: ${ep.duration}`);
-    log.info(`  Metadata: "${basename(paths.rss)}"`);
-    log.record('info', `Saved RSS metadata: "${basename(paths.rss)}"`, {
+    print.info(`  Length: ${ep.duration}`);
+    print.info(`  Metadata: "${basename(paths.rss)}"`);
+    log.info(`Saved RSS metadata: "${basename(paths.rss)}"`, {
       'Title': `"${ep.title}"`,
       'Publish Date': ep.pubDate.toISOString().slice(0, 10),
       'Length': ep.duration,
@@ -161,21 +161,21 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       downloaded.push({ episode: ep, mp3Path });
     } catch (err) {
       const error = (err as Error).message;
-      log.error(`  Download failed: ${error}`);
-      log.record('error', `Download failed for episode ${ep.episodeNumber}: ${error}`);
+      print.error(`  Download failed: ${error}`);
+      log.error(`Download failed for episode ${ep.episodeNumber}: ${error}`);
       outcomes.push({ status: 'download_failed', episode: ep.episodeNumber, error });
     }
   }
 
   // Phase 2: Transcribe all downloaded MP3s
-  log.info('');
-  log.info(`=== Transcribing ${downloaded.length} ${pluralize(downloaded.length, 'episode')} ===`);
+  print.info();
+  print.info(`=== Transcribing ${downloaded.length} ${pluralize(downloaded.length, 'episode')} ===`);
 
   const transcribed: { episode: Episode; outputPath: string; wallTimeSeconds: number }[] = [];
 
   for (const { episode, mp3Path } of downloaded) {
-    log.info('');
-    log.info(`#${episode.episodeNumber} [${episode.pubDate.toISOString().slice(0, 10)}] "${episode.title}"`);
+    print.info();
+    print.info(`#${episode.episodeNumber} [${episode.pubDate.toISOString().slice(0, 10)}] "${episode.title}"`);
 
     const paths = episodePaths({ episode: episode.episodeNumber, model });
 
@@ -189,15 +189,15 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       const text = readFileSync(result.outputPath, 'utf-8');
       const wordCount = text.split(/\s+/).filter(Boolean).length;
       const charCount = text.length;
-      log.info(`  Stats: ${formatNumber(wordCount)} words, ${formatNumber(charCount)} chars`);
+      print.info(`  Stats: ${formatNumber(wordCount)} words, ${formatNumber(charCount)} chars`);
 
       transcribed.push({ episode, ...result });
-      log.info(`  Output: "${basename(result.outputPath)}"`);
+      print.info(`  Output: "${basename(result.outputPath)}"`);
 
       const wall = fromSeconds(result.wallTimeSeconds);
       const total = fromSeconds(episode.durationSeconds);
       const pct = Math.round((result.wallTimeSeconds / episode.durationSeconds) * 100);
-      log.record('info', `Saved transcription: "${basename(result.outputPath)}"`, {
+      log.info(`Saved transcription: "${basename(result.outputPath)}"`, {
         'Model': model,
         'Transcription time': `${wall.human} (${pct}% of ${total.timestamp})`,
         'Characters': formatNumber(charCount),
@@ -205,8 +205,8 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       });
     } catch (err) {
       const error = (err as Error).message;
-      log.error(`  Transcription failed: ${error}`);
-      log.record('error', `Transcription failed for episode ${episode.episodeNumber}: ${error}`);
+      print.error(`  Transcription failed: ${error}`);
+      log.error(`Transcription failed for episode ${episode.episodeNumber}: ${error}`);
       outcomes.push({ status: 'transcribe_failed', episode: episode.episodeNumber, error });
     }
   }
@@ -215,14 +215,14 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   const summarized = new Set<number>();
 
   if (opts.summarize && transcribed.length > 0) {
-    log.info('');
-    log.info(`=== Summarizing ${transcribed.length} ${pluralize(transcribed.length, 'episode')} ===`);
+    print.info();
+    print.info(`=== Summarizing ${transcribed.length} ${pluralize(transcribed.length, 'episode')} ===`);
 
     for (const r of transcribed) {
       const paths = episodePaths({ episode: r.episode.episodeNumber, model, summaryModel });
 
-      log.info('');
-      log.info(`#${r.episode.episodeNumber} "${r.episode.title}"`);
+      print.info();
+      print.info(`#${r.episode.episodeNumber} "${r.episode.title}"`);
 
       try {
         const { skipped, usage } = await summarizeEpisode({
@@ -232,22 +232,21 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
           description: r.episode.description,
           summaryModel,
           force,
-          log: (msg) => log.info(`  ${msg}`),
         });
 
         if (skipped) {
-          log.warn(`Skipping summary for episode ${r.episode.episodeNumber}: already exists (use --force)`);
+          print.warn(`Skipping summary for episode ${r.episode.episodeNumber}: already exists (use --force)`);
         } else {
           summarized.add(r.episode.episodeNumber);
           const details: Record<string, string> = { 'Model': summaryModel };
           if (usage) {
             details['Tokens'] = `input ${formatNumber(usage.prompt)} / output ${formatNumber(usage.completion)}`;
           }
-          log.record('info', `Saved summary: "${basename(paths.summary!)}"`, details);
+          log.info(`Saved summary: "${basename(paths.summary!)}"`, details);
         }
       } catch (err) {
-        log.error(`  Summarization failed: ${(err as Error).message}`);
-        log.record('error', `Summarization failed for episode ${r.episode.episodeNumber}: ${(err as Error).message}`);
+        print.error(`  Summarization failed: ${(err as Error).message}`);
+        log.error(`Summarization failed for episode ${r.episode.episodeNumber}: ${(err as Error).message}`);
         outcomes.push({ status: 'summarize_failed', episode: r.episode.episodeNumber, error: (err as Error).message });
       }
     }
@@ -270,28 +269,28 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   }
 
   // Print summary
-  log.info('');
-  log.info('=== Summary ===');
+  print.info();
+  print.info('=== Summary ===');
 
   const completed = outcomes.filter((o): o is Extract<EpisodeOutcome, { status: 'completed' }> => o.status === 'completed');
   for (const r of completed) {
     const pct = Math.round((r.wallTimeSeconds / r.durationSeconds) * 100);
-    log.info(`#${r.episode} "${r.title}"`);
+    print.info(`#${r.episode} "${r.title}"`);
     const wall = fromSeconds(r.wallTimeSeconds);
     const total = fromSeconds(r.durationSeconds);
-    log.info(`  Transcription time:  ${wall.human} (${pct}% of ${total.timestamp})`);
-    log.info(`  Output:              "${basename(r.outputPath)}"`);
+    print.info(`  Transcription time:  ${wall.human} (${pct}% of ${total.timestamp})`);
+    print.info(`  Output:              "${basename(r.outputPath)}"`);
   }
 
   const failures = outcomes.filter((o) => o.status !== 'completed' && o.status !== 'skipped');
   if (failures.length > 0) {
-    log.info('');
-    log.warn('Failures:');
+    print.info();
+    print.warn('Failures:');
     for (const f of failures) {
       if (f.status === 'not_found') {
-        log.warn(`  Episode ${f.episode}: not found in feed`);
+        print.warn(`  Episode ${f.episode}: not found in feed`);
       } else if ('error' in f) {
-        log.warn(`  Episode ${f.episode}: ${f.status.replace('_', ' ')} — ${f.error}`);
+        print.warn(`  Episode ${f.episode}: ${f.status.replace('_', ' ')} — ${f.error}`);
       }
     }
   }
@@ -307,18 +306,17 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
   const force = opts.force ?? false;
 
-  const log = createLogger();
   const outcomes: SummarizeOutcome[] = [];
 
-  log.info(`Summarizing ${opts.episodes.length} ${pluralize(opts.episodes.length, 'episode')} using Whisper model: ${pc.blue(model)}, summary model: ${pc.blue(summaryModel)}`);
-  log.info('');
+  print.info(`Summarizing ${opts.episodes.length} ${pluralize(opts.episodes.length, 'episode')} using Whisper model: ${pc.blue(model)}, summary model: ${pc.blue(summaryModel)}`);
+  print.info();
 
   for (const epNum of opts.episodes) {
     const transcriptFile = findTranscript(epNum, model);
     if (!transcriptFile) {
       const msg = `Episode ${epNum}: no transcription found for model "${model}"`;
-      log.error(pc.red(msg));
-      log.record('error', msg);
+      print.error(pc.red(msg));
+      log.error(msg);
       outcomes.push({ status: 'no_transcript', episode: epNum });
       continue;
     }
@@ -344,27 +342,26 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
         description,
         summaryModel,
         force,
-        log: (msg) => log.info(`  ${msg}`),
       });
 
       if (skipped) {
-        log.info(pc.yellow(`Episode ${epNum}: summary already exists (use --force to overwrite)`));
+        print.info(pc.yellow(`Episode ${epNum}: summary already exists (use --force to overwrite)`));
         outcomes.push({ status: 'skipped', episode: epNum });
       } else if (result) {
         const details: Record<string, string> = { 'Model': summaryModel };
         if (usage) {
           details['Tokens'] = `input ${formatNumber(usage.prompt)} / output ${formatNumber(usage.completion)}`;
         }
-        log.record('info', `Saved summary: "${basename(paths.summary!)}"`, details);
+        log.info(`Saved summary: "${basename(paths.summary!)}"`, details);
         outcomes.push({ status: 'completed', episode: epNum, result });
       }
     } catch (err) {
-      log.error(pc.red(`  Summarization failed: ${(err as Error).message}`));
-      log.record('error', `Summarization failed for episode ${epNum}: ${(err as Error).message}`);
+      print.error(pc.red(`  Summarization failed: ${(err as Error).message}`));
+      log.error(`Summarization failed for episode ${epNum}: ${(err as Error).message}`);
       outcomes.push({ status: 'failed', episode: epNum, error: (err as Error).message });
     }
 
-    log.info('');
+    print.info();
   }
 
   return { outcomes };

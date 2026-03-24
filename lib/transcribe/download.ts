@@ -2,6 +2,7 @@ import { createWriteStream, statSync } from 'node:fs';
 import { Readable } from 'node:stream';
 import { SingleBar, Presets } from 'cli-progress';
 import pc from 'picocolors';
+import { print } from '@lib/print.js';
 
 const BYTES_PER_MB = 1024 * 1024;
 
@@ -29,7 +30,7 @@ export async function downloadMp3(
     if (contentLength > 0 && stat.size === contentLength) {
       // Skip download if file already exists with matching size.
       const sizeMB = Math.round(stat.size / BYTES_PER_MB);
-      console.log(pc.yellow(`Already downloaded: "${destPath}" (${sizeMB} MB)`));
+      print.info(pc.yellow(`Already downloaded: "${destPath}" (${sizeMB} MB)`));
       return destPath;
     }
   } catch {
@@ -78,6 +79,6 @@ export async function downloadMp3(
   bar.stop();
 
   const sizeMB = Math.round(downloaded / BYTES_PER_MB);
-  console.log(`Downloaded: ${destPath} (${sizeMB} MB)`);
+  print.info(`Downloaded: ${destPath} (${sizeMB} MB)`);
   return destPath;
 }

@@ -24,12 +24,11 @@ const fakeTranscription = JSON.stringify({
 // Mocks
 // =============================================================================
 vi.mock('@lib/logger.js', () => ({
-  createLogger: () => ({
+  log: {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
-    record: vi.fn(),
-  }),
+  },
 }));
 
 vi.mock('@lib/transcribe/rss.js', () => ({

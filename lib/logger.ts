@@ -1,47 +1,44 @@
 import { appendFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+type LogLevel = 'info' | 'warn' | 'error';
+type LogDetails = Record<string, string>;
+
 const LOG_PATH = resolve(import.meta.dirname, '../LOG');
 const STRIP_ANSI = /\x1b\[[0-9;]*m/g;
+let isFirstWrite = true;
 
-export type Logger = {
-  /** Console output only — show progress on-screen */
-  info: (msg: string) => void;
-  warn: (msg: string) => void;
-  error: (msg: string) => void;
-
-  /** File output only — show events in the log file */
-  record: (level: 'info' | 'warn' | 'error', msg: string, details?: Record<string, string>) => void;
-};
-
-function formatDetails(details: Record<string, string>, indent: number): string {
+/**
+ * Format sub-items with indentation.
+ */
+function formatDetails(details: LogDetails, indent: number): string {
   const pad = ' '.repeat(indent);
   return Object.entries(details)
     .map(([key, value]) => `${pad}- ${key}: ${value}`)
     .join('\n');
 }
 
-export function createLogger(): Logger {
-  // Blank line as session separator
-  appendFileSync(LOG_PATH, '\n');
+function record(level: LogLevel, msg: string, details?: LogDetails) {
+  if (isFirstWrite) {
+    appendFileSync(LOG_PATH, '\n');
+    isFirstWrite = false;
+  }
 
-  return {
-    info: (msg: string) => console.log(msg),
-    warn: (msg: string) => console.error(`[WARN] ${msg}`),
-    error: (msg: string) => console.error(`[ERROR] ${msg}`),
+  const timestamp = new Date().toISOString().slice(0, 17);
+  const tag = `[${level.toUpperCase()}]`.padEnd(7);
+  const prefix = `${timestamp} ${tag} - `;
+  const plain = msg.replace(STRIP_ANSI, '');
+  let line = `${prefix}${plain}`;
 
-    record: (level, msg, details) => {
-      const timestamp = new Date().toISOString().slice(0, 17);
-      const tag = `[${level.toUpperCase()}]`.padEnd(7);
-      const prefix = `${timestamp} ${tag} - `;
-      const plain = msg.replace(STRIP_ANSI, '');
-      let line = `${prefix}${plain}`;
+  if (details && Object.keys(details).length > 0) {
+    line += '\n' + formatDetails(details, prefix.length);
+  }
 
-      if (details && Object.keys(details).length > 0) {
-        line += '\n' + formatDetails(details, prefix.length);
-      }
-
-      appendFileSync(LOG_PATH, line + '\n');
-    },
-  };
+  appendFileSync(LOG_PATH, line + '\n');
 }
+
+export const log = {
+  info: (msg: string, details?: LogDetails) => record('info', msg, details),
+  warn: (msg: string, details?: LogDetails) => record('warn', msg, details),
+  error: (msg: string, details?: LogDetails) => record('error', msg, details),
+};

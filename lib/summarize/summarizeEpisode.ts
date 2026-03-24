@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename } from 'node:path';
+import { print } from '@lib/print.js';
 import { formatNumber } from '@lib/strings.js';
 import { TranscriptSchema } from '@lib/transcribe/schema.js';
 import { summarize, type SummaryResult, type TokenUsage } from './llm.js';
@@ -11,7 +12,6 @@ export interface SummarizeEpisodeOptions {
   description: string;
   summaryModel: string;
   force?: boolean;
-  log: (msg: string) => void;
 }
 
 export interface SummarizeEpisodeResult {
@@ -23,21 +23,19 @@ export interface SummarizeEpisodeResult {
 export async function summarizeEpisode(
   opts: SummarizeEpisodeOptions
 ): Promise<SummarizeEpisodeResult> {
-  const { log } = opts;
-
   // Skip if summary already exists (unless --force is set.)
   if (existsSync(opts.summaryPath) && !opts.force) {
     return { skipped: true };
   }
 
   // Extract the `text` property from transcript JSON.
-  log(`Extracting text from "${basename(opts.transcriptPath)}"...`);
+  print.info(`  Extracting text from "${basename(opts.transcriptPath)}"...`);
   const raw = readFileSync(opts.transcriptPath, 'utf-8');
   const text = TranscriptSchema.parse(JSON.parse(raw)).text.trim();
-  log(`Text length: ${formatNumber(text.length)} characters`);
+  print.info(`  Text length: ${formatNumber(text.length)} characters`);
 
   // Call LLM to summarize.
-  log(`Sending to ${opts.summaryModel} for summarization...`);
+  print.info(`  Sending to ${opts.summaryModel} for summarization...`);
   const { result, usage } = await summarize(text, {
     title: opts.title,
     description: opts.description,
@@ -45,7 +43,7 @@ export async function summarizeEpisode(
 
   // Write summary result to file.
   writeFileSync(opts.summaryPath, JSON.stringify(result, null, 2) + '\n');
-  log(`Written: "${basename(opts.summaryPath)}"`);
+  print.info(`  Written: "${basename(opts.summaryPath)}"`);
 
   return { skipped: false, result, usage };
 }
