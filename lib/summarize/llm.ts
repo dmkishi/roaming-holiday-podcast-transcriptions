@@ -1,40 +1,17 @@
 import OpenAI from 'openai';
+import { zodResponseFormat } from 'openai/helpers/zod';
+import { z } from 'zod';
 import { formatNumber } from '@lib/strings.js';
 import { SYSTEM_PROMPT } from '@lib/config/prompts.js';
 
-export interface SummaryResult {
-  summary: string;
-  sections: { title: string; sentences: string }[];
-  places: string[];
-  keywords: string[];
-}
+const SummarySchema = z.object({
+  summary: z.string(),
+  sections: z.array(z.object({ title: z.string(), sentences: z.string() })),
+  places: z.array(z.string()),
+  keywords: z.array(z.string()),
+});
 
-const summarySchema = {
-  name: 'episode_summary',
-  strict: true,
-  schema: {
-    type: 'object' as const,
-    properties: {
-      summary: { type: 'string' as const },
-      sections: {
-        type: 'array' as const,
-        items: {
-          type: 'object' as const,
-          properties: {
-            title: { type: 'string' as const },
-            sentences: { type: 'string' as const },
-          },
-          required: ['title', 'sentences'],
-          additionalProperties: false,
-        },
-      },
-      places: { type: 'array' as const, items: { type: 'string' as const } },
-      keywords: { type: 'array' as const, items: { type: 'string' as const } },
-    },
-    required: ['summary', 'sections', 'places', 'keywords'],
-    additionalProperties: false,
-  },
-};
+export type SummaryResult = z.infer<typeof SummarySchema>;
 
 export async function summarize(
   text: string,
@@ -58,10 +35,7 @@ export async function summarize(
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMessage },
     ],
-    response_format: {
-      type: 'json_schema',
-      json_schema: summarySchema,
-    },
+    response_format: zodResponseFormat(SummarySchema, 'episode_summary'),
   });
 
   if (response.usage) {
@@ -76,5 +50,5 @@ export async function summarize(
     throw new Error('Empty response from OpenAI');
   }
 
-  return JSON.parse(content) as SummaryResult;
+  return SummarySchema.parse(JSON.parse(content));
 }

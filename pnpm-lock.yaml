@@ -10,10 +10,13 @@ importers:
     dependencies:
       openai:
         specifier: ^6.32.0
-        version: 6.32.0
+        version: 6.32.0(zod@4.3.6)
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@dmkishi/markdownlint-cli2.yaml':
         specifier: ^0.0.3
@@ -700,6 +703,9 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
 snapshots:
 
   '@dmkishi/markdownlint-cli2.yaml@0.0.3': {}
@@ -1060,7 +1066,9 @@ snapshots:
 
   obug@2.1.1: {}
 
-  openai@6.32.0: {}
+  openai@6.32.0(zod@4.3.6):
+    optionalDependencies:
+      zod: 4.3.6
 
   path-expression-matcher@1.2.0: {}
 
@@ -1188,3 +1196,5 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
+
+  zod@4.3.6: {}
