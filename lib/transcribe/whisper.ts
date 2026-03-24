@@ -44,8 +44,6 @@ export async function transcribe(
     );
   }
 
-  const prompt = makePrompt(options.title, options.description);
-
   const args = [
     audioPath,
     '--model', options.model,
@@ -53,7 +51,7 @@ export async function transcribe(
     '--output_dir', join(outputPath, '..'),
     '--language', 'en',
     '--verbose', 'True',
-    '--initial_prompt', prompt,
+    '--initial_prompt', makePrompt(options.title, options.description),
   ];
 
   const bar = new SingleBar(
@@ -100,11 +98,9 @@ export async function transcribe(
     throw new Error(`Whisper exited with code ${exitCode}`);
   }
 
-  // Rename Whisper output to the desired filename
   const outputDir = join(outputPath, '..');
   const whisperOutputName = basename(audioPath).replace(/\.[^.]+$/, '') + '.json';
   const whisperOutput = join(outputDir, whisperOutputName);
-
   if (existsSync(whisperOutput)) {
     renameSync(whisperOutput, outputPath);
   }
