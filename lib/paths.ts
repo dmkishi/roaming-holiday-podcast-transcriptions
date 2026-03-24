@@ -36,14 +36,12 @@ export function transcriptExists(episode: number, model: string): boolean {
   return existsSync(episodePaths({ episode, model }).transcript);
 }
 
-export function findTranscript(episode: number, model?: string): string | undefined {
+export function findTranscript(episode: number, model: string): string | undefined {
   const num = formatEpisodeNumber(episode);
-  const suffix = model
-    ? `.transcript__${handelize(model)}.json`
-    : '.transcript__';
+  const suffix = `.transcript__${handelize(model)}.json`;
   const files = readdirSync(TRANSCRIPTS_DIR);
   const match = files.find((f) =>
-    f.startsWith(num) && f.includes(suffix) && f.endsWith('.json') && !f.includes('.stats') && !f.includes('.summary__'),
+    f.startsWith(num) && f.includes(suffix) && !f.includes('.stats') && !f.includes('.summary__'),
   );
   return match ? join(TRANSCRIPTS_DIR, match) : undefined;
 }
