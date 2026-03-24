@@ -18,7 +18,7 @@ export interface TranscribeResult {
   wallTimeSeconds: number;
 }
 
-export function buildPrompt(title: string, description: string): string {
+export function makePrompt(title: string, description: string): string {
   return [BASE_PROMPT, title, description].filter(Boolean).join(' ');
 }
 
@@ -37,7 +37,7 @@ export async function transcribe(
     );
   }
 
-  const prompt = buildPrompt(options.title, options.description);
+  const prompt = makePrompt(options.title, options.description);
 
   const args = [
     audioPath,
