@@ -24,10 +24,10 @@ export function episodePaths(params: EpisodePathParams): EpisodePaths {
   const model = handelize(params.model);
   return {
     meta: join(TRANSCRIPTIONS_DIR, `${num}.episode-meta.json`),
-    transcription: join(TRANSCRIPTIONS_DIR, `${num}.transcription__${model}.json`),
-    stats: join(TRANSCRIPTIONS_DIR, `${num}.transcription__${model}.stats.json`),
+    transcription: join(TRANSCRIPTIONS_DIR, `${num}.transcript__${model}.json`),
+    stats: join(TRANSCRIPTIONS_DIR, `${num}.transcript__${model}.stats.json`),
     summary: params.summaryModel
-      ? join(TRANSCRIPTIONS_DIR, `${num}.transcription__${model}.summary__${handelize(params.summaryModel)}.json`)
+      ? join(TRANSCRIPTIONS_DIR, `${num}.transcript__${model}.summary__${handelize(params.summaryModel)}.json`)
       : null,
   };
 }
@@ -47,8 +47,8 @@ export function transcriptionExists(params: { episode: number; model: string }):
 export function findTranscription(episode: number, model?: string): string | undefined {
   const num = formatEpisodeNumber(episode);
   const suffix = model
-    ? `.transcription__${handelize(model)}.json`
-    : '.transcription__';
+    ? `.transcript__${handelize(model)}.json`
+    : '.transcript__';
   const files = readdirSync(TRANSCRIPTIONS_DIR);
   const match = files.find((f) =>
     f.startsWith(num) && f.includes(suffix) && f.endsWith('.json') && !f.includes('.stats') && !f.includes('.summary__'),
