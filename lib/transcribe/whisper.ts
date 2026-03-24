@@ -18,10 +18,17 @@ export interface TranscribeResult {
   wallTimeSeconds: number;
 }
 
+/**
+ * Make prompt for Whisper by combining the base prompt with the episode title
+ * and description.
+ */
 export function makePrompt(title: string, description: string): string {
   return [BASE_PROMPT, title, description].filter(Boolean).join(' ');
 }
 
+/**
+ * Requests OpenAI Whisper to transcribe an audio file (shows progress bar.)
+ */
 export async function transcribe(
   audioPath: string,
   outputPath: string,

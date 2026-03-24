@@ -13,6 +13,10 @@ const SummaryResultSchema = z.object({
 
 export type SummaryResult = z.infer<typeof SummaryResultSchema>;
 
+/**
+ * Requests an OpenAI model to summarize a podcast episode transcript and
+ * returns a structured object.
+ */
 export async function summarize(
   text: string,
   context: { title: string; description: string },
