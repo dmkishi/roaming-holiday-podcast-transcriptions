@@ -54,7 +54,7 @@ export type SummarizeOutcome =
   | { status: 'no_transcription'; episode: number }
   | { status: 'skipped'; episode: number }
   | { status: 'failed'; episode: number; error: string }
-  | { status: 'completed'; episode: number; result: { summary: string; keywords: string[]; places: string[] } };
+  | { status: 'completed'; episode: number; result: { summary: string; places: string[]; keywords: string[]; } };
 
 export interface SummarizeResult {
   outcomes: SummarizeOutcome[];
@@ -209,7 +209,6 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
         const { skipped } = await summarizeEpisode({
           transcriptionPath: r.outputPath,
           summaryPath: paths.summary!,
-          episodeNumber: r.episode.episodeNumber,
           title: r.episode.title,
           description: r.episode.description,
           summaryModel,
@@ -314,7 +313,6 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
       const { skipped, result } = await summarizeEpisode({
         transcriptionPath: transcriptionFile,
         summaryPath: paths.summary!,
-        episodeNumber: epNum,
         title,
         description,
         summaryModel,
@@ -327,8 +325,8 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
         outcomes.push({ status: 'skipped', episode: epNum });
       } else if (result) {
         log.info(`  Summary: ${result.summary.slice(0, 100)}...`);
-        log.info(`  Keywords: ${result.keywords.join(', ')}`);
         log.info(`  Places: ${result.places.join(', ')}`);
+        log.info(`  Keywords: ${result.keywords.join(', ')}`);
         outcomes.push({ status: 'completed', episode: epNum, result });
       }
     } catch (err) {

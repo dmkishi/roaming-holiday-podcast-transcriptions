@@ -24,10 +24,23 @@ export const SYSTEM_PROMPT = `
        describing the content and themes of the episode.
      - Mention specific place names but avoid listing them exhaustively.
 
-  2. **places**: All place names mentioned (cities, countries, trails, landmarks,
+  2. **sections**: Break the episode into 1–5 sections principally by changes in
+     the locale or the time of recording.
+     - For each section, provide:
+       - **title**: A concise title for the section (1–8 words).
+       - **sentences**: The first 2 sentences of the section's content, VERBATIM.
+         Do not change the spelling or punctuation, copy it exactly as it is in
+         the transcript.
+     - The first section should always start from the beginning of the
+       transcript.
+     - If he ends the episode with a closing statement, that should be its own
+       section.
+     - Return sections as an array in transcript order.
+
+  3. **places**: All place names mentioned (cities, countries, trails, landmarks,
      businesses, etc.).
 
-  3. **keywords**: 3–5 relevant keywords or short phrases capturing the main
+  4. **keywords**: 3–5 relevant keywords or short phrases capturing the main
      topics discussed.
      - Prefer single words with a maximum of 2 words.
      - Do not include place names.
@@ -40,5 +53,5 @@ export const SYSTEM_PROMPT = `
        - "local culture"
        - "urban exploration".
 
-  Return only the JSON object with these three fields.
+  Return only the JSON object with these four fields.
 `.trim();

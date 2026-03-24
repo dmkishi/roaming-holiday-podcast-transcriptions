@@ -202,10 +202,10 @@ describe('runSummarizePipeline', () => {
 
   test('returns completed with result on success', async () => {
     const summaryResult = {
-      episodeNumber: 42,
       summary: 'A great episode about travel.',
-      keywords: ['travel', 'adventure'],
+      sections: [{ title: 'Exploring Japan', sentences: 'We arrived in Tokyo early.' }],
       places: ['Tokyo', 'Kyoto'],
+      keywords: ['travel', 'adventure'],
     };
     vi.mocked(findTranscription).mockReturnValue('/tmp/test-transcriptions/042.transcription__base.json');
     vi.mocked(summarizeEpisode).mockResolvedValue({ skipped: false, result: summaryResult });

@@ -6,7 +6,6 @@ import { summarize, type SummaryResult } from './llm.js';
 export interface SummarizeEpisodeOptions {
   transcriptionPath: string;
   summaryPath: string;
-  episodeNumber: number;
   title: string;
   description: string;
   summaryModel: string;
@@ -42,7 +41,6 @@ export async function summarizeEpisode(
 
   log(`Sending to ${opts.summaryModel} for summarization...`);
   const result = await summarize(text, {
-    episodeNumber: opts.episodeNumber,
     title: opts.title,
     description: opts.description,
   }, opts.summaryModel);

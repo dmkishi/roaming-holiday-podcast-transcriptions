@@ -3,10 +3,10 @@ import { formatNumber } from '@lib/strings.js';
 import { SYSTEM_PROMPT } from '@lib/config/prompts.js';
 
 export interface SummaryResult {
-  episodeNumber: number;
   summary: string;
-  keywords: string[];
+  sections: { title: string; sentences: string }[];
   places: string[];
+  keywords: string[];
 }
 
 const summarySchema = {
@@ -16,23 +16,35 @@ const summarySchema = {
     type: 'object' as const,
     properties: {
       summary: { type: 'string' as const },
-      keywords: { type: 'array' as const, items: { type: 'string' as const } },
+      sections: {
+        type: 'array' as const,
+        items: {
+          type: 'object' as const,
+          properties: {
+            title: { type: 'string' as const },
+            sentences: { type: 'string' as const },
+          },
+          required: ['title', 'sentences'],
+          additionalProperties: false,
+        },
+      },
       places: { type: 'array' as const, items: { type: 'string' as const } },
+      keywords: { type: 'array' as const, items: { type: 'string' as const } },
     },
-    required: ['summary', 'keywords', 'places'],
+    required: ['summary', 'sections', 'places', 'keywords'],
     additionalProperties: false,
   },
 };
 
 export async function summarize(
   text: string,
-  context: { episodeNumber: number; title: string; description: string },
+  context: { title: string; description: string },
   model: string,
 ): Promise<SummaryResult> {
   const client = new OpenAI();
 
   const userMessage = [
-    `Episode #${context.episodeNumber}: "${context.title}"`,
+    `"${context.title}"`,
     '',
     `Description: ${context.description}`,
     '',
@@ -64,10 +76,5 @@ export async function summarize(
     throw new Error('Empty response from OpenAI');
   }
 
-  const parsed = JSON.parse(content) as { summary: string; keywords: string[]; places: string[] };
-
-  return {
-    episodeNumber: context.episodeNumber,
-    ...parsed,
-  };
+  return JSON.parse(content) as SummaryResult;
 }
