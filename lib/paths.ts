@@ -21,13 +21,13 @@ export interface EpisodePaths {
  */
 export function episodePaths(params: EpisodePathParams): EpisodePaths {
   const num = formatEpisodeNumber(params.episode);
-  const model = handelize(params.model);
+  const model = handleize(params.model);
   return {
     meta: join(TRANSCRIPTS_DIR, `${num}.episode-meta.json`),
     transcript: join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.json`),
     stats: join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.stats.json`),
     summary: params.summaryModel
-      ? join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.summary__${handelize(params.summaryModel)}.json`)
+      ? join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`)
       : null,
   };
 }
@@ -38,7 +38,7 @@ export function transcriptExists(episode: number, model: string): boolean {
 
 export function findTranscript(episode: number, model: string): string | undefined {
   const num = formatEpisodeNumber(episode);
-  const suffix = `.transcript__${handelize(model)}.json`;
+  const suffix = `.transcript__${handleize(model)}.json`;
   const files = readdirSync(TRANSCRIPTS_DIR);
   const match = files.find((f) =>
     f.startsWith(num) && f.includes(suffix) && !f.includes('.stats') && !f.includes('.summary__'),
@@ -50,7 +50,7 @@ function formatEpisodeNumber(n: number): string {
   return String(n).padStart(3, '0');
 }
 
-function handelize(str: string): string {
+function handleize(str: string): string {
   return str
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
