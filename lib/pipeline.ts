@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import pc from 'picocolors';
 import { pluralize, formatDate, formatNumber } from '@lib/strings.js';
 import { fromSeconds } from '@lib/duration.js';
-import { episodePaths, transcriptExists, findTranscript, TRANSCRIPTS_DIR } from '@lib/paths.js';
+import { episodePaths, findTranscript, TRANSCRIPTS_DIR } from '@lib/paths.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
@@ -108,7 +108,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   // Check for existing transcripts
   const toProcess: Episode[] = [];
   for (const ep of found) {
-    if (!force && transcriptExists(ep.episodeNumber, model)) {
+    if (!force && findTranscript(ep.episodeNumber, model)) {
       const paths = episodePaths({ episode: ep.episodeNumber, model });
       log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(paths.transcript)} already exists (use --force to overwrite)`);
       outcomes.push({ status: 'skipped', episode: ep.episodeNumber, reason: 'transcript already exists' });

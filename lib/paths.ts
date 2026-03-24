@@ -1,5 +1,5 @@
 import { resolve, join } from 'node:path';
-import { existsSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 
 export const TRANSCRIPTS_DIR = resolve(import.meta.dirname, '../transcripts');
 
@@ -30,10 +30,6 @@ export function episodePaths(params: EpisodePathParams): EpisodePaths {
       ? join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`)
       : null,
   };
-}
-
-export function transcriptExists(episode: number, model: string): boolean {
-  return existsSync(episodePaths({ episode, model }).transcript);
 }
 
 export function findTranscript(episode: number, model: string): string | undefined {
