@@ -27,5 +27,5 @@ const result = await runSummarizePipeline({
   force: argv.force,
 });
 
-const failed = result.outcomes.some((o) => o.status === 'failed' || o.status === 'no_transcription');
+const failed = result.outcomes.some((o) => o.status === 'failed' || o.status === 'no_transcript');
 if (failed) process.exit(1);

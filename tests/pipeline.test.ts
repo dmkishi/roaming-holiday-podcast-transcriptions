@@ -54,15 +54,15 @@ vi.mock('@lib/summarize/summarizeEpisode.js', () => ({
 }));
 
 vi.mock('@lib/paths.js', () => ({
-  TRANSCRIPTIONS_DIR: '/tmp/test-transcriptions',
+  TRANSCRIPTS_DIR: '/tmp/test-transcripts',
   episodePaths: vi.fn(() => ({
-    meta: '/tmp/test-transcriptions/042.episode-meta.json',
-    transcription: '/tmp/test-transcriptions/042.transcript__base.json',
-    stats: '/tmp/test-transcriptions/042.transcript__base.stats.json',
-    summary: '/tmp/test-transcriptions/042.transcript__base.summary__gpt-4o.json',
+    meta: '/tmp/test-transcripts/042.episode-meta.json',
+    transcript: '/tmp/test-transcripts/042.transcript__base.json',
+    stats: '/tmp/test-transcripts/042.transcript__base.stats.json',
+    summary: '/tmp/test-transcripts/042.transcript__base.summary__gpt-4o.json',
   })),
-  transcriptionExists: vi.fn(),
-  findTranscription: vi.fn(),
+  transcriptExists: vi.fn(),
+  findTranscript: vi.fn(),
 }));
 
 vi.mock('node:fs', async (importOriginal) => {
@@ -83,7 +83,7 @@ import { fetchEpisodes, findEpisodes } from '@lib/transcribe/rss.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
-import { transcriptionExists, findTranscription } from '@lib/paths.js';
+import { transcriptExists, findTranscript } from '@lib/paths.js';
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -96,9 +96,9 @@ describe('runTranscriptionPipeline', () => {
   test('completes full pipeline for a valid episode', async () => {
     vi.mocked(fetchEpisodes).mockResolvedValue([fakeEpisode]);
     vi.mocked(findEpisodes).mockReturnValue({ found: [fakeEpisode], notFound: [] });
-    vi.mocked(transcriptionExists).mockReturnValue(false);
+    vi.mocked(transcriptExists).mockReturnValue(false);
     vi.mocked(downloadMp3).mockResolvedValue('/tmp/RH0042.mp3');
-    vi.mocked(transcribe).mockResolvedValue({ outputPath: '/tmp/test-transcriptions/042.transcript__base.json', wallTimeSeconds: 30 });
+    vi.mocked(transcribe).mockResolvedValue({ outputPath: '/tmp/test-transcripts/042.transcript__base.json', wallTimeSeconds: 30 });
 
     const result = await runTranscriptionPipeline({ episodes: [42] });
 
@@ -123,12 +123,12 @@ describe('runTranscriptionPipeline', () => {
   test('returns skipped when transcription exists and force is false', async () => {
     vi.mocked(fetchEpisodes).mockResolvedValue([fakeEpisode]);
     vi.mocked(findEpisodes).mockReturnValue({ found: [fakeEpisode], notFound: [] });
-    vi.mocked(transcriptionExists).mockReturnValue(true);
+    vi.mocked(transcriptExists).mockReturnValue(true);
 
     const result = await runTranscriptionPipeline({ episodes: [42], force: false });
 
     expect(result.outcomes).toEqual([
-      { status: 'skipped', episode: 42, reason: 'transcription already exists' },
+      { status: 'skipped', episode: 42, reason: 'transcript already exists' },
     ]);
     expect(downloadMp3).not.toHaveBeenCalled();
   });
@@ -136,7 +136,7 @@ describe('runTranscriptionPipeline', () => {
   test('returns download_failed when download errors', async () => {
     vi.mocked(fetchEpisodes).mockResolvedValue([fakeEpisode]);
     vi.mocked(findEpisodes).mockReturnValue({ found: [fakeEpisode], notFound: [] });
-    vi.mocked(transcriptionExists).mockReturnValue(false);
+    vi.mocked(transcriptExists).mockReturnValue(false);
     vi.mocked(downloadMp3).mockRejectedValue(new Error('network timeout'));
 
     const result = await runTranscriptionPipeline({ episodes: [42] });
@@ -149,7 +149,7 @@ describe('runTranscriptionPipeline', () => {
   test('returns transcribe_failed when transcription errors', async () => {
     vi.mocked(fetchEpisodes).mockResolvedValue([fakeEpisode]);
     vi.mocked(findEpisodes).mockReturnValue({ found: [fakeEpisode], notFound: [] });
-    vi.mocked(transcriptionExists).mockReturnValue(false);
+    vi.mocked(transcriptExists).mockReturnValue(false);
     vi.mocked(downloadMp3).mockResolvedValue('/tmp/RH0042.mp3');
     vi.mocked(transcribe).mockRejectedValue(new Error('whisper crashed'));
 
@@ -165,11 +165,11 @@ describe('runTranscriptionPipeline', () => {
 
     vi.mocked(fetchEpisodes).mockResolvedValue([fakeEpisode, ep43]);
     vi.mocked(findEpisodes).mockReturnValue({ found: [fakeEpisode, ep43], notFound: [] });
-    vi.mocked(transcriptionExists).mockReturnValue(false);
+    vi.mocked(transcriptExists).mockReturnValue(false);
     vi.mocked(downloadMp3)
       .mockRejectedValueOnce(new Error('network timeout'))
       .mockResolvedValueOnce('/tmp/RH0043.mp3');
-    vi.mocked(transcribe).mockResolvedValue({ outputPath: '/tmp/test-transcriptions/043.transcript__base.json', wallTimeSeconds: 20 });
+    vi.mocked(transcribe).mockResolvedValue({ outputPath: '/tmp/test-transcripts/043.transcript__base.json', wallTimeSeconds: 20 });
 
     const result = await runTranscriptionPipeline({ episodes: [42, 43] });
 
@@ -183,16 +183,16 @@ describe('runTranscriptionPipeline', () => {
 // Summarization pipeline
 // =============================================================================
 describe('runSummarizePipeline', () => {
-  test('returns no_transcription when no transcription file exists', async () => {
-    vi.mocked(findTranscription).mockReturnValue(undefined);
+  test('returns no_transcript when no transcription file exists', async () => {
+    vi.mocked(findTranscript).mockReturnValue(undefined);
 
     const result = await runSummarizePipeline({ episodes: [42] });
 
-    expect(result.outcomes).toEqual([{ status: 'no_transcription', episode: 42 }]);
+    expect(result.outcomes).toEqual([{ status: 'no_transcript', episode: 42 }]);
   });
 
   test('returns skipped when summary already exists', async () => {
-    vi.mocked(findTranscription).mockReturnValue('/tmp/test-transcriptions/042.transcript__base.json');
+    vi.mocked(findTranscript).mockReturnValue('/tmp/test-transcripts/042.transcript__base.json');
     vi.mocked(summarizeEpisode).mockResolvedValue({ skipped: true });
 
     const result = await runSummarizePipeline({ episodes: [42] });
@@ -207,7 +207,7 @@ describe('runSummarizePipeline', () => {
       places: ['Tokyo', 'Kyoto'],
       keywords: ['travel', 'adventure'],
     };
-    vi.mocked(findTranscription).mockReturnValue('/tmp/test-transcriptions/042.transcript__base.json');
+    vi.mocked(findTranscript).mockReturnValue('/tmp/test-transcripts/042.transcript__base.json');
     vi.mocked(summarizeEpisode).mockResolvedValue({ skipped: false, result: summaryResult });
 
     const result = await runSummarizePipeline({ episodes: [42] });
@@ -220,7 +220,7 @@ describe('runSummarizePipeline', () => {
   });
 
   test('returns failed when summarization errors', async () => {
-    vi.mocked(findTranscription).mockReturnValue('/tmp/test-transcriptions/042.transcript__base.json');
+    vi.mocked(findTranscript).mockReturnValue('/tmp/test-transcripts/042.transcript__base.json');
     vi.mocked(summarizeEpisode).mockRejectedValue(new Error('API rate limited'));
 
     const result = await runSummarizePipeline({ episodes: [42] });

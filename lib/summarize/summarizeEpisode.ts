@@ -2,10 +2,10 @@ import { basename } from 'node:path';
 import { formatNumber } from '@lib/strings.js';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { summarize, type SummaryResult } from './llm.js';
-import { TranscriptionSchema } from '@lib/transcribe/stats.js';
+import { TranscriptSchema } from '@lib/transcribe/stats.js';
 
 export interface SummarizeEpisodeOptions {
-  transcriptionPath: string;
+  transcriptPath: string;
   summaryPath: string;
   title: string;
   description: string;
@@ -22,7 +22,7 @@ export interface SummarizeEpisodeResult {
 /**
  * Run the full summarization pipeline for a single episode:
  *   - check for existing output
- *   - extract only the text property from the transcription JSON,
+ *   - extract only the text property from the transcript JSON,
  *   - call LLM,
  *   - write result.
  */
@@ -35,9 +35,9 @@ export async function summarizeEpisode(
     return { skipped: true };
   }
 
-  log(`Extracting text from "${basename(opts.transcriptionPath)}"...`);
-  const raw = readFileSync(opts.transcriptionPath, 'utf-8');
-  const text = TranscriptionSchema.parse(JSON.parse(raw)).text.trim();
+  log(`Extracting text from "${basename(opts.transcriptPath)}"...`);
+  const raw = readFileSync(opts.transcriptPath, 'utf-8');
+  const text = TranscriptSchema.parse(JSON.parse(raw)).text.trim();
   log(`Text length: ${formatNumber(text.length)} characters`);
 
   log(`Sending to ${opts.summaryModel} for summarization...`);

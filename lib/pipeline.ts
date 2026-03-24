@@ -3,11 +3,11 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import pc from 'picocolors';
 import { pluralize, formatDate, formatNumber } from '@lib/strings.js';
 import { fromSeconds } from '@lib/duration.js';
-import { episodePaths, transcriptionExists, findTranscription, TRANSCRIPTIONS_DIR } from '@lib/paths.js';
+import { episodePaths, transcriptExists, findTranscript, TRANSCRIPTS_DIR } from '@lib/paths.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { transcribe } from '@lib/transcribe/whisper.js';
-import { computeTranscriptionStats, TranscriptionSchema } from '@lib/transcribe/stats.js';
+import { computeTranscriptStats, TranscriptSchema } from '@lib/transcribe/stats.js';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
 import { createLogger } from '@lib/logger.js';
 import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/models.js';
@@ -51,7 +51,7 @@ export interface SummarizeOptions {
 }
 
 export type SummarizeOutcome =
-  | { status: 'no_transcription'; episode: number }
+  | { status: 'no_transcript'; episode: number }
   | { status: 'skipped'; episode: number }
   | { status: 'failed'; episode: number; error: string }
   | { status: 'completed'; episode: number; result: { summary: string; places: string[]; keywords: string[]; } };
@@ -68,7 +68,7 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
   const force = opts.force ?? false;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
 
-  mkdirSync(TRANSCRIPTIONS_DIR, { recursive: true });
+  mkdirSync(TRANSCRIPTS_DIR, { recursive: true });
   const log = createLogger();
 
   log.info(`${pluralize(opts.episodes.length, 'Episode')}: ${opts.episodes.join(', ')}`);
@@ -105,20 +105,20 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
     return { outcomes };
   }
 
-  // Check for existing transcriptions
+  // Check for existing transcripts
   const toProcess: Episode[] = [];
   for (const ep of found) {
-    if (!force && transcriptionExists({ episode: ep.episodeNumber, model })) {
+    if (!force && transcriptExists({ episode: ep.episodeNumber, model })) {
       const paths = episodePaths({ episode: ep.episodeNumber, model });
-      log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(paths.transcription)} already exists (use --force to overwrite)`);
-      outcomes.push({ status: 'skipped', episode: ep.episodeNumber, reason: 'transcription already exists' });
+      log.warn(`Skipping episode ${ep.episodeNumber}: ${basename(paths.transcript)} already exists (use --force to overwrite)`);
+      outcomes.push({ status: 'skipped', episode: ep.episodeNumber, reason: 'transcript already exists' });
     } else {
       toProcess.push(ep);
     }
   }
 
   if (toProcess.length === 0) {
-    log.info('Nothing to do — all transcriptions already exist.');
+    log.info('Nothing to do — all transcripts already exist.');
     return { outcomes };
   }
 
@@ -171,15 +171,15 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
     const paths = episodePaths({ episode: episode.episodeNumber, model });
 
     try {
-      const result = await transcribe(mp3Path, paths.transcription, episode.durationSeconds, {
+      const result = await transcribe(mp3Path, paths.transcript, episode.durationSeconds, {
         model,
         title: episode.title,
         description: episode.description,
       });
       // Compute and write transcription stats
       const raw = readFileSync(result.outputPath, 'utf-8');
-      const transcription = TranscriptionSchema.parse(JSON.parse(raw));
-      const stats = computeTranscriptionStats(transcription);
+      const transcript = TranscriptSchema.parse(JSON.parse(raw));
+      const stats = computeTranscriptStats(transcript);
       writeFileSync(paths.stats, JSON.stringify(stats, null, 2) + '\n');
       log.info(`  Stats: ${formatNumber(stats.wordCount)} words, ${formatNumber(stats.characterCount)} chars, confidence: ${stats.meanAvgLogProb.toFixed(3)}`);
 
@@ -192,7 +192,7 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
     }
   }
 
-  // Phase 3: Summarize transcriptions (optional)
+  // Phase 3: Summarize transcripts (optional)
   const summarized = new Set<number>();
 
   if (opts.summarize && transcribed.length > 0) {
@@ -207,7 +207,7 @@ export async function runTranscriptionPipeline(opts: TranscriptionOptions): Prom
 
       try {
         const { skipped } = await summarizeEpisode({
-          transcriptionPath: r.outputPath,
+          transcriptPath: r.outputPath,
           summaryPath: paths.summary!,
           title: r.episode.title,
           description: r.episode.description,
@@ -289,10 +289,10 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
   log.info('');
 
   for (const epNum of opts.episodes) {
-    const transcriptionFile = findTranscription(epNum, model);
-    if (!transcriptionFile) {
+    const transcriptFile = findTranscript(epNum, model);
+    if (!transcriptFile) {
       log.error(pc.red(`Episode ${epNum}: no transcription found for model "${model}"`));
-      outcomes.push({ status: 'no_transcription', episode: epNum });
+      outcomes.push({ status: 'no_transcript', episode: epNum });
       continue;
     }
 
@@ -311,7 +311,7 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
 
     try {
       const { skipped, result } = await summarizeEpisode({
-        transcriptionPath: transcriptionFile,
+        transcriptPath: transcriptFile,
         summaryPath: paths.summary!,
         title,
         description,

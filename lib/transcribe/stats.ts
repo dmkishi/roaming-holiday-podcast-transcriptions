@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const TranscriptionSegmentSchema = z.object({
+const TranscriptSegmentSchema = z.object({
   id: z.number(),
   seek: z.number(),
   start: z.number(),
@@ -13,15 +13,15 @@ const TranscriptionSegmentSchema = z.object({
   no_speech_prob: z.number(),
 });
 
-export const TranscriptionSchema = z.object({
+export const TranscriptSchema = z.object({
   text: z.string(),
-  segments: z.array(TranscriptionSegmentSchema),
+  segments: z.array(TranscriptSegmentSchema),
   language: z.string(),
 });
 
-export type Transcription = z.infer<typeof TranscriptionSchema>;
+export type Transcript = z.infer<typeof TranscriptSchema>;
 
-interface TranscriptionStats {
+interface TranscriptStats {
   characterCount: number;
   wordCount: number;
   meanAvgLogProb: number; // Model confidence: closer to 0 = higher confidence
@@ -30,11 +30,11 @@ interface TranscriptionStats {
 
 const LOW_CONFIDENCE_THRESHOLD = -1.0;
 
-export function computeTranscriptionStats(
-  transcription: Transcription
-): TranscriptionStats {
-  const text = transcription.text.trim();
-  const segments = transcription.segments;
+export function computeTranscriptStats(
+  transcript: Transcript
+): TranscriptStats {
+  const text = transcript.text.trim();
+  const segments = transcript.segments;
   const segmentCount = segments.length;
   const sumAvgLogProb = segments.reduce((sum, s) => sum + s.avg_logprob, 0);
   const lowConfidenceCount = segments.filter((s) => s.avg_logprob < LOW_CONFIDENCE_THRESHOLD).length;

@@ -14,7 +14,7 @@ python3 -m venv .venv
 .venv/bin/pip install openai-whisper
 
 # Copy the example env file and add your OpenAI API key (used to summarize
-# transcriptions).
+# transcripts).
 cp .env.example .env
 ```
 
@@ -30,7 +30,7 @@ pnpm transcribe 101 [102 103]
 # Use a different Whisper transcription model
 pnpm transcribe 101 --model small
 
-# Overwrite existing transcriptions
+# Overwrite existing transcripts
 pnpm transcribe 101 --force
 
 # Summarize a single or multiple episodes
@@ -76,7 +76,7 @@ Compare [pricing](https://developers.openai.com/api/docs/pricing) and [models](h
 
 Output Files
 --------------------------------------------------------------------------------
-All output goes to `transcriptions/`. For episode 179 with `--model base`:
+All output goes to `transcripts/`. For episode 179 with `--model base`:
 
 - **Transcription**: `0179 [2026-03-18] Approaching Yinghanling in insane heat--base.json`
   Whisper's JSON output with full text, segment timestamps, and per-segment
