@@ -52,7 +52,7 @@ vi.mock('@lib/summarize/summarizeEpisode.js', () => ({
 vi.mock('@lib/paths.js', () => ({
   TRANSCRIPTS_DIR: '/tmp/test-transcripts',
   episodePaths: vi.fn(() => ({
-    meta: '/tmp/test-transcripts/042.rss.json',
+    rss: '/tmp/test-transcripts/042.rss.json',
     transcript: '/tmp/test-transcripts/042.transcript__base.json',
     summary: '/tmp/test-transcripts/042.transcript__base.summary__gpt-4o.json',
   })),

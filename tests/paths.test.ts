@@ -5,20 +5,20 @@ import { episodePaths } from '@lib/paths.js';
 describe('episodePaths', () => {
   test('produces correct filenames for a basic episode', () => {
     const paths = episodePaths({ episode: 123, model: 'base' });
-    expect(basename(paths.meta)).toBe('123.rss.json');
+    expect(basename(paths.rss)).toBe('123.rss.json');
     expect(basename(paths.transcript)).toBe('123.transcript__base.json');
     expect(paths.summary).toBeNull();
   });
 
   test('zero-pads episode numbers to 3 digits', () => {
     const paths = episodePaths({ episode: 1, model: 'base' });
-    expect(basename(paths.meta)).toBe('001.rss.json');
+    expect(basename(paths.rss)).toBe('001.rss.json');
     expect(basename(paths.transcript)).toBe('001.transcript__base.json');
   });
 
   test('does not over-pad 3+ digit episode numbers', () => {
     const paths = episodePaths({ episode: 1234, model: 'base' });
-    expect(basename(paths.meta)).toBe('1234.rss.json');
+    expect(basename(paths.rss)).toBe('1234.rss.json');
   });
 
   test('handelizes model name', () => {
@@ -38,7 +38,7 @@ describe('episodePaths', () => {
 
   test('all paths share the same directory', () => {
     const paths = episodePaths({ episode: 1, model: 'base', summaryModel: 'gpt-4o' });
-    const dirs = [paths.meta, paths.transcript, paths.summary!].map(
+    const dirs = [paths.rss, paths.transcript, paths.summary!].map(
       (p) => p.replace(basename(p), ''),
     );
     expect(new Set(dirs).size).toBe(1);

@@ -10,7 +10,7 @@ export interface EpisodePathParams {
 }
 
 export interface EpisodePaths {
-  meta: string;
+  rss: string;
   transcript: string;
   summary: string | null;
 }
@@ -22,7 +22,7 @@ export function episodePaths(params: EpisodePathParams): EpisodePaths {
   const num = formatEpisodeNumber(params.episode);
   const model = handleize(params.model);
   return {
-    meta: join(TRANSCRIPTS_DIR, `${num}.rss.json`),
+    rss: join(TRANSCRIPTS_DIR, `${num}.rss.json`),
     transcript: join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.json`),
     summary: params.summaryModel
       ? join(TRANSCRIPTS_DIR, `${num}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`)

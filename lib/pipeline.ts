@@ -147,10 +147,10 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
       imageUrl: ep.imageUrl,
       mp3Url: ep.mp3Url,
     };
-    writeFileSync(paths.meta, JSON.stringify(metadata, null, 2) + '\n');
+    writeFileSync(paths.rss, JSON.stringify(metadata, null, 2) + '\n');
     log.info(`  Length: ${ep.duration}`);
-    log.info(`  Metadata: "${basename(paths.meta)}"`);
-    log.record('info', `Saved RSS metadata: "${basename(paths.meta)}"`, {
+    log.info(`  Metadata: "${basename(paths.rss)}"`);
+    log.record('info', `Saved RSS metadata: "${basename(paths.rss)}"`, {
       'Title': `"${ep.title}"`,
       'Publish Date': ep.pubDate.toISOString().slice(0, 10),
       'Length': ep.duration,
@@ -329,7 +329,7 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
     let title = '';
     let description = '';
     try {
-      const meta = JSON.parse(readFileSync(paths.meta, 'utf-8'));
+      const meta = JSON.parse(readFileSync(paths.rss, 'utf-8'));
       title = meta.title ?? '';
       description = meta.description ?? '';
     } catch {
