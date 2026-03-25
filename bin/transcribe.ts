@@ -21,7 +21,7 @@ if (episodes.length === 0) {
   process.exit(1);
 }
 
-const result = await runTranscribePipeline({
+const outcomes = await runTranscribePipeline({
   episodes,
   model: argv.model,
   force: argv.force,
@@ -29,5 +29,5 @@ const result = await runTranscribePipeline({
   summaryModel: argv['summary-model'],
 });
 
-const failed = result.outcomes.some((o) => o.status !== 'completed' && o.status !== 'skipped');
+const failed = outcomes.some((o) => o.status !== 'completed' && o.status !== 'skipped');
 if (failed) process.exit(1);

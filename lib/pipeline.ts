@@ -23,7 +23,7 @@ export interface TranscribeOptions {
   summaryModel?: string;
 }
 
-export type EpisodeOutcome =
+type EpisodeOutcome =
   | { status: 'skipped'; episode: number; reason: string }
   | { status: 'not_found'; episode: number }
   | { status: 'download_failed'; episode: number; error: string }
@@ -39,10 +39,6 @@ export type EpisodeOutcome =
       summarized: boolean;
     };
 
-export interface TranscribeResult {
-  outcomes: EpisodeOutcome[];
-}
-
 export interface SummarizeOptions {
   episodes: number[];
   model?: string;
@@ -50,20 +46,16 @@ export interface SummarizeOptions {
   force?: boolean;
 }
 
-export type SummarizeOutcome =
+type SummarizeOutcome =
   | { status: 'no_transcript'; episode: number }
   | { status: 'skipped'; episode: number }
   | { status: 'failed'; episode: number; error: string }
   | { status: 'completed'; episode: number; result: { summary: string; places: string[]; keywords: string[]; } };
 
-export interface SummarizeResult {
-  outcomes: SummarizeOutcome[];
-}
-
 // =============================================================================
 // Transcribe pipeline
 // =============================================================================
-export async function runTranscribePipeline(opts: TranscribeOptions): Promise<TranscribeResult> {
+export async function runTranscribePipeline(opts: TranscribeOptions): Promise<EpisodeOutcome[]> {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
   const force = opts.force ?? false;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
@@ -82,7 +74,8 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
     const msg = `Failed to fetch RSS feed: ${(err as Error).message}`;
     print.error(msg);
     log.error(msg);
-    return { outcomes: opts.episodes.map((ep) => ({ status: 'not_found' as const, episode: ep })) };
+    const outcomes = opts.episodes.map((ep) => ({ status: 'not_found' as const, episode: ep }));
+    return outcomes;
   }
   print.info(pc.green(`Found ${allEpisodes.length} episodes`));
   log.info(`Fetched RSS feed (${allEpisodes.length} episodes)`);
@@ -103,7 +96,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
   }
   if (found.length === 0) {
     print.error('No valid episodes to process.');
-    return { outcomes };
+    return outcomes;
   }
 
   // Check for existing transcripts
@@ -122,7 +115,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
 
   if (toProcess.length === 0) {
     print.info('Nothing to do — all transcripts already exist.');
-    return { outcomes };
+    return outcomes;
   }
 
   // Phase 1: Download all MP3s
@@ -295,13 +288,13 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
     }
   }
 
-  return { outcomes };
+  return outcomes;
 }
 
 // =============================================================================
 // Summarize pipeline
 // =============================================================================
-export async function runSummarizePipeline(opts: SummarizeOptions): Promise<SummarizeResult> {
+export async function runSummarizePipeline(opts: SummarizeOptions): Promise<SummarizeOutcome[]> {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
   const force = opts.force ?? false;
@@ -364,5 +357,5 @@ export async function runSummarizePipeline(opts: SummarizeOptions): Promise<Summ
     print.info();
   }
 
-  return { outcomes };
+  return outcomes;
 }

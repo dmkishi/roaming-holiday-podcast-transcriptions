@@ -20,12 +20,12 @@ if (episodes.length === 0) {
   process.exit(1);
 }
 
-const result = await runSummarizePipeline({
+const outcomes = await runSummarizePipeline({
   episodes,
   model: argv.model,
   summaryModel: argv['summary-model'],
   force: argv.force,
 });
 
-const failed = result.outcomes.some((o) => o.status === 'failed' || o.status === 'no_transcript');
+const failed = outcomes.some((o) => o.status === 'failed' || o.status === 'no_transcript');
 if (failed) process.exit(1);
