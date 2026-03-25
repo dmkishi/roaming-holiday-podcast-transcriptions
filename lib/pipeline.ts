@@ -23,7 +23,7 @@ interface TranscribeOptions {
   summaryModel?: string;
 }
 
-type EpisodeOutcome =
+type TranscribeOutcome =
   | { status: 'skipped'; episode: number; reason: string }
   | { status: 'not_found'; episode: number }
   | { status: 'download_failed'; episode: number; error: string }
@@ -63,7 +63,7 @@ type SummarizeOutcome =
 // =============================================================================
 // Transcribe pipeline
 // =============================================================================
-export async function runTranscribePipeline(opts: TranscribeOptions): Promise<EpisodeOutcome[]> {
+export async function runTranscribePipeline(opts: TranscribeOptions): Promise<TranscribeOutcome[]> {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
   const force = opts.force ?? false;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
@@ -90,7 +90,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
 
   // Find requested episodes
   const { found, notFound } = findEpisodes(opts.episodes, allEpisodes);
-  const outcomes: EpisodeOutcome[] = [];
+  const outcomes: TranscribeOutcome[] = [];
   if (notFound.length > 0) {
     const range = allEpisodes.map((ep) => ep.episodeNumber);
     const min = Math.min(...range);
@@ -268,7 +268,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
   // Print summary
   print.heading('Summary');
 
-  const completed = outcomes.filter((o): o is Extract<EpisodeOutcome, { status: 'completed' }> => o.status === 'completed');
+  const completed = outcomes.filter((o): o is Extract<TranscribeOutcome, { status: 'completed' }> => o.status === 'completed');
   for (const r of completed) {
     const pct = Math.round((r.wallTimeSeconds / r.durationSeconds) * 100);
     print.info(`#${r.episode} "${r.title}"`);
