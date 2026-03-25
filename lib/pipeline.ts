@@ -119,8 +119,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
   }
 
   // Phase 1: Download all MP3s
-  print.info();
-  print.info(`=== Downloading ${toProcess.length} ${pluralize(toProcess.length, 'episode')} ===`);
+  print.heading(`Downloading ${toProcess.length} ${pluralize(toProcess.length, 'episode')}`);
 
   const downloaded: { episode: Episode; mp3Path: string }[] = [];
 
@@ -161,8 +160,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
   }
 
   // Phase 2: Transcribe all downloaded MP3s
-  print.info();
-  print.info(`=== Transcribing ${downloaded.length} ${pluralize(downloaded.length, 'episode')} ===`);
+  print.heading(`Transcribing ${downloaded.length} ${pluralize(downloaded.length, 'episode')}`);
 
   const transcribed: { episode: Episode; outputPath: string; wallTimeSeconds: number }[] = [];
 
@@ -207,8 +205,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
   const summarized = new Set<number>();
 
   if (opts.summarize && transcribed.length > 0) {
-    print.info();
-    print.info(`=== Summarizing ${transcribed.length} ${pluralize(transcribed.length, 'episode')} ===`);
+    print.heading(`Summarizing ${transcribed.length} ${pluralize(transcribed.length, 'episode')}`);
 
     for (const r of transcribed) {
       const paths = episodePaths({ episode: r.episode.episodeNumber, model, summaryModel });
@@ -261,8 +258,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
   }
 
   // Print summary
-  print.info();
-  print.info('=== Summary ===');
+  print.heading('Summary');
 
   const completed = outcomes.filter((o): o is Extract<EpisodeOutcome, { status: 'completed' }> => o.status === 'completed');
   for (const r of completed) {
