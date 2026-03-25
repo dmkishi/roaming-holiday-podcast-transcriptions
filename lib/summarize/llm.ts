@@ -55,7 +55,7 @@ export async function summarize(
     const { prompt_tokens, completion_tokens } = response.usage;
     print.info();
     print.info(
-      `  Tokens: input ${formatNumber(prompt_tokens)} / output ${formatNumber(completion_tokens)}`,
+      `  Tokens:  input ${formatNumber(prompt_tokens)} / output ${formatNumber(completion_tokens)}`,
     );
   }
 

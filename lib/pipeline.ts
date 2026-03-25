@@ -141,7 +141,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
       mp3Url: ep.mp3Url,
     };
     writeFileSync(paths.rss, JSON.stringify(metadata, null, 2) + '\n');
-    print.info(`  Length: ${ep.duration}`);
+    print.info(`  Length:   ${ep.duration}`);
     print.info(`  Metadata: "${basename(paths.rss)}"`);
     log.info(`Saved RSS metadata: "${basename(paths.rss)}"`, {
       'Title': `"${ep.title}"`,
@@ -182,7 +182,7 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
       const text = readFileSync(result.outputPath, 'utf-8');
       const wordCount = text.split(/\s+/).filter(Boolean).length;
       const charCount = text.length;
-      print.info(`  Stats: ${formatNumber(wordCount)} words, ${formatNumber(charCount)} chars`);
+      print.info(`  Stats:  ${formatNumber(wordCount)} words, ${formatNumber(charCount)} chars`);
 
       transcribed.push({ episode, ...result });
       print.info(`  Output: "${basename(result.outputPath)}"`);
