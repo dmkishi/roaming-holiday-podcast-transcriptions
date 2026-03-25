@@ -7,6 +7,7 @@ type LogDetails = Record<string, string>;
 
 const LOG_PATH = resolve(import.meta.dirname, '../LOG');
 const STRIP_ANSI = /\x1b\[[0-9;]*m/g;
+const hr = '-'.repeat(80) + '\n';
 let isFirstWrite = true;
 
 /**
@@ -21,7 +22,7 @@ function formatDetails(details: LogDetails, indent: number): string {
 
 function record(level: LogLevel, msg: string, details?: LogDetails) {
   if (isFirstWrite) {
-    appendFileSync(LOG_PATH, '\n');
+    appendFileSync(LOG_PATH, hr);
     isFirstWrite = false;
   }
 
