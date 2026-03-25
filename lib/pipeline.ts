@@ -50,7 +50,15 @@ type SummarizeOutcome =
   | { status: 'no_transcript'; episode: number }
   | { status: 'skipped'; episode: number }
   | { status: 'failed'; episode: number; error: string }
-  | { status: 'completed'; episode: number; result: { summary: string; places: string[]; keywords: string[]; } };
+  | {
+      status: 'completed';
+      episode: number;
+      result: {
+        summary: string;
+        places: string[];
+        keywords: string[];
+      };
+    };
 
 // =============================================================================
 // Transcribe pipeline
