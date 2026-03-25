@@ -12,17 +12,6 @@ import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.j
 import { transcribe } from '@lib/transcribe/whisper.js';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
 
-// =============================================================================
-// Types
-// =============================================================================
-interface TranscribeOptions {
-  episodes: number[];
-  model?: string;
-  force?: boolean;
-  summarize?: boolean;
-  summaryModel?: string;
-}
-
 type TranscribeOutcome =
   | { status: 'skipped'; episode: number; reason: string }
   | { status: 'not_found'; episode: number }
@@ -38,13 +27,6 @@ type TranscribeOutcome =
       outputPath: string;
       summarized: boolean;
     };
-
-interface SummarizeOptions {
-  episodes: number[];
-  model?: string;
-  summaryModel?: string;
-  force?: boolean;
-}
 
 type SummarizeOutcome =
   | { status: 'no_transcript'; episode: number }
@@ -63,7 +45,13 @@ type SummarizeOutcome =
 // =============================================================================
 // Transcribe pipeline
 // =============================================================================
-export async function runTranscribePipeline(opts: TranscribeOptions): Promise<TranscribeOutcome[]> {
+export async function runTranscribePipeline(opts: {
+  episodes: number[];
+  model?: string;
+  force?: boolean;
+  summarize?: boolean;
+  summaryModel?: string;
+}): Promise<TranscribeOutcome[]> {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
   const force = opts.force ?? false;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
@@ -297,7 +285,12 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Tr
 // =============================================================================
 // Summarize pipeline
 // =============================================================================
-export async function runSummarizePipeline(opts: SummarizeOptions): Promise<SummarizeOutcome[]> {
+export async function runSummarizePipeline(opts: {
+  episodes: number[];
+  model?: string;
+  summaryModel?: string;
+  force?: boolean;
+}): Promise<SummarizeOutcome[]> {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
   const force = opts.force ?? false;
