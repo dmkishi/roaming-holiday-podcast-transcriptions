@@ -15,7 +15,7 @@ import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
 // =============================================================================
 // Types
 // =============================================================================
-export interface TranscribeOptions {
+interface TranscribeOptions {
   episodes: number[];
   model?: string;
   force?: boolean;
@@ -39,7 +39,7 @@ type EpisodeOutcome =
       summarized: boolean;
     };
 
-export interface SummarizeOptions {
+interface SummarizeOptions {
   episodes: number[];
   model?: string;
   summaryModel?: string;

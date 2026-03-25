@@ -7,13 +7,13 @@ import { parseDuration } from '@lib/duration.js';
 
 const VENV_WHISPER = resolve(import.meta.dirname, '../../.venv/bin/whisper');
 
-export interface TranscribeOptions {
+interface TranscribeOptions {
   model: string;
   title: string;
   description: string;
 }
 
-export interface TranscribeResult {
+interface TranscribeResult {
   outputPath: string;
   wallTimeSeconds: number;
 }
