@@ -109,7 +109,6 @@ export async function runTranscribePipeline(opts: {
       toProcess.push(ep);
     }
   }
-
   if (toProcess.length === 0) {
     print.info('Nothing to do — all transcripts already exist.');
     return outcomes;
@@ -119,7 +118,6 @@ export async function runTranscribePipeline(opts: {
   print.heading(`Downloading ${toProcess.length} ${pluralize(toProcess.length, 'episode')}`);
 
   const downloaded: { episode: Episode; mp3Path: string }[] = [];
-
   for (const ep of toProcess) {
     print.info();
     print.info(`#${ep.episodeNumber} [${formatDate(ep.pubDate)}] "${ep.title}"`);
@@ -160,7 +158,6 @@ export async function runTranscribePipeline(opts: {
   print.heading(`Transcribing ${downloaded.length} ${pluralize(downloaded.length, 'episode')}`);
 
   const transcribed: { episode: Episode; outputPath: string; wallTimeSeconds: number }[] = [];
-
   for (const { episode, mp3Path } of downloaded) {
     print.info();
     print.info(`#${episode.episodeNumber} [${episode.pubDate.toISOString().slice(0, 10)}] "${episode.title}"`);
@@ -200,7 +197,6 @@ export async function runTranscribePipeline(opts: {
 
   // Phase 3: Summarize transcripts (optional)
   const summarized = new Set<number>();
-
   if (opts.summarize && transcribed.length > 0) {
     print.heading(`Summarizing ${transcribed.length} ${pluralize(transcribed.length, 'episode')}`);
 

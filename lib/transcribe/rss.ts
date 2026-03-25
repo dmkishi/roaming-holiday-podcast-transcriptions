@@ -72,7 +72,10 @@ export async function fetchEpisodes(): Promise<Episode[]> {
 export function findEpisodes(
   nums: number[],
   episodes: Episode[],
-): { found: Episode[]; notFound: number[] } {
+): {
+  found: Episode[];
+  notFound: number[];
+} {
   const episodeMap = new Map(episodes.map((ep) => [ep.episodeNumber, ep]));
   const found: Episode[] = [];
   const notFound: number[] = [];
@@ -97,4 +100,3 @@ function parseEpisodeNumber(guid: string): number | null {
   const match = guid.match(/RH(\d+)\.mp3/);
   return match ? parseInt(match[1], 10) : null;
 }
-
