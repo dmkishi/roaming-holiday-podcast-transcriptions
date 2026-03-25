@@ -179,12 +179,11 @@ export async function runTranscribePipeline(opts: TranscribeOptions): Promise<Ep
         description: episode.description,
       });
 
+      transcribed.push({ episode, ...result });
       const text = readFileSync(result.outputPath, 'utf-8');
       const wordCount = text.split(/\s+/).filter(Boolean).length;
       const charCount = text.length;
       print.info(`  Stats:  ${formatNumber(wordCount)} words, ${formatNumber(charCount)} chars`);
-
-      transcribed.push({ episode, ...result });
       print.info(`  Output: "${basename(result.outputPath)}"`);
 
       const wall = fromSeconds(result.wallTimeSeconds);
