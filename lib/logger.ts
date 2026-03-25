@@ -1,5 +1,6 @@
 import { appendFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { Temporal } from '@js-temporal/polyfill';
 
 type LogLevel = 'info' | 'warn' | 'error';
 type LogDetails = Record<string, string>;
@@ -24,7 +25,7 @@ function record(level: LogLevel, msg: string, details?: LogDetails) {
     isFirstWrite = false;
   }
 
-  const timestamp = new Date().toISOString().slice(0, 17);
+  const timestamp = Temporal.Now.plainDateTimeISO().toString().slice(0, 16);
   const tag = `[${level.toUpperCase()}]`.padEnd(7);
   const prefix = `${timestamp} ${tag} - `;
   const plain = msg.replace(STRIP_ANSI, '');
