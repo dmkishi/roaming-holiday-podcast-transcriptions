@@ -81,16 +81,15 @@ export async function runTranscribePipeline(opts: {
   // Find requested episodes
   const { found, notFound } = findEpisodes(opts.episodes, allEpisodes);
   if (notFound.length > 0) {
-    const range = allEpisodes.map((ep) => ep.episodeNumber);
-    const min = Math.min(...range);
-    const max = Math.max(...range);
-    const msg = `Episodes not found: ${notFound.join(', ')} (feed has episodes ${min}-${max})`;
+    const msg = `Episodes not found: ${notFound.join(', ')}`;
     print.warn(msg);
     log.warn(msg);
     outcomes.push(...notFound.map(episode => ({ status: 'not_found' as const, episode })));
   }
   if (found.length === 0) {
-    print.error('No valid episodes to process.');
+    const msg = 'No valid episodes to process.';
+    print.error(msg);
+    log.error(msg);
     return outcomes;
   }
 
@@ -108,7 +107,9 @@ export async function runTranscribePipeline(opts: {
     }
   }
   if (toProcess.length === 0) {
-    print.info('Nothing to do — all transcripts already exist.');
+    const msg = 'Nothing to do — all transcripts already exist.';
+    print.warn(msg);
+    log.warn(msg);
     return outcomes;
   }
 
@@ -344,8 +345,6 @@ export async function runSummarizePipeline(opts: {
       log.error(`Summarization failed for episode ${epNum}: ${(err as Error).message}`);
       outcomes.push({ status: 'failed', episode: epNum, error: (err as Error).message });
     }
-
-    print.info();
   }
 
   return outcomes;
