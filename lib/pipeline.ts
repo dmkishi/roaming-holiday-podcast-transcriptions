@@ -62,6 +62,7 @@ export async function runTranscribePipeline(opts: {
   print.info(`Whisper Model: ${pc.blue(model)}`);
   print.info();
 
+  // Fetch RSS feed
   print.info('Fetching RSS feed...');
   let allEpisodes: Episode[];
   try {
@@ -114,7 +115,7 @@ export async function runTranscribePipeline(opts: {
     return outcomes;
   }
 
-  // Phase 1: Download all MP3s
+  // Phase 1: Download MP3s
   print.heading(`Downloading ${toProcess.length} ${pluralize(toProcess.length, 'episode')}`);
 
   const downloaded: { episode: Episode; mp3Path: string }[] = [];
@@ -155,7 +156,7 @@ export async function runTranscribePipeline(opts: {
     }
   }
 
-  // Phase 2: Transcribe all downloaded MP3s
+  // Phase 2: Transcribe downloaded MP3s
   print.heading(`Transcribing ${downloaded.length} ${pluralize(downloaded.length, 'episode')}`);
 
   const transcribed: { episode: Episode; outputPath: string; wallTimeSeconds: number }[] = [];
