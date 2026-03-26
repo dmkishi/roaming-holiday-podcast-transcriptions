@@ -55,6 +55,7 @@ export async function runTranscribePipeline(opts: {
   const model = opts.model ?? DEFAULT_WHISPER_MODEL;
   const force = opts.force ?? false;
   const summaryModel = opts.summaryModel ?? DEFAULT_SUMMARY_MODEL;
+  const outcomes: TranscribeOutcome[] = [];
 
   mkdirSync(TRANSCRIPTS_DIR, { recursive: true });
 
@@ -71,7 +72,7 @@ export async function runTranscribePipeline(opts: {
     const msg = `Failed to fetch RSS feed: ${(err as Error).message}`;
     print.error(msg);
     log.error(msg);
-    const outcomes = opts.episodes.map((ep) => ({ status: 'not_found' as const, episode: ep }));
+    outcomes.push(...opts.episodes.map((ep) => ({ status: 'not_found' as const, episode: ep })));
     return outcomes;
   }
   print.info(pc.green(`Found ${allEpisodes.length} episodes`));
@@ -79,7 +80,6 @@ export async function runTranscribePipeline(opts: {
 
   // Find requested episodes
   const { found, notFound } = findEpisodes(opts.episodes, allEpisodes);
-  const outcomes: TranscribeOutcome[] = [];
   if (notFound.length > 0) {
     const range = allEpisodes.map((ep) => ep.episodeNumber);
     const min = Math.min(...range);
@@ -87,9 +87,7 @@ export async function runTranscribePipeline(opts: {
     const msg = `Episodes not found: ${notFound.join(', ')} (feed has episodes ${min}-${max})`;
     print.warn(msg);
     log.warn(msg);
-    for (const n of notFound) {
-      outcomes.push({ status: 'not_found', episode: n });
-    }
+    outcomes.push(...notFound.map(episode => ({ status: 'not_found' as const, episode })));
   }
   if (found.length === 0) {
     print.error('No valid episodes to process.');
