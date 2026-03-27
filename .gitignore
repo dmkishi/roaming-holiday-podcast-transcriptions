@@ -2,14 +2,15 @@
 node_modules/
 .venv/
 
-# Build outputs
-dist/
-
-# Secrets
-.env
-
 # OS
 .DS_Store
+
+# Private
+.env
+.claude/settings.local.json
+
+# Build outputs
+dist/
 
 # Project outputs
 LOG
