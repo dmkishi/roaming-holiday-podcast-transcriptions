@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
-import { SYSTEM_PROMPT } from '@lib/config/prompts.js';
+import { SUMMARY_PROMPT } from '@lib/config/prompts.js';
 import { print } from '@lib/print.js';
 import { formatNumber } from '@lib/strings.js';
 
@@ -45,7 +45,7 @@ export async function summarize(
   const response = await client.chat.completions.create({
     model,
     messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: SUMMARY_PROMPT },
       { role: 'user', content: userMessage },
     ],
     response_format: zodResponseFormat(SummaryResultSchema, 'episode_summary'),

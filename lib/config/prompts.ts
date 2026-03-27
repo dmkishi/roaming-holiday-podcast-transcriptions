@@ -1,18 +1,20 @@
 /**
  * The Whisper prompt is not instructional but provides context about the style
- * speech patterns of the audio. Here, we include proper nouns and names to help
- * Whisper recognize and spell them correctly.
+ * of speech patterns in the audio. Here, we provide proper nouns to condition
+ * Whisper to recognize and spell them correctly.
  */
-export const BASE_PROMPT = `
-  Roaming Holiday by Keith McNally of Fredericton, New Brunswick. He visits:
-  7-Eleven, Tim Hortons.
-`.trim();
+export const WHISPER_PROMPT = {
+  // List place names often mentioned in the podcast that may be or are misheard
+  // or misspelled by the model.
+  placeNames: '7-Eleven, Tim Hortons.',
+  basicInfo: '"Roaming Holiday" by Keith McNally of Fredericton, New Brunswick.',
+} as const;
 
 /**
  * - Generally, LLMs perform better when steered with positive examples instead
  *   of negative constraints.
  */
-export const SYSTEM_PROMPT = `
+export const SUMMARY_PROMPT = `
   You are analyzing a transcript from "Roaming Holiday", a travel podcast by
   Keith McNally.
 

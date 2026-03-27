@@ -9,7 +9,7 @@ import { episodePaths, findTranscript, TRANSCRIPTS_DIR } from '@lib/paths.js';
 import { pluralize, formatDate, formatNumber } from '@lib/strings.js';
 import { downloadMp3 } from '@lib/transcribe/download.js';
 import { fetchEpisodes, findEpisodes, type Episode } from '@lib/transcribe/rss.js';
-import { transcribe } from '@lib/transcribe/whisper.js';
+import { makePrompt, PROMPT_TOKEN_LIMIT, transcribe } from '@lib/transcribe/whisper.js';
 import { summarizeEpisode } from '@lib/summarize/summarizeEpisode.js';
 
 type TranscribeOutcome =
@@ -164,10 +164,20 @@ export async function runTranscribePipeline(opts: {
     const paths = episodePaths({ episode: episode.episodeNumber, model });
 
     try {
-      const result = await transcribe(mp3Path, paths.transcript, episode.durationSeconds, {
+      const promptResponse = await makePrompt(episode.title, episode.description);
+      if (promptResponse.isOverLimit) {
+        print.info(`  Prompt token count: ${pc.red(promptResponse.tokenCount)}/${pc.red(PROMPT_TOKEN_LIMIT)}`);
+        print.warn(pc.yellow(`Prompt token count exceeds limit — PROMPT MAY BE TRUNCATED!`));
+      } else {
+        print.info(`  Prompt token count: ${promptResponse.tokenCount}/${PROMPT_TOKEN_LIMIT}`);
+      }
+
+      const result = await transcribe({
+        audioPath: mp3Path,
         model,
-        title: episode.title,
-        description: episode.description,
+        prompt: promptResponse.prompt,
+        outputPath: paths.transcript,
+        durationSeconds: episode.durationSeconds,
       });
 
       transcribed.push({ episode, ...result });
