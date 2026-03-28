@@ -14,5 +14,5 @@ dist/
 
 # Project outputs
 LOG
-transcripts/*
-!transcripts/.gitkeep
+outputs/*
+!outputs/.gitkeep
