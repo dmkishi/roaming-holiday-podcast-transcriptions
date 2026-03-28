@@ -32,15 +32,6 @@ pnpm transcribe 101 --model small
 
 # Overwrite existing transcripts
 pnpm transcribe 101 --force
-
-# Summarize a single or multiple episodes
-pnpm summarize 101 [102 103]
-
-# Summarize using a different transcription model
-pnpm summarize 101 --model small
-
-# Overwrite existing summaries
-pnpm summarize 101 --force
 ```
 
 Models

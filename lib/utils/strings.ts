@@ -1,11 +1,3 @@
-export function pluralize(
-  count: number,
-  singular: string,
-  plural = `${singular}s`
-): string {
-  return count === 1 ? singular : plural;
-}
-
 /**
  * Date → YYYY-MM-DD
  */
@@ -18,4 +10,12 @@ export function formatDate(date: Date): string {
  */
 export function formatNumber(n: number): string {
   return n.toLocaleString('en-US');
+}
+
+export function pluralize(
+  count: number,
+  singular: string,
+  plural = `${singular}s`,
+): string {
+  return count === 1 ? singular : plural;
 }

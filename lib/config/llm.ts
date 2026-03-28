@@ -1,3 +1,6 @@
+export const DEFAULT_WHISPER_MODEL = 'base';
+export const DEFAULT_SUMMARY_MODEL = 'gpt-4.1';
+
 /**
  * The Whisper prompt is not instructional but provides context about the style
  * of speech patterns in the audio. Here, we provide proper nouns to condition

@@ -4,8 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "transcribe": "tsx bin/transcribe.ts",
-    "summarize": "tsx --env-file=.env bin/summarize.ts",
+    "transcribe": "tsx --env-file=.env bin/transcribe.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
