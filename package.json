@@ -1,6 +1,6 @@
 {
   "name": "roaming-holiday-podcast-transcriptions",
-  "author": "",
+  "author": "DM Kishi <dm.kishi@gmail.com>",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -8,7 +8,6 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
-  "keywords": [],
   "packageManager": "pnpm@10.24.0",
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
