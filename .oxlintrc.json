@@ -1,0 +1,64 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+  ],
+
+  /**
+   * Set groups of rules by category. This is a convenient way to set large
+   * groups of rules at once.
+   *
+   * Prefer categorically enabling rules then disabling individual rules below.
+   *
+   * - "correctness": Code that is outright wrong or useless.
+   * - "suspicious": Code that is most likely wrong or useless.
+   * - "pedantic": Lints which are rather strict or have occasional false positives.
+   * - "style": Code that should be written in a more idiomatic way.
+   * - "perf": Code that can be written to run faster.
+   * - "nursery": New lints that are still under development
+   * - "restriction": Don't use.
+   */
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "pedantic": "warn",
+    "style": "warn",
+  },
+
+  /**
+   * Set individual rules: https://oxc.rs/docs/guide/usage/linter/rules.html
+   */
+  "rules": {
+    /* Pedantic */
+    "max-lines-per-function": "off",
+
+    /* Style */
+    "capitalized-comments": "off", // Agree but cannot detect consecutive lines.
+    "curly": ["error", "multi-line", "consistent"],
+    "func-style": "off",
+    "id-length": "off", // Agree but prefer exception in single-line functions.
+    "init-declarations": "off",
+    "max-statements": "off",
+    "no-continue": "off", // Agree but prefer "returning" early.
+    "no-magic-numbers": "off", // Agree but too cumbersome.
+    "no-ternary": "off",
+    "prefer-destructuring": "off",
+    "prefer-template": "off",
+    "sort-imports": "off", // Disagree on sort order.
+    "sort-keys": "off", // Disagree on sort order.
+
+    /* Perf */
+    "no-useless-call": "error",
+    "unicorn/prefer-array-find": "error",
+    "unicorn/prefer-array-flat-map": "error",
+  },
+  "env": {
+    "builtin": true, // Support built-in globals (console, setTimeout, etc.)
+  },
+  "options": {
+    "typeAware": true, // Enable rules that require type information
+    "typeCheck": true, // Enable experimental type checking
+  },
+}
