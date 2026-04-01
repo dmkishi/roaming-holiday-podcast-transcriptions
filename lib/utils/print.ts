@@ -8,10 +8,10 @@ function joinLines(msg: string | string[]) {
 }
 
 export const print = {
-  info: (msg: string) => console.log(msg),
-  warn: (msg: string) => console.error(`${pc.yellow('[WARN]')} ${msg}`),
-  error: (msg: string) => console.error(`${pc.red('[ERROR]')} ${msg}`),
-  emptyLine: () => console.log(''),
+  info: (msg: string) => { console.log(msg); },
+  warn: (msg: string) => { console.error(`${pc.yellow('[WARN]')} ${msg}`); },
+  error: (msg: string) => { console.error(`${pc.red('[ERROR]')} ${msg}`); },
+  emptyLine: () => { console.log(''); },
 };
 
 export const printAndLog = {

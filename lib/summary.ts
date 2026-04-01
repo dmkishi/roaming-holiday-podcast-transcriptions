@@ -64,8 +64,8 @@ export async function promptSummary(
       response_format: zodResponseFormat(SummaryResultSchema, 'episode_summary'),
     });
 
-    const content = response.choices[0]?.message.content;
-    if (!content) {
+    const content = response.choices[0]?.message.content ?? '';
+    if (content === '') {
       return {
         ok: false,
         error: 'Empty response from OpenAI',
@@ -74,13 +74,13 @@ export async function promptSummary(
 
     SummaryResultSchema.parse(JSON.parse(content));
 
-    const { summary: path } = episodePaths({
+    const { summary: path = '' } = episodePaths({
       episodeNumber: transcript.episodeNumber,
       model: transcriptModel,
       summaryModel,
     });
 
-    if (!path) {
+    if (path === '') {
       return {
         ok: false,
         error: 'Could not derive summary path',

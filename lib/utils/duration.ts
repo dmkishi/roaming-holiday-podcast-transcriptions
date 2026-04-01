@@ -9,7 +9,7 @@ export interface Duration {
  * a Duration with seconds, normalized timestamp, and human-readable form.
  */
 export function parseDuration(input: string): Duration {
-  const [secs = 0, mins = 0, hrs = 0] = input.split(':').map(Number).reverse();
+  const [secs = 0, mins = 0, hrs = 0] = input.split(':').map(Number).toReversed();
   const totalSeconds = hrs * 3600 + mins * 60 + secs;
   return fromSeconds(totalSeconds);
 }

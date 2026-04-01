@@ -92,7 +92,7 @@ for (const episode of episodes) {
   toTranscribes.push(toTranscribe);
 }
 
-if (!toTranscribes.length) {
+if (toTranscribes.length === 0) {
   printAndLog.info('No episodes to transcribe.');
   process.exit(0);
 }

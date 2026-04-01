@@ -10,7 +10,12 @@ interface CliOptions {
 }
 
 export function getCliArgs(args: string[]): CliOptions {
-  const argv = minimist(args.slice(2), {
+  const argv = minimist<{
+    model: string;
+    'summary-model': string;
+    'skip-summary': boolean;
+    force: boolean;
+  }>(args.slice(2), {
     string: ['model', 'summary-model'],
     boolean: ['force', 'skip-summary'],
     default: {
@@ -31,9 +36,9 @@ export function getCliArgs(args: string[]): CliOptions {
 
   return {
     episodeNums,
-    transcribeModel: argv['model'],
+    transcribeModel: argv.model,
     summaryModel: argv['summary-model'],
     skipSummary: argv['skip-summary'],
-    force: argv['force'],
+    force: argv.force,
   };
 }

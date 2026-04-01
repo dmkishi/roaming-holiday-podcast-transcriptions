@@ -12,16 +12,16 @@ export function episodePaths(params: {
 }): {
   metadata: string;
   transcript: string;
-  summary: string | null;
+  summary: string | undefined;
 } {
   const code = formatEpisodeNumber(params.episodeNumber);
   const model = handleize(params.model);
   return {
     metadata: join(OUTPUTS_DIR, `${code}.metadata.json`),
     transcript: join(OUTPUTS_DIR, `${code}.transcript__${model}.json`),
-    summary: params.summaryModel
-      ? join(OUTPUTS_DIR, `${code}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`)
-      : null,
+    summary: params.summaryModel === undefined
+      ? undefined
+      : join(OUTPUTS_DIR, `${code}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`),
   };
 }
 
@@ -53,6 +53,6 @@ function formatEpisodeNumber(episodeNumber: number): string {
 function handleize(str: string): string {
   return str
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replaceAll(/[^a-z0-9]+/g, '-')
+    .replaceAll(/^-+|-+$/g, '');
 }

@@ -162,7 +162,7 @@ export async function promptTranscript(
       const proc = spawn(VENV_WHISPER, args, {
         stdio: ['ignore', 'pipe', 'pipe'],
       });
-      proc.on('close', (code) => resolvePromise(code));
+      proc.on('close', (code) => { resolvePromise(code); });
     });
 
     const workDuration = fromSeconds((performance.now() - startTime) / 1000);

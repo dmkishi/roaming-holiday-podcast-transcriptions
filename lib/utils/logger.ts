@@ -4,7 +4,8 @@ import { LOG_PATH } from '@lib/config/paths.js';
 
 type LogLevel = 'info' | 'warn' | 'error';
 
-const STRIP_ANSI = /\x1b\[[0-9;]*m/g;
+// oxlint-disable-next-line no-control-regex
+const STRIP_ANSI = /\u001B\[[0-9;]*m/g;
 let isFirstWrite = true;
 
 function toPlain(msg: string) {
@@ -29,7 +30,7 @@ function record(level: LogLevel, msg: string) {
 }
 
 export const log = {
-  info: (msg: string) => record('info', msg),
-  warn: (msg: string) => record('warn', msg),
-  error: (msg: string) => record('error', msg),
+  info: (msg: string) => { record('info', msg); },
+  warn: (msg: string) => { record('warn', msg); },
+  error: (msg: string) => { record('error', msg); },
 };
