@@ -12,6 +12,13 @@ export function formatNumber(n: number): string {
   return n.toLocaleString('en-US');
 }
 
+export function handleize(str: string): string {
+  return str
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]+/g, '-')
+    .replaceAll(/^-+|-+$/g, '');
+}
+
 export function pluralize(
   count: number,
   singular: string,

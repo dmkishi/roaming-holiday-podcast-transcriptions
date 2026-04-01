@@ -1,7 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
-import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { handleize } from '@lib/utils/strings.js';
 import { TMP_DIR } from '@lib/config/paths.js';
 
 export interface RssItem {
@@ -22,11 +22,6 @@ type RssFeedResponse =
       items: RssItem[];
     };
 
-interface CacheMeta {
-  etag?: string;
-  lastModified?: string;
-}
-
 /**
  * Fetch all items from an RSS feed, serving from cache when unchanged.
  * @todo Error message on fail would be helpful.
@@ -34,29 +29,24 @@ interface CacheMeta {
  */
 export async function getAllRssItems(url: string): Promise<RssFeedResponse> {
   try {
-    const paths = cachePathsFor(url);
-    const cached = readCacheMeta(paths.meta);
+    const cachePaths = cachePathsFor(url);
+    const cacheEtag = readCachedEtag(cachePaths.etag);
+    const requestHeaders = cacheEtag === undefined
+      ? undefined
+      : { 'If-None-Match': cacheEtag };
 
-    const headers: Record<string, string> = {};
-    if (cached?.etag) headers['If-None-Match'] = cached.etag;
-    if (cached?.lastModified) headers['If-Modified-Since'] = cached.lastModified;
-
-    const res = await fetch(url, { headers });
-
+    const res = await fetch(url, { headers: requestHeaders });
     let xml: string;
     let status: 'downloaded' | 'cached';
-    if (res.status === 304 && existsSync(paths.xml)) {
-      xml = readFileSync(paths.xml, 'utf-8');
+    if (res.status === 304 && existsSync(cachePaths.xml)) {
+      xml = readFileSync(cachePaths.xml, 'utf-8');
       status = 'cached';
     } else if (res.ok) {
       xml = await res.text();
       status = 'downloaded';
-      const meta: CacheMeta = {
-        etag: res.headers.get('etag')?.replace(/-gzip"$/, '"') ?? undefined,
-        lastModified: res.headers.get('last-modified') ?? undefined,
-      };
-      writeFileSync(paths.xml, xml);
-      writeFileSync(paths.meta, JSON.stringify(meta));
+      writeFileSync(cachePaths.xml, xml);
+      const newEtag = res.headers.get('etag')?.replace(/-gzip"$/, '"') ?? '';
+      if (newEtag !== '') writeFileSync(cachePaths.etag, newEtag);
     } else {
       return { status: 'failed' };
     }
@@ -66,10 +56,7 @@ export async function getAllRssItems(url: string): Promise<RssFeedResponse> {
     const items = parsed?.rss?.channel?.item as RssItem[] | undefined;
 
     if (!items) return { status: 'failed' };
-    return {
-      status,
-      items,
-    };
+    return { status, items };
   } catch {
     return { status: 'failed' };
   }
@@ -80,22 +67,23 @@ export async function getAllRssItems(url: string): Promise<RssFeedResponse> {
  *
  * ```js
  * {
- *   xml: "/tmp/rss-a1b2c3d4e5f6.xml",
- *   meta: "/tmp/rss-a1b2c3d4e5f6.meta.json",
+ *   xml: "/tmp/https-keithcourage-com-rh-rss-rss-xml.xml",
+ *   etag: "/tmp/https-keithcourage-com-rh-rss-rss-xml.etag.txt",
  * }
  * ```
  */
 function cachePathsFor(url: string) {
-  const hash = createHash('sha256').update(url).digest('hex').slice(0, 12);
+  const handleizedUrl = handleize(url);
   return {
-    xml: resolve(TMP_DIR, `rss-${hash}.xml`),
-    meta: resolve(TMP_DIR, `rss-${hash}.meta.json`),
+    xml: resolve(TMP_DIR, `${handleizedUrl}.xml`),
+    etag: resolve(TMP_DIR, `${handleizedUrl}.etag.txt`),
   };
 }
 
-function readCacheMeta(path: string): CacheMeta | undefined {
+function readCachedEtag(path: string): string | undefined {
   try {
-    return JSON.parse(readFileSync(path, 'utf-8')) as CacheMeta;
+    const etag = readFileSync(path, 'utf-8');
+    return etag || undefined;
   } catch {
     return undefined;
   }

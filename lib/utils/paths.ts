@@ -1,5 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { handleize } from '@lib/utils/strings.js';
 import { OUTPUTS_DIR, ROOT } from '@lib/config/paths.js';
 
 /**
@@ -48,11 +49,4 @@ export function toRelative(absolutePath: string): string {
 
 function formatEpisodeNumber(episodeNumber: number): string {
   return String(episodeNumber).padStart(3, '0');
-}
-
-function handleize(str: string): string {
-  return str
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
 }
