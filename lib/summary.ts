@@ -64,7 +64,7 @@ export async function promptSummary(
       response_format: zodResponseFormat(SummaryResultSchema, 'episode_summary'),
     });
 
-    const content = response.choices[0].message.content;
+    const content = response.choices[0]?.message.content;
     if (!content) {
       return {
         ok: false,

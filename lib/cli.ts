@@ -31,9 +31,9 @@ export function getCliArgs(args: string[]): CliOptions {
 
   return {
     episodeNums,
-    transcribeModel: argv.model,
+    transcribeModel: argv['model'],
     summaryModel: argv['summary-model'],
     skipSummary: argv['skip-summary'],
-    force: argv.force,
+    force: argv['force'],
   };
 }
