@@ -37,7 +37,7 @@ export async function promptSummary(
 ): Promise<SummaryResponse> {
   try {
     const { text } = TranscriptFileSchema.parse(
-      JSON.parse(readFileSync(transcript.path, 'utf-8')),
+      JSON.parse(readFileSync(transcript.path, 'utf8')),
     );
 
     if (!text) {

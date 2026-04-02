@@ -191,7 +191,7 @@ export async function promptTranscript(
       };
     }
 
-    const json = readFileSync(whisperOutputPath, 'utf-8');
+    const json = readFileSync(whisperOutputPath, 'utf8');
     const { text } = TranscriptFileSchema.parse(JSON.parse(json));
 
     if (text === '') {

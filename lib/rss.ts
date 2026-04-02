@@ -50,7 +50,7 @@ export async function getAllRssItems(url: string): Promise<RssFeedResponse> {
     let xml: string;
     let status: 'downloaded' | 'cached';
     if (res.status === 304 && existsSync(cachePaths.xml)) {
-      xml = readFileSync(cachePaths.xml, 'utf-8');
+      xml = readFileSync(cachePaths.xml, 'utf8');
       status = 'cached';
     } else if (res.ok) {
       xml = await res.text();
@@ -92,7 +92,7 @@ function cachePathsFor(url: string) {
 
 function readCachedEtag(path: string): string | undefined {
   try {
-    const etag = readFileSync(path, 'utf-8');
+    const etag = readFileSync(path, 'utf8');
     return etag || undefined;
   } catch {
     return undefined;
