@@ -1,6 +1,7 @@
 import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
+import { promisify } from 'node:util';
 import type { FailResponse } from '@lib/types.js';
 import type { Episode } from '@lib/episode.js';
 import { fromSeconds, type Duration } from '@lib/utils/duration.js';
@@ -44,22 +45,20 @@ export type TranscriptResponse = FailResponse | Transcript;
 
 export const PROMPT_TOKEN_LIMIT = 224;
 
+const execFileAsync = promisify(execFile);
+
 /**
  * Count tokens a string uses in Whisper's multilingual tokenizer.
  */
-function countTokens(text: string): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const script = `
+async function countTokens(text: string): Promise<number> {
+  const script = `
 from whisper.tokenizer import get_tokenizer
 t = get_tokenizer(multilingual=True)
 print(len(t.encode(${JSON.stringify(text)})))
-    `.trim();
+  `.trim();
 
-    execFile(VENV_PYTHON, ['-c', script], (error, stdout) => {
-      if (error) return reject(error);
-      resolve(parseInt(stdout.trim(), 10));
-    });
-  });
+  const { stdout } = await execFileAsync(VENV_PYTHON, ['-c', script]);
+  return parseInt(stdout.trim(), 10);
 }
 
 /**
