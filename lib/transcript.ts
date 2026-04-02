@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
@@ -184,7 +185,7 @@ export async function promptTranscript(
     }
 
     const json = readFileSync(whisperOutputPath, 'utf-8');
-    const text: string = JSON.parse(json).text ?? '';
+    const { text } = z.object({ text: z.string().default('') }).parse(JSON.parse(json));
     const wordCount = text.split(/\s+/).filter(Boolean).length;
     const characterCount = text.length;
 
