@@ -1,19 +1,30 @@
 import { XMLParser } from 'fast-xml-parser';
+import { z } from 'zod';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { handleize } from '@lib/utils/strings.js';
 import { TMP_DIR } from '@lib/config/paths.js';
 
-export interface RssItem {
-  title: string;
-  description?: string;
-  pubDate: string;
-  guid: string;
-  enclosure: { '@_url': string; '@_length': string };
-  'itunes:duration': string;
-  'itunes:image': { '@_href': string };
-  'itunes:summary': string;
-}
+const RssItemSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  pubDate: z.string(),
+  guid: z.string(),
+  enclosure: z.object({ '@_url': z.string(), '@_length': z.string() }),
+  'itunes:duration': z.string(),
+  'itunes:image': z.object({ '@_href': z.string() }),
+  'itunes:summary': z.string(),
+});
+
+const RssFeedSchema = z.object({
+  rss: z.object({
+    channel: z.object({
+      item: z.array(RssItemSchema),
+    }),
+  }),
+});
+
+export type RssItem = z.infer<typeof RssItemSchema>;
 
 type RssFeedResponse =
   | { status: 'failed' }
@@ -52,10 +63,9 @@ export async function getAllRssItems(url: string): Promise<RssFeedResponse> {
     }
 
     const parser = new XMLParser({ ignoreAttributes: false });
-    const parsed = parser.parse(xml);
-    const items = parsed?.rss?.channel?.item as RssItem[] | undefined;
-
-    if (!items) return { status: 'failed' };
+    const parsed = RssFeedSchema.safeParse(parser.parse(xml));
+    if (!parsed.success) return { status: 'failed' };
+    const items = parsed.data.rss.channel.item;
     return { status, items };
   } catch {
     return { status: 'failed' };
