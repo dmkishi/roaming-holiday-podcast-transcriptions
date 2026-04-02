@@ -20,9 +20,11 @@ export function episodePaths(params: {
   return {
     metadata: join(OUTPUTS_DIR, `${code}.metadata.json`),
     transcript: join(OUTPUTS_DIR, `${code}.transcript__${model}.json`),
-    summary: params.summaryModel === undefined
-      ? undefined
-      : join(OUTPUTS_DIR, `${code}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`),
+    // Unlikely to have surprising falsy values.
+    // oxlint-disable-next-line typescript/strict-boolean-expressions
+    summary: params.summaryModel
+      ? join(OUTPUTS_DIR, `${code}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`)
+      : undefined,
   };
 }
 
@@ -40,6 +42,8 @@ export function findTranscript(
   const match = files.find((f) =>
     f.startsWith(code) && f.includes(suffix) && !f.includes('.summary__'),
   );
+  // Unlikely to have surprising falsy values.
+  // oxlint-disable-next-line typescript/strict-boolean-expressions
   return match ? join(OUTPUTS_DIR, match) : undefined;
 }
 
