@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { FailResponse } from '@lib/types.js';
-import type { Transcript } from '@lib/transcript.js';
+import { TranscriptFileSchema, type Transcript } from '@lib/transcript.js';
 import { episodePaths } from '@lib/utils/paths.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
@@ -36,8 +36,9 @@ export async function promptSummary(
   transcriptModel: string,
 ): Promise<SummaryResponse> {
   try {
-    const parsed = JSON.parse(readFileSync(transcript.path, 'utf-8'));
-    const text = parsed.text ?? '';
+    const { text } = TranscriptFileSchema.parse(
+      JSON.parse(readFileSync(transcript.path, 'utf-8')),
+    );
 
     if (!text) {
       return {

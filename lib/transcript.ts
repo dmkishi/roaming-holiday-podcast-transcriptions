@@ -44,6 +44,10 @@ export interface Transcript {
 
 export type TranscriptResponse = FailResponse | Transcript;
 
+export const TranscriptFileSchema = z.object({
+  text: z.string().default(''),
+});
+
 export const PROMPT_TOKEN_LIMIT = 224;
 
 const execFileAsync = promisify(execFile);
@@ -188,7 +192,7 @@ export async function promptTranscript(
     }
 
     const json = readFileSync(whisperOutputPath, 'utf-8');
-    const { text } = z.object({ text: z.string().default('') }).parse(JSON.parse(json));
+    const { text } = TranscriptFileSchema.parse(JSON.parse(json));
 
     if (text === '') {
       return {
