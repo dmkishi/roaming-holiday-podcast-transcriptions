@@ -18,7 +18,7 @@ import { RSS_FEED_URL } from '@lib/config/podcast.js';
 // =============================================================================
 const opts = getCliArgs(process.argv);
 printAndLog.info([
-  `Transcribe ${pluralize(opts.episodeNums.size, 'episode')}: ${Array.from(opts.episodeNums).join(', ')}`,
+  `Transcribe ${pluralize(opts.episodeNums.size, 'episode')}: ${[...opts.episodeNums].join(', ')}`,
   `  Whisper model: ${opts.transcribeModel}`,
   `  Summary model: ${opts.skipSummary ? 'skipped' : opts.summaryModel}`,
 ]);
@@ -45,7 +45,7 @@ if (episodes.length < opts.episodeNums.size) {
     printAndLog.error('No episodes found');
     process.exit(1);
   } else {
-    const missingEpisodeNums = Array.from(opts.episodeNums).filter(num => !foundEpisodeNums.includes(num));
+    const missingEpisodeNums = [...opts.episodeNums].filter(num => !foundEpisodeNums.includes(num));
     printAndLog.warn(
       `${pluralize(missingEpisodeNums.length, 'Episode')} NOT found: ${missingEpisodeNums.map(num => pc.red(num)).join(', ')}`
     );
