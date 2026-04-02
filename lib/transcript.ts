@@ -104,7 +104,10 @@ export async function makeToTranscribe(
   model: string,
   force: boolean,
 ): Promise<ToTranscribe | undefined> {
-  if (!force && findTranscript(episode.episodeNumber, model)) return undefined;
+  const alreadyTranscribed = findTranscript(episode.episodeNumber, model) !== undefined
+  if (alreadyTranscribed && !force) {
+    return undefined;
+  }
 
   const prompt = await makePrompt(episode.title, episode.description);
   const { transcript: path } = episodePaths({ episodeNumber: episode.episodeNumber, model });
