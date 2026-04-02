@@ -186,6 +186,14 @@ export async function promptTranscript(
 
     const json = readFileSync(whisperOutputPath, 'utf-8');
     const { text } = z.object({ text: z.string().default('') }).parse(JSON.parse(json));
+
+    if (text === '') {
+      return {
+        ok: false,
+        error: 'Whisper transcript is empty',
+      };
+    }
+
     const wordCount = text.split(/\s+/).filter(Boolean).length;
     const characterCount = text.length;
 
