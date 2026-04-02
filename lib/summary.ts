@@ -100,10 +100,10 @@ export async function promptSummary(
         tokenOutput: response.usage?.completion_tokens ?? 0,
       },
     };
-  } catch (err) {
+  } catch (error) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }

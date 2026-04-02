@@ -39,10 +39,10 @@ export async function downloadMp3(toTranscribe: ToTranscribe): Promise<Mp3Respon
       status: 'downloaded',
       sizeMB: Math.round(buffer.byteLength / BYTES_PER_MB),
     };
-  } catch (err) {
+  } catch (error) {
     return {
       status: 'failed',
-      error: err instanceof Error ? err.message : String(err),
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }

@@ -221,10 +221,10 @@ export async function promptTranscript(
         workDuration,
       },
     };
-  } catch (err) {
+  } catch (error) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }
