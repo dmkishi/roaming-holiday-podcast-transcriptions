@@ -46,6 +46,6 @@ export function saveMetadata(
 ): string {
   const { metadata: filepath } = episodePaths({ episodeNumber: episode.episodeNumber, model: '' });
   mkdirSync(dirname(filepath), { recursive: true });
-  writeFileSync(filepath, JSON.stringify(episode, null, 2) + '\n');
+  writeFileSync(filepath, JSON.stringify(episode, undefined, 2) + '\n');
   return filepath;
 }
