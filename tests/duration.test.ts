@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { parseDuration, fromSeconds } from '@lib/duration.js';
+import { parseDuration, fromSeconds } from '@lib/utils/duration.js';
 
 describe('parseDuration', () => {
   test('H:MM:SS', () => {
@@ -72,9 +72,9 @@ describe('fromSeconds', () => {
   test('roundtrips with parseDuration', () => {
     const original = '1:23:45';
     const d = parseDuration(original);
-    const roundtripped = fromSeconds(d.seconds);
-    expect(roundtripped.timestamp).toBe(original);
-    expect(roundtripped.seconds).toBe(d.seconds);
-    expect(roundtripped.human).toBe(d.human);
+    const roundtrip = fromSeconds(d.seconds);
+    expect(roundtrip.timestamp).toBe(original);
+    expect(roundtrip.seconds).toBe(d.seconds);
+    expect(roundtrip.human).toBe(d.human);
   });
 });
