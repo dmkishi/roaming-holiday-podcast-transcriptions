@@ -7,7 +7,8 @@
     "transcribe": "tsx --env-file=.env bin/transcribe.ts",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "fallow": "fallow"
   },
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
