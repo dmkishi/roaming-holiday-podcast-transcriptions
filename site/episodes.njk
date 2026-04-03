@@ -1,0 +1,56 @@
+---
+pagination:
+  data: episodes
+  size: 1
+  alias: episode
+permalink: "episodes/{{ episode.episodeNumber }}.html"
+layout: base.njk
+eleventyComputed:
+  title: "{{ episode.title }} — Roaming Holiday"
+---
+
+<article class="episode">
+  <header class="episode-header">
+    <img src="{{ ('/' + episode.imagePath) | url }}" alt="Episode {{ episode.episodeNumber }}" class="episode-image" width="200" height="200">
+    <div>
+      <h1>{{ episode.episodeNumber }}. {{ episode.title }}</h1>
+      <time datetime="{{ episode.pubDate }}">{{ episode.pubDate | formatDate }}</time>
+      <span class="duration">{{ episode.duration.human }}</span>
+      {%- if episode.location %}
+      <span class="location">{{ episode.location }}</span>
+      {%- endif %}
+      {%- if episode.youtube %}
+      <a href="{{ episode.youtube }}" class="youtube-link" target="_blank" rel="noopener">Watch on YouTube</a>
+      {%- endif %}
+    </div>
+  </header>
+
+  <section class="episode-summary">
+    <p>{{ episode.summary }}</p>
+  </section>
+
+  {%- if episode.places.length > 0 %}
+  <section class="episode-places">
+    <h2>Places</h2>
+    <ul class="tag-list">
+      {%- for place in episode.places %}
+      <li>{{ place }}</li>
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endif %}
+
+  <section class="transcript" data-transcript>
+    {%- for segment in episode.segments %}
+      {%- for section in episode.sections %}
+        {%- if section.segmentIndex == segment.id %}
+    <h2 class="section-title">{{ section.title }}</h2>
+        {%- endif %}
+      {%- endfor %}
+      {%- if segment.timelineMarker %}
+    <time class="timeline-marker" data-time="{{ segment.start }}">{{ segment.start | formatTimestamp }}</time>
+      {%- endif %}
+      <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">{{ segment.text }}</span>
+    {%- endfor %}
+  </section>
+</article>

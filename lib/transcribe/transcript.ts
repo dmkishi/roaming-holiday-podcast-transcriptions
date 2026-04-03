@@ -1,12 +1,12 @@
-import { z } from 'zod';
 import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { promisify } from 'node:util';
-import type { FailResponse } from '@lib/types.js';
-import type { Episode } from '@lib/episode.js';
-import { fromSeconds, type Duration } from '@lib/utils/duration.js';
-import { episodePaths, findTranscript } from '@lib/utils/paths.js';
+import type { FailResponse } from '@lib/transcribe/types.js';
+import type { Episode } from '@lib/transcribe/episode.js';
+import { fromSeconds, type Duration } from '@lib/shared/duration.js';
+import { TranscriptFileSchema } from '@lib/shared/schemas.js';
+import { episodePaths, findTranscript } from '@lib/transcribe/paths.js';
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/config/paths.js';
 
@@ -43,10 +43,6 @@ export interface Transcript {
 }
 
 export type TranscriptResponse = FailResponse | Transcript;
-
-export const TranscriptFileSchema = z.object({
-  text: z.string().default(''),
-});
 
 export const PROMPT_TOKEN_LIMIT = 224;
 

@@ -57,6 +57,11 @@
   "env": {
     "builtin": true, // Support built-in globals (console, setTimeout, etc.)
   },
+  "ignorePatterns": [
+    "site/js/**",
+    "site/_data/**",
+    "eleventy.config.js",
+  ],
   "options": {
     "typeAware": true, // Enable rules that require type information
     "typeCheck": true, // Enable experimental type checking

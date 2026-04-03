@@ -1,5 +1,5 @@
 import { existsSync, statSync, writeFileSync } from 'node:fs';
-import type { ToTranscribe } from '@lib/transcript.js';
+import type { ToTranscribe } from '@lib/transcribe/transcript.js';
 
 type Mp3Response =
   | {

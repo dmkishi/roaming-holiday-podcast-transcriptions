@@ -1,6 +1,6 @@
 import { basename } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { episodePaths } from '@lib/utils/paths.js';
+import { episodePaths } from '@lib/transcribe/paths.js';
 
 describe('episodePaths', () => {
   test('produces correct filenames for a basic episode', () => {

@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import { log } from '@lib/utils/logger.js';
+import { log } from '@lib/shared/logger.js';
 
 function joinLines(msg: string | string[]) {
   if (!Array.isArray(msg)) return msg;

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { findEpisodes } from '@lib/episode.js';
-import type { RssItem } from '@lib/rss.js';
+import { findEpisodes } from '@lib/transcribe/episode.js';
+import type { RssItem } from '@lib/transcribe/rss.js';
 
 function makeItem(overrides: Partial<RssItem> & { guid: string }): RssItem {
   return {

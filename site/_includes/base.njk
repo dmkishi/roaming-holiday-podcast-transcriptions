@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+    {{- title | default(site.title) -}}
+  </title>
+  <link rel="stylesheet" href="{{ '/css/style.css' | url }}">
+</head>
+
+<body>
+  <header class="site-header">
+    <a href="{{ '/' | url }}">
+      {{- site.title -}}
+    </a>
+  </header>
+  <main>
+    {{ content | safe }}
+  </main>
+  <script src="{{ '/js/timeline.js' | url }}" defer></script>
+</body>
+</html>

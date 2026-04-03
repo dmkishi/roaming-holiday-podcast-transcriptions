@@ -1,8 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import type { RssItem } from '@lib/rss.js';
-import { type Duration, parseDuration } from '@lib/utils/duration.js';
-import { episodePaths } from '@lib/utils/paths.js';
+import type { RssItem } from '@lib/transcribe/rss.js';
+import { type Duration, parseDuration } from '@lib/shared/duration.js';
+import { episodePaths } from '@lib/transcribe/paths.js';
 
 export interface Episode {
   episodeNumber: number;

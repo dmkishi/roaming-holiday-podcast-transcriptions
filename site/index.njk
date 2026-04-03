@@ -1,0 +1,24 @@
+---
+layout: base.njk
+---
+
+<h1>Episodes</h1>
+
+<ul class="episode-list">
+{%- for episode in episodes | reverse %}
+  <li class="episode-card">
+    <a href="{{ ('/episodes/' + episode.episodeNumber + '.html') | url }}">
+      <img src="{{ ('/' + episode.imagePath) | url }}" alt="Episode {{ episode.episodeNumber }}" class="episode-thumb" loading="lazy" width="120" height="120">
+      <div class="episode-info">
+        <h2>{{ episode.episodeNumber }}. {{ episode.title }}</h2>
+        <time datetime="{{ episode.pubDate }}">{{ episode.pubDate | formatDate }}</time>
+        <span class="duration">{{ episode.duration.human }}</span>
+        {%- if episode.location %}
+        <span class="location">{{ episode.location }}</span>
+        {%- endif %}
+        <p>{{ episode.summary }}</p>
+      </div>
+    </a>
+  </li>
+{%- endfor %}
+</ul>

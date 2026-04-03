@@ -1,11 +1,11 @@
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
-import { z } from 'zod';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import type { FailResponse } from '@lib/types.js';
-import { TranscriptFileSchema, type Transcript } from '@lib/transcript.js';
-import { episodePaths } from '@lib/utils/paths.js';
+import type { FailResponse } from '@lib/transcribe/types.js';
+import { TranscriptFileSchema, SummaryFileSchema } from '@lib/shared/schemas.js';
+import type { Transcript } from '@lib/transcribe/transcript.js';
+import { episodePaths } from '@lib/transcribe/paths.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
 export interface Summary {
@@ -19,14 +19,6 @@ export interface Summary {
 }
 
 export type SummaryResponse = FailResponse | Summary;
-
-// Expected response format of summary from OpenAI.
-const SummaryResultSchema = z.object({
-  summary: z.string(),
-  sections: z.array(z.object({ title: z.string(), sentences: z.string() })),
-  places: z.array(z.string()),
-  keywords: z.array(z.string()),
-});
 
 const client = new OpenAI();
 
@@ -62,7 +54,7 @@ export async function promptSummary(
         { role: 'system', content: SUMMARY_PROMPT },
         { role: 'user', content: userMessage },
       ],
-      response_format: zodResponseFormat(SummaryResultSchema, 'episode_summary'),
+      response_format: zodResponseFormat(SummaryFileSchema, 'episode_summary'),
     });
 
     const content = response.choices[0]?.message.content ?? '';
@@ -73,7 +65,7 @@ export async function promptSummary(
       };
     }
 
-    SummaryResultSchema.parse(JSON.parse(content));
+    SummaryFileSchema.parse(JSON.parse(content));
 
     const { summary: path = '' } = episodePaths({
       episodeNumber: transcript.episodeNumber,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { parseDuration, fromSeconds } from '@lib/utils/duration.js';
+import { parseDuration, fromSeconds } from '@lib/shared/duration.js';
 
 describe('parseDuration', () => {
   test('H:MM:SS', () => {

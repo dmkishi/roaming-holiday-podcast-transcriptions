@@ -1,16 +1,16 @@
 import pc from 'picocolors';
-import { getCliArgs } from '@lib/cli.js';
-import { getAllRssItems } from '@lib/rss.js';
-import { findEpisodes, saveMetadata } from '@lib/episode.js';
-import { downloadMp3 } from '@lib/mp3.js';
+import { getCliArgs } from '@lib/transcribe/cli.js';
+import { getAllRssItems } from '@lib/transcribe/rss.js';
+import { findEpisodes, saveMetadata } from '@lib/transcribe/episode.js';
+import { downloadMp3 } from '@lib/transcribe/mp3.js';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript,
-} from '@lib/transcript.js';
-import { promptSummary, type Summary } from '@lib/summary.js';
-import { toRelative } from '@lib/utils/paths.js';
-import { formatDate, formatNumber, pluralize } from '@lib/utils/strings.js';
-import { print, printAndLog } from '@lib/utils/print.js';
+} from '@lib/transcribe/transcript.js';
+import { promptSummary, type Summary } from '@lib/transcribe/summary.js';
+import { toRelative } from '@lib/transcribe/paths.js';
+import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
+import { print, printAndLog } from '@lib/shared/print.js';
 import { RSS_FEED_URL } from '@lib/config/podcast.js';
 
 // =============================================================================

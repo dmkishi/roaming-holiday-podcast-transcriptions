@@ -20,6 +20,7 @@ cp .env.example .env
 
 Usage
 --------------------------------------------------------------------------------
+### Transcribe
 The command reads the RSS feed, locates the episode, downloads the MP3 to
 `/tmp/`, saves a metadata sidecar, and then transcribes the episode.
 
@@ -32,6 +33,15 @@ pnpm transcribe 101 --model small
 
 # Overwrite existing transcripts
 pnpm transcribe 101 --force
+```
+
+### Build Site
+```sh
+# Build the site data and the static site using the transcription output
+pnpm site:build
+
+# Serve the site locally and watch
+pnpm site:watch
 ```
 
 Models
