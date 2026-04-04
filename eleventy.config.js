@@ -1,11 +1,28 @@
+import cssnano from 'cssnano';
+import { transform as esbuildTransform } from 'esbuild';
+import { minify } from 'html-minifier-terser';
 import postcss from 'postcss';
 import postcssImport from 'postcss-import';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 export default function (eleventyConfig) {
-  eleventyConfig.addPassthroughCopy('www/src/js');
+  // Minify JS
+  eleventyConfig.addTemplateFormats('js');
+  eleventyConfig.addExtension('js', {
+    outputFileExtension: 'js',
+    compile: async function (_content, inputPath) {
+      if (path.basename(inputPath).startsWith('_')) return;
 
+      return async () => {
+        const js = await readFile(inputPath, 'utf8');
+        const result = await esbuildTransform(js, { minify: true });
+        return result.code;
+      };
+    },
+  });
+
+  // Bundle and minify CSS
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
     outputFileExtension: 'css',
@@ -14,7 +31,7 @@ export default function (eleventyConfig) {
 
       return async () => {
         const css = await readFile(inputPath, 'utf8');
-        const result = await postcss([postcssImport]).process(css, {
+        const result = await postcss([postcssImport, cssnano]).process(css, {
           from: inputPath,
         });
         return result.css;
@@ -22,6 +39,20 @@ export default function (eleventyConfig) {
     },
   });
 
+  // Minify HTML
+  eleventyConfig.addTransform('htmlmin', async (content, outputPath) => {
+    if (outputPath?.endsWith('.html')) {
+      return minify(content, {
+        collapseWhitespace: true,
+        removeComments: true,
+        minifyCSS: true,
+        minifyJS: true,
+      });
+    }
+    return content;
+  });
+
+  // Template filters
   eleventyConfig.addFilter('formatTimestamp', (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
