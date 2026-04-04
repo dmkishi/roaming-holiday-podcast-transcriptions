@@ -8,6 +8,7 @@
     "site:build": "tsx bin/build-site.ts && eleventy",
     "site:build:data-only": "tsx bin/build-site.ts",
     "site:dev": "open http://localhost:8080 & eleventy --serve",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm fallow",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
     "test": "vitest run",
