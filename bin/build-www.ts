@@ -2,17 +2,17 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { SITE_EPISODES_DIR } from '@lib/config/paths.js';
 import { formatEpisodeNumber } from '@lib/shared/paths.js';
-import { discoverEpisodes } from '@lib/build-site/discover.js';
-import { matchSections } from '@lib/build-site/match-sections.js';
-import { downloadImage } from '@lib/build-site/images.js';
-import { loadOverrides } from '@lib/build-site/overrides.js';
-import { addTimelineMarkers } from '@lib/build-site/timeline.js';
-import type { SiteEpisode } from '@lib/build-site/types.js';
+import { discoverEpisodes } from '@lib/build-www/discover.js';
+import { matchSections } from '@lib/build-www/match-sections.js';
+import { downloadImage } from '@lib/build-www/images.js';
+import { loadOverrides } from '@lib/build-www/overrides.js';
+import { addTimelineMarkers } from '@lib/build-www/timeline.js';
+import type { SiteEpisode } from '@lib/build-www/types.js';
 
 const artifacts = discoverEpisodes();
 
 if (artifacts.length === 0) {
-  console.warn('[build-site] No complete episodes found in outputs/');
+  console.warn('[build-www] No complete episodes found in episodes/');
   process.exit(0);
 }
 
@@ -53,4 +53,4 @@ for (const { metadata, transcript, summary } of artifacts) {
   count++;
 }
 
-console.log(`[build-site] Built data for ${count} episode(s)`);
+console.log(`[build-www] Built data for ${count} episode(s)`);

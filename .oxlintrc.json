@@ -58,9 +58,9 @@
     "builtin": true, // Support built-in globals (console, setTimeout, etc.)
   },
   "ignorePatterns": [
-    "site/js/**",
-    "site/_data/**",
     "eleventy.config.js",
+    "www/src/_data/**",
+    "www/src/js/**",
   ],
   "options": {
     "typeAware": true, // Enable rules that require type information

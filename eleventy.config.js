@@ -1,6 +1,26 @@
+import postcss from 'postcss';
+import postcssImport from 'postcss-import';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
 export default function (eleventyConfig) {
-  eleventyConfig.addPassthroughCopy('site/css');
-  eleventyConfig.addPassthroughCopy('site/js');
+  eleventyConfig.addPassthroughCopy('www/src/js');
+
+  eleventyConfig.addTemplateFormats('css');
+  eleventyConfig.addExtension('css', {
+    outputFileExtension: 'css',
+    compile: async function (_content, inputPath) {
+      if (path.basename(inputPath).startsWith('_')) return;
+
+      return async () => {
+        const css = await readFile(inputPath, 'utf8');
+        const result = await postcss([postcssImport]).process(css, {
+          from: inputPath,
+        });
+        return result.css;
+      };
+    },
+  });
 
   eleventyConfig.addFilter('formatTimestamp', (seconds) => {
     const hrs = Math.floor(seconds / 3600);
@@ -22,8 +42,8 @@ export default function (eleventyConfig) {
 
   return {
     dir: {
-      input: 'site',
-      output: 'dist',
+      input: 'www/src',
+      output: 'www/dist',
     },
   };
 }

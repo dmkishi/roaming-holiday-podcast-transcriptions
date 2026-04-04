@@ -2,10 +2,10 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import type { FailResponse } from '@lib/transcribe/types.js';
+import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { TranscriptFileSchema, SummaryFileSchema } from '@lib/shared/schemas.js';
-import type { Transcript } from '@lib/transcribe/transcript.js';
-import { episodePaths } from '@lib/transcribe/paths.js';
+import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
+import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
 export interface Summary {

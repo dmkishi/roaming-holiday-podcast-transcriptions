@@ -6,7 +6,7 @@ pagination:
 permalink: "episodes/{{ episode.episodeNumber }}.html"
 layout: base.njk
 eleventyComputed:
-  title: "{{ episode.title }} — Roaming Holiday"
+  title: "{{ episode.episodeNumber }}. {{ episode.title }} — Roaming Holiday"
 ---
 
 <article class="episode">
@@ -17,10 +17,10 @@ eleventyComputed:
       <time datetime="{{ episode.pubDate }}">{{ episode.pubDate | formatDate }}</time>
       <span class="duration">{{ episode.duration.human }}</span>
       {%- if episode.location %}
-      <span class="location">{{ episode.location }}</span>
+        <span class="location">{{ episode.location }}</span>
       {%- endif %}
       {%- if episode.youtube %}
-      <a href="{{ episode.youtube }}" class="youtube-link" target="_blank" rel="noopener">Watch on YouTube</a>
+        <a href="{{ episode.youtube }}" class="youtube-link" target="_blank" rel="noopener">Watch on YouTube</a>
       {%- endif %}
     </div>
   </header>
@@ -28,6 +28,17 @@ eleventyComputed:
   <section class="episode-summary">
     <p>{{ episode.summary }}</p>
   </section>
+
+  {%- if episode.sections.length > 0 %}
+    <nav class="episode-toc">
+      <h2>Sections</h2>
+      <ol class="section-list">
+        {%- for section in episode.sections %}
+        <li><a href="#section-{{ section.title | slug }}">{{ section.title }}</a></li>
+        {%- endfor %}
+      </ol>
+    </nav>
+  {%- endif %}
 
   {%- if episode.places.length > 0 %}
   <section class="episode-places">
@@ -44,7 +55,7 @@ eleventyComputed:
     {%- for segment in episode.segments %}
       {%- for section in episode.sections %}
         {%- if section.segmentIndex == segment.id %}
-    <h2 class="section-title">{{ section.title }}</h2>
+    <h2 class="section-title" id="section-{{ section.title | slug }}">{{ loop.index }}. {{ section.title }}</h2>
         {%- endif %}
       {%- endfor %}
       {%- if segment.timelineMarker %}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchSections } from '@lib/build-site/match-sections.js';
+import { matchSections } from '@lib/build-www/match-sections.js';
 
 describe('matchSections', () => {
   it('returns empty array for empty inputs', () => {

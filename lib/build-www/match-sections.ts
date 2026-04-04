@@ -1,4 +1,4 @@
-import type { ResolvedSection } from '@lib/build-site/types.js';
+import type { ResolvedSection } from '@lib/build-www/types.js';
 
 interface SummarySection {
   title: string;

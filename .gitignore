@@ -12,11 +12,9 @@ node_modules/
 # Other
 .fallow
 
-# Build outputs
-dist/
-site/_episodes/
-
-# Project outputs
+# Outputs
 LOG
-outputs/*
-!outputs/.gitkeep
+episodes/*
+!episodes/.gitkeep
+www/dist/
+www/src/_episodes/

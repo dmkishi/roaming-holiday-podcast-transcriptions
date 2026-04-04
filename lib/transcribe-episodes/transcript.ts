@@ -2,11 +2,11 @@ import { execFile, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { promisify } from 'node:util';
-import type { FailResponse } from '@lib/transcribe/types.js';
-import type { Episode } from '@lib/transcribe/episode.js';
+import type { FailResponse } from '@lib/transcribe-episodes/types.js';
+import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import { TranscriptFileSchema } from '@lib/shared/schemas.js';
-import { episodePaths, findTranscript } from '@lib/transcribe/paths.js';
+import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/config/paths.js';
 

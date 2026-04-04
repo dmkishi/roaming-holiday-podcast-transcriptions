@@ -1,14 +1,9 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@import '@dmkishi/css-reset/dist/reset.css' layer(reset);
 
 :root {
   --max-width: 70ch;
-  --font-body: system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', monospace;
-  --color-bg: #fafaf9;
+  --color-background: #f0ead6;
   --color-text: #1c1917;
   --color-muted: #78716c;
   --color-border: #e7e5e4;
@@ -16,16 +11,25 @@
   --color-tag-bg: #f5f5f4;
 }
 
-body {
-  font-family: var(--font-body);
+html {
+  background-color: var(--color-background);
   color: var(--color-text);
-  background: var(--color-bg);
   line-height: 1.7;
+}
+
+body {
   margin: 0;
   padding: 0 1rem;
 }
 
-/* Site header */
+main {
+  max-width: var(--max-width);
+  margin: 2rem auto;
+}
+
+/* -----------------------------------------------------------------------------
+ * Site Header
+ * -------------------------------------------------------------------------- */
 .site-header {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -40,12 +44,9 @@ body {
   font-size: 1.1rem;
 }
 
-main {
-  max-width: var(--max-width);
-  margin: 2rem auto;
-}
-
-/* Index page */
+/* -----------------------------------------------------------------------------
+ * Index Page
+ * -------------------------------------------------------------------------- */
 .episode-list {
   list-style: none;
   padding: 0;
@@ -69,7 +70,6 @@ main {
 }
 
 .episode-thumb {
-  border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -98,7 +98,9 @@ main {
   color: var(--color-muted);
 }
 
-/* Episode page */
+/* -----------------------------------------------------------------------------
+ * Episode Page
+ * -------------------------------------------------------------------------- */
 .episode-header {
   display: flex;
   gap: 1.5rem;
@@ -220,7 +222,7 @@ main {
 .timeline-tooltip {
   position: fixed;
   background: var(--color-text);
-  color: var(--color-bg);
+  color: var(--color-background);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   padding: 0.2rem 0.5rem;
