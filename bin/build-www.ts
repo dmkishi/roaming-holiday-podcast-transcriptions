@@ -1,29 +1,61 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { SITE_EPISODES_DIR } from '@lib/config/paths.js';
+import { join, relative } from 'node:path';
+import { ROOT, SITE_EPISODES_DIR } from '@lib/config/paths.js';
 import { formatEpisodeNumber } from '@lib/shared/paths.js';
-import { discoverEpisodes } from '@lib/build-www/discover.js';
+import { print, printAndLog } from '@lib/shared/print.js';
+import { pluralize } from '@lib/shared/strings.js';
+import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
 import { matchSections } from '@lib/build-www/match-sections.js';
 import { downloadImage } from '@lib/build-www/images.js';
 import { loadOverrides } from '@lib/build-www/overrides.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
 
-const artifacts = discoverEpisodes();
-
-if (artifacts.length === 0) {
-  console.warn('[build-www] No complete episodes found in episodes/');
-  process.exit(0);
+// =============================================================================
+// Discover episodes
+// =============================================================================
+print.info('Discovering episodes...');
+const discoveries = discoverEpisodes();
+const artifacts: EpisodeArtifacts[] = [];
+for (const result of discoveries) {
+  if (result.ok) {
+    artifacts.push(result.artifacts);
+  } else {
+    printAndLog.warn(`#${result.episodeNumber}: Skipping - ${result.reason}`);
+  }
 }
 
+if (artifacts.length === 0) {
+  printAndLog.warn('No complete episodes found.');
+  process.exit(0);
+}
+printAndLog.info(`Discovered ${artifacts.length} ${pluralize(artifacts.length, 'episode')}`);
+print.emptyLine();
+
+// =============================================================================
+// Build episode data
+// =============================================================================
+print.info('Building episode data...');
 const overrides = loadOverrides();
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
-let count = 0;
+let built = 0;
 
 for (const { metadata, transcript, summary } of artifacts) {
   const ep = metadata.episodeNumber;
-  const sections = matchSections(summary.sections, transcript.segments);
-  const imagePath = await downloadImage(ep, metadata.imageUrl);
+
+  const image = await downloadImage(ep, metadata.imageUrl);
+  if (image.status === 'failed') {
+    printAndLog.warn(`#${ep}: Image download failed - ${image.error}`);
+  }
+
+  const { sections, unmatched } = matchSections(summary.sections, transcript.segments);
+  if (unmatched.length > 0) {
+    printAndLog.warn([
+      `#${ep}: ${unmatched.length} unmatched ${pluralize(unmatched.length, 'section')}:`,
+      ...unmatched.map((title) => `  "${title}"`),
+    ]);
+  }
+
   const segments = addTimelineMarkers(transcript.segments);
   const override = overrides.get(ep);
 
@@ -35,7 +67,7 @@ for (const { metadata, transcript, summary } of artifacts) {
     duration: metadata.duration,
     imageUrl: metadata.imageUrl,
     mp3Url: metadata.mp3Url,
-    imagePath,
+    imagePath: image.path,
     segments,
     sections,
     summary: summary.summary,
@@ -45,12 +77,11 @@ for (const { metadata, transcript, summary } of artifacts) {
     youtube: override?.youtube,
   };
 
-  const filename = `${formatEpisodeNumber(ep)}.json`;
-  writeFileSync(
-    join(SITE_EPISODES_DIR, filename),
-    JSON.stringify(episode, undefined, 2) + '\n',
-  );
-  count++;
+  const filepath = join(SITE_EPISODES_DIR, `${formatEpisodeNumber(ep)}.json`);
+  writeFileSync(filepath, JSON.stringify(episode, undefined, 2) + '\n');
+  printAndLog.info(`#${ep}: Saved "${relative(ROOT, filepath)}"`);
+  built++;
 }
 
-console.log(`[build-www] Built data for ${count} episode(s)`);
+print.emptyLine();
+printAndLog.info(`Built data for ${built} ${pluralize(built, 'episode')}`);

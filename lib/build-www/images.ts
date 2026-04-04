@@ -3,28 +3,37 @@ import { join } from 'node:path';
 import { DIST_IMG_DIR } from '@lib/config/paths.js';
 import { formatEpisodeNumber } from '@lib/shared/paths.js';
 
+export type ImageResponse =
+  | { status: 'downloaded' | 'alreadyExists'; path: string }
+  | { status: 'failed'; path: string; error: string };
+
 export async function downloadImage(
   episodeNumber: number,
   imageUrl: string,
-): Promise<string> {
+): Promise<ImageResponse> {
   const filename = `${formatEpisodeNumber(episodeNumber)}.jpg`;
+  const relPath = `img/${filename}`;
   const destPath = join(DIST_IMG_DIR, filename);
 
-  if (existsSync(destPath)) return `img/${filename}`;
+  if (existsSync(destPath)) {
+    return { status: 'alreadyExists', path: relPath };
+  }
 
   mkdirSync(DIST_IMG_DIR, { recursive: true });
 
   try {
     const res = await fetch(imageUrl);
     if (!res.ok) {
-      console.warn(`[images] Failed to download image for episode ${episodeNumber}: ${res.status}`);
-      return `img/${filename}`;
+      return { status: 'failed', path: relPath, error: `HTTP ${res.status}` };
     }
     const buffer = Buffer.from(await res.arrayBuffer());
     writeFileSync(destPath, buffer);
+    return { status: 'downloaded', path: relPath };
   } catch (error) {
-    console.warn(`[images] Error downloading image for episode ${episodeNumber}: ${String(error)}`);
+    return {
+      status: 'failed',
+      path: relPath,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
-
-  return `img/${filename}`;
 }

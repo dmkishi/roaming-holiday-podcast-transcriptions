@@ -20,14 +20,19 @@ export interface EpisodeArtifacts {
   summary: z.infer<typeof SummaryFileSchema>;
 }
 
+export type DiscoveryResult =
+  | { ok: true; artifacts: EpisodeArtifacts }
+  | { ok: false; episodeNumber: number; reason: string };
+
 /**
- * Scan the outputs directory and return parsed artifacts for each episode that
- * has a complete set of metadata, transcript (with segments), and summary.
+ * Scan the outputs directory and return a result per metadata file. Episodes
+ * missing a transcript, summary, or segments are returned as `{ ok: false }`
+ * entries so the caller can report the skip with a reason.
  */
-export function discoverEpisodes(): EpisodeArtifacts[] {
+export function discoverEpisodes(): DiscoveryResult[] {
   const files = readdirSync(OUTPUTS_DIR);
   const metadataFiles = files.filter((f) => f.endsWith('.metadata.json'));
-  const results: EpisodeArtifacts[] = [];
+  const results: DiscoveryResult[] = [];
 
   for (const metaFile of metadataFiles) {
     // oxlint-disable-next-line typescript/no-unsafe-assignment
@@ -43,7 +48,7 @@ export function discoverEpisodes(): EpisodeArtifacts[] {
     );
 
     if (transcriptFile === undefined) {
-      console.warn(`[discover] No transcript found for episode ${ep}, skipping`);
+      results.push({ ok: false, episodeNumber: ep, reason: 'No transcript found' });
       continue;
     }
 
@@ -52,7 +57,7 @@ export function discoverEpisodes(): EpisodeArtifacts[] {
     );
 
     if (summaryFile === undefined) {
-      console.warn(`[discover] No summary found for episode ${ep}, skipping`);
+      results.push({ ok: false, episodeNumber: ep, reason: 'No summary found' });
       continue;
     }
 
@@ -61,7 +66,7 @@ export function discoverEpisodes(): EpisodeArtifacts[] {
     );
 
     if (transcript.segments === undefined || transcript.segments.length === 0) {
-      console.warn(`[discover] No segments in transcript for episode ${ep}, skipping`);
+      results.push({ ok: false, episodeNumber: ep, reason: 'No segments in transcript' });
       continue;
     }
 
@@ -70,9 +75,12 @@ export function discoverEpisodes(): EpisodeArtifacts[] {
     );
 
     results.push({
-      metadata,
-      transcript: { ...transcript, segments: transcript.segments },
-      summary,
+      ok: true,
+      artifacts: {
+        metadata,
+        transcript: { ...transcript, segments: transcript.segments },
+        summary,
+      },
     });
   }
 

@@ -10,18 +10,28 @@ interface Segment {
   text: string;
 }
 
+export interface MatchSectionsResult {
+  sections: ResolvedSection[];
+  unmatched: string[];
+}
+
 /**
  * Match summary section sentences to transcript segment indices using
- * normalized substring search with Dice coefficient fallback.
+ * normalized substring search with Dice coefficient fallback. Sections that
+ * fail both strategies fall back to `searchFrom` and are reported in
+ * `unmatched` so the caller can surface a warning.
  */
 export function matchSections(
   sections: SummarySection[],
   segments: Segment[],
-): ResolvedSection[] {
-  if (sections.length === 0 || segments.length === 0) return [];
+): MatchSectionsResult {
+  if (sections.length === 0 || segments.length === 0) {
+    return { sections: [], unmatched: [] };
+  }
 
   const normalizedSegments = segments.map((s) => normalize(s.text));
-  const results: ResolvedSection[] = [];
+  const resolved: ResolvedSection[] = [];
+  const unmatched: string[] = [];
   let searchFrom = 0;
 
   for (const section of sections) {
@@ -34,14 +44,14 @@ export function matchSections(
 
     if (matchIndex === -1) {
       matchIndex = searchFrom;
-      console.warn(`[match-sections] No match for "${section.title}", using segment ${matchIndex}`);
+      unmatched.push(section.title);
     }
 
-    results.push({ title: section.title, segmentIndex: matchIndex });
+    resolved.push({ title: section.title, segmentIndex: matchIndex });
     searchFrom = matchIndex + 1;
   }
 
-  return results;
+  return { sections: resolved, unmatched };
 }
 
 function normalize(text: string): string {
