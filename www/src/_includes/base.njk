@@ -1,24 +1,25 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>
-    {{- title | default(site.title) -}}
-  </title>
-  <link rel="stylesheet" href="{{ '/style.css' | url }}">
-</head>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      {{- title | default(site.title) -}}
+    </title>
+    <link rel="stylesheet" href="{{ '/style.css' | url }}">
+    <script src="{{ '/js/timeline.js' | url }}" defer></script>
+  </head>
 
-<body>
-  <header class="site-header">
-    <a href="{{ '/' | url }}">
-      {{- site.title -}}
-    </a>
-    <p>This is an unofficial transcript site for the Roaming Holiday podcast. All transcripts and summaries have been machine generated. If you find any errors, please let me know and I will try to fix it.</p>
-  </header>
-  <main>
-    {{ content | safe }}
-  </main>
-  <script src="{{ '/js/timeline.js' | url }}" defer></script>
-</body>
+  <body>
+    <header class="site-header">
+      <a href="{{ '/' | url }}">
+        {{- site.title -}}
+      </a>
+      <p>This is an unofficial transcript site for the Roaming Holiday podcast. All transcripts and summaries have been machine generated. If you find any errors, please let me know and I will try to fix it.</p>
+    </header>
+
+    <main>
+      {{ content | safe }}
+    </main>
+  </body>
 </html>
