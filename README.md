@@ -39,6 +39,22 @@ pnpm transcribe 101 --force-summarize   # Re-generate the summary
 pnpm transcribe 101 --force-all
 ```
 
+### Summarize
+Re-runs only the summarization stage without repeating earlier pipeline steps.
+Reads the transcript and metadata sidecar from episodes/ and writes the summary
+alongside them.
+
+```sh
+# Summarize a single or multiple episodes
+pnpm summarize 101 [102 103]
+
+# Use a different summarization model
+pnpm summarize 101 --model gpt-4.1-mini
+
+# Force overwrite if the summary already exists
+pnpm summarize 101 --force
+```
+
 ### Build Site
 ```sh
 # Build the site data and the static site using the transcription output

@@ -7,6 +7,11 @@ const SegmentSchema = z.object({
   text: z.string(),
 });
 
+export const MetadataFileSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+});
+
 export const TranscriptFileSchema = z.object({
   text: z.string().default(''),
   segments: z.array(SegmentSchema).optional(),

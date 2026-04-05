@@ -8,6 +8,8 @@ import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
+export type SummaryInput = Pick<Transcript, 'episodeNumber' | 'path' | 'title' | 'description'>;
+
 export type Summary =
   | {
       ok: true;
@@ -31,7 +33,7 @@ export type SummaryResponse = FailResponse | Summary;
 const client = new OpenAI();
 
 export async function promptSummary(
-  transcript: Transcript,
+  transcript: SummaryInput,
   summaryModel: string,
   transcriptModel: string,
   force: boolean,

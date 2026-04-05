@@ -11,7 +11,7 @@ interface CliOptions {
   forceSummarize: boolean;
 }
 
-export function getCliArgs(args: string[]): CliOptions {
+export function getTranscribeCliArgs(args: string[]): CliOptions {
   const argv = minimist<{
     model: string;
     'summary-model': string;
@@ -57,5 +57,39 @@ export function getCliArgs(args: string[]): CliOptions {
     forceDownload: forceAll || argv['force-download'],
     forceTranscribe: forceAll || argv['force-transcribe'],
     forceSummarize: forceAll || argv['force-summarize'],
+  };
+}
+
+interface SummarizeCliOptions {
+  episodeNums: Set<number>;
+  summaryModel: string;
+  force: boolean;
+}
+
+export function getSummarizeCliArgs(args: string[]): SummarizeCliOptions {
+  const argv = minimist<{
+    model: string;
+    force: boolean;
+  }>(args.slice(2), {
+    string: ['model'],
+    boolean: ['force'],
+    default: {
+      model: DEFAULT_SUMMARY_MODEL,
+      force: false,
+    },
+  });
+
+  const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
+  if (episodeNums.size === 0) {
+    console.error(
+      `Usage: pnpm summarize <episode-numbers...> [--model ${DEFAULT_SUMMARY_MODEL}] [--force]`,
+    );
+    process.exit(1);
+  }
+
+  return {
+    episodeNums,
+    summaryModel: argv.model,
+    force: argv.force,
   };
 }

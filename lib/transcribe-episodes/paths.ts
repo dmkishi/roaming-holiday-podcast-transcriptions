@@ -48,6 +48,26 @@ export function findTranscript(
   return match ? join(OUTPUTS_DIR, match) : undefined;
 }
 
+/**
+ * Searches the outputs directory for all transcript files belonging to the
+ * given episode, regardless of model.
+ */
+export function findTranscripts(
+  episodeNumber: number,
+): { path: string; model: string }[] {
+  const code = formatEpisodeNumber(episodeNumber);
+  const transcriptPattern = new RegExp(`^${code}\\.transcript__(.+)\\.json$`);
+
+  const matches = readdirSync(OUTPUTS_DIR)
+    .filter((f) => !f.includes('.summary__'))
+    .map((f) => transcriptPattern.exec(f))
+    .filter((m) => m !== null);
+  return matches.map((m) => ({
+    path: join(OUTPUTS_DIR, m[0]),
+    model: m[1]!,
+  }));
+}
+
 export function toRelative(absolutePath: string): string {
   return relative(ROOT, absolutePath);
 }

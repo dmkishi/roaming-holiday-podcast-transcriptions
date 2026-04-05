@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import { getCliArgs } from '@lib/transcribe-episodes/cli.js';
+import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/transcribe-episodes/rss.js';
 import { findEpisodes, saveMetadata } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
@@ -16,7 +16,7 @@ import { RSS_FEED_URL } from '@lib/config/podcast.js';
 // =============================================================================
 // Parse CLI args
 // =============================================================================
-const opts = getCliArgs(process.argv);
+const opts = getTranscribeCliArgs(process.argv);
 printAndLog.info([
   `Transcribe ${pluralize(opts.episodeNums.size, 'episode')}: ${[...opts.episodeNums].join(', ')}`,
   `  Whisper model: ${opts.transcribeModel}`,
