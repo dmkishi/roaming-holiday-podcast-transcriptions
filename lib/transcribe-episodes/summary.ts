@@ -98,10 +98,9 @@ export async function promptSummary(
       };
     }
 
-    SummaryFileSchema.parse(JSON.parse(content));
-
+    const parsed = SummaryFileSchema.parse(JSON.parse(content));
     mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, content);
+    writeFileSync(path, JSON.stringify(parsed, undefined, 2) + '\n');
 
     return {
       ok: true,
