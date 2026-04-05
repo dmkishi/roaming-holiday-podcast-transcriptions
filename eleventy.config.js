@@ -7,21 +7,6 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 export default function (eleventyConfig) {
-  // Minify JS
-  eleventyConfig.addTemplateFormats('js');
-  eleventyConfig.addExtension('js', {
-    outputFileExtension: 'js',
-    compile: async function (_content, inputPath) {
-      if (path.basename(inputPath).startsWith('_')) return;
-
-      return async () => {
-        const js = await readFile(inputPath, 'utf8');
-        const result = await esbuildTransform(js, { minify: true });
-        return result.code;
-      };
-    },
-  });
-
   // Bundle and minify CSS
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
@@ -35,6 +20,21 @@ export default function (eleventyConfig) {
           from: inputPath,
         });
         return result.css;
+      };
+    },
+  });
+
+  // Minify JS
+  eleventyConfig.addTemplateFormats('js');
+  eleventyConfig.addExtension('js', {
+    outputFileExtension: 'js',
+    compile: async function (_content, inputPath) {
+      if (path.basename(inputPath).startsWith('_')) return;
+
+      return async () => {
+        const js = await readFile(inputPath, 'utf8');
+        const result = await esbuildTransform(js, { minify: true });
+        return result.code;
       };
     },
   });
