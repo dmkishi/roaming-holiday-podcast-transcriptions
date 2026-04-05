@@ -52,7 +52,12 @@ export default function (eleventyConfig) {
     return content;
   });
 
-  // Template filters
+  /**
+   * Format seconds to a timestamp string.
+   * @example
+   * {{ 61 | formatTimestamp }}   // => "1:01"
+   * {{ 3661 | formatTimestamp }} // => "1:01:01"
+   */
   eleventyConfig.addFilter('formatTimestamp', (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -63,6 +68,11 @@ export default function (eleventyConfig) {
     return `${mins}:${String(secs).padStart(2, '0')}`;
   });
 
+  /**
+   * Format an ISO date string as a long-form US English date.
+   * @example
+   * {{ '2026-04-04' | formatDate }} // => "April 4, 2026"
+   */
   eleventyConfig.addFilter('formatDate', (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric',

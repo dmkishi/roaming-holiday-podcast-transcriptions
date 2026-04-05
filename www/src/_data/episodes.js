@@ -3,7 +3,13 @@ import { join, resolve } from 'node:path';
 
 const EPISODES_DIR = resolve(import.meta.dirname, '../_episodes');
 
-export default function () {
+/**
+ * Reads episode JSON files from `_episodes/` and transforms them into an array
+ * sorted by episode number.
+ *
+ * @returns {object[]} Episode objects sorted by episodeNumber.
+ */
+export default function() {
   let files;
   try {
     files = readdirSync(EPISODES_DIR).filter((f) => f.endsWith('.json'));
