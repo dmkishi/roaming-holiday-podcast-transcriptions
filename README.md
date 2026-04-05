@@ -1,7 +1,7 @@
 Roaming Holiday Podcast Transcriptions
 ================================================================================
-CLI tool that downloads episodes of the Roaming Holiday podcast by episode
-number and transcribes them using OpenAI's Whisper.
+CLI tool that downloads, transcribes, and summarizes episodes of the Roaming
+Holiday podcast by episode number, and builds a static site from the output.
 
 Install
 --------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ pnpm install
 python3 -m venv .venv
 .venv/bin/pip install openai-whisper
 
-# Copy the example env file and add your OpenAI API key (used to summarize
+# Copy the example env file and add your OpenAI API key (for summarizing
 # transcripts).
 cp .env.example .env
 ```
@@ -21,8 +21,9 @@ cp .env.example .env
 Usage
 --------------------------------------------------------------------------------
 ### Transcribe
-The command reads the RSS feed, locates the episode, downloads the MP3 to
-`/tmp/`, saves a metadata sidecar, and then transcribes the episode.
+Runs the full pipeline for an episode from download to summary. Reads the RSS
+feed, downloads the MP3 to `/tmp/`, transcribes it using Whisper, and writes a
+metadata sidecar, transcript, and summary to `episodes/`.
 
 ```sh
 # Transcribe a single or multiple episodes
@@ -56,6 +57,10 @@ pnpm summarize 101 --force
 ```
 
 ### Build Site
+Builds the static site from the transcription output. Reads episode metadata,
+transcripts, and summaries from `episodes/` and compiles them into a Eleventy
+site in `www/`.
+
 ```sh
 # Build the site data and the static site using the transcription output
 pnpm www:build
