@@ -1,8 +1,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { RssItem } from '@lib/transcribe-episodes/rss.js';
-import { type Duration, parseDuration } from '@lib/shared/duration.js';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
+import { type Duration, parseDuration } from '@lib/shared/duration.js';
+import { toPrettyJson } from '@lib/shared/strings.js';
 
 export interface Episode {
   episodeNumber: number;
@@ -46,6 +47,6 @@ export function saveMetadata(
 ): string {
   const { metadata: filepath } = episodePaths({ episodeNumber: episode.episodeNumber, model: '' });
   mkdirSync(dirname(filepath), { recursive: true });
-  writeFileSync(filepath, JSON.stringify(episode, undefined, 2) + '\n');
+  writeFileSync(filepath, toPrettyJson(episode));
   return filepath;
 }

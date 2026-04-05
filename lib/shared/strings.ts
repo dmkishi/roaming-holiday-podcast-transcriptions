@@ -26,3 +26,7 @@ export function pluralize(
 ): string {
   return count === 1 ? singular : plural;
 }
+
+export function toPrettyJson(value: unknown): string {
+  return JSON.stringify(value, undefined, 2) + '\n';
+}

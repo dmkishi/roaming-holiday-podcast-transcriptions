@@ -6,6 +6,7 @@ import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { TranscriptFileSchema, SummaryFileSchema } from '@lib/shared/schemas.js';
 import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
+import { toPrettyJson } from '@lib/shared/strings.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
 export type SummaryInput = Pick<Transcript, 'episodeNumber' | 'path' | 'title' | 'description'>;
@@ -100,7 +101,7 @@ export async function promptSummary(
 
     const parsed = SummaryFileSchema.parse(JSON.parse(content));
     mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, JSON.stringify(parsed, undefined, 2) + '\n');
+    writeFileSync(path, toPrettyJson(parsed));
 
     return {
       ok: true,

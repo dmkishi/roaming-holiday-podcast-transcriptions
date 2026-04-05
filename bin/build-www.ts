@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 import { ROOT, SITE_EPISODES_DIR } from '@lib/config/paths.js';
 import { formatEpisodeNumber } from '@lib/shared/paths.js';
 import { print, printAndLog } from '@lib/shared/print.js';
-import { pluralize } from '@lib/shared/strings.js';
+import { pluralize, toPrettyJson } from '@lib/shared/strings.js';
 import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
 import { matchSections } from '@lib/build-www/match-sections.js';
 import { downloadImage } from '@lib/build-www/images.js';
@@ -78,7 +78,7 @@ for (const { metadata, transcript, summary } of artifacts) {
   };
 
   const filepath = join(SITE_EPISODES_DIR, `${formatEpisodeNumber(ep)}.json`);
-  writeFileSync(filepath, JSON.stringify(episode, undefined, 2) + '\n');
+  writeFileSync(filepath, toPrettyJson(episode));
   printAndLog.info(`#${ep}: Saved "${relative(ROOT, filepath)}"`);
   built++;
 }
