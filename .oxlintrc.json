@@ -40,6 +40,7 @@
     "func-style": "off",
     "id-length": "off", // Agree but prefer exception in single-line functions.
     "init-declarations": "off",
+    "max-params": ["error", { "max": 4 }],
     "max-statements": "off",
     "no-continue": "off", // Agree but prefer "returning" early.
     "no-magic-numbers": "off", // Agree but too cumbersome.

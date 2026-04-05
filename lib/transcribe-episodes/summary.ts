@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
-import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { TranscriptFileSchema, SummaryFileSchema } from '@lib/shared/schemas.js';
@@ -8,15 +8,23 @@ import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
-export interface Summary {
-  ok: true;
-  episodeNumber: number;
-  path: string;
-  stats: {
-    tokenInput: number;
-    tokenOutput: number;
-  };
-}
+export type Summary =
+  | {
+      ok: true;
+      status: 'generated';
+      episodeNumber: number;
+      path: string;
+      stats: {
+        tokenInput: number;
+        tokenOutput: number;
+      };
+    }
+  | {
+      ok: true;
+      status: 'alreadyExists';
+      episodeNumber: number;
+      path: string;
+    };
 
 export type SummaryResponse = FailResponse | Summary;
 
@@ -26,8 +34,31 @@ export async function promptSummary(
   transcript: Transcript,
   summaryModel: string,
   transcriptModel: string,
+  force: boolean,
 ): Promise<SummaryResponse> {
   try {
+    const { summary: path = '' } = episodePaths({
+      episodeNumber: transcript.episodeNumber,
+      model: transcriptModel,
+      summaryModel,
+    });
+
+    if (path === '') {
+      return {
+        ok: false,
+        error: 'Could not derive summary path',
+      };
+    }
+
+    if (!force && existsSync(path)) {
+      return {
+        ok: true,
+        status: 'alreadyExists',
+        episodeNumber: transcript.episodeNumber,
+        path,
+      };
+    }
+
     const { text } = TranscriptFileSchema.parse(
       JSON.parse(readFileSync(transcript.path, 'utf8')),
     );
@@ -67,24 +98,12 @@ export async function promptSummary(
 
     SummaryFileSchema.parse(JSON.parse(content));
 
-    const { summary: path = '' } = episodePaths({
-      episodeNumber: transcript.episodeNumber,
-      model: transcriptModel,
-      summaryModel,
-    });
-
-    if (path === '') {
-      return {
-        ok: false,
-        error: 'Could not derive summary path',
-      };
-    }
-
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content);
 
     return {
       ok: true,
+      status: 'generated',
       episodeNumber: transcript.episodeNumber,
       path,
       stats: {

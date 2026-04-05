@@ -20,7 +20,7 @@ const opts = getCliArgs(process.argv);
 printAndLog.info([
   `Transcribe ${pluralize(opts.episodeNums.size, 'episode')}: ${[...opts.episodeNums].join(', ')}`,
   `  Whisper model: ${opts.transcribeModel}`,
-  `  Summary model: ${opts.skipSummary ? 'skipped' : opts.summaryModel}`,
+  `  Summary model: ${opts.summaryModel}`,
 ]);
 print.emptyLine();
 
@@ -28,7 +28,7 @@ print.emptyLine();
 // Get RSS feed
 // =============================================================================
 print.info('Fetching RSS feed...');
-const feed = await getAllRssItems(RSS_FEED_URL);
+const feed = await getAllRssItems(RSS_FEED_URL, opts.forceRss);
 if (feed.status === 'failed') {
   printAndLog.error(`Failed to fetch RSS feed <${RSS_FEED_URL}>`);
   process.exit(1);
@@ -72,7 +72,7 @@ print.emptyLine();
 print.info('Preparing for transcription...');
 let toTranscribes: ToTranscribe[] = [];
 for (const episode of episodes) {
-  const toTranscribe = await makeToTranscribe(episode, opts.transcribeModel, opts.force);
+  const toTranscribe = await makeToTranscribe(episode, opts.transcribeModel, opts.forceTranscribe);
   if (!toTranscribe) {
     printAndLog.warn(`#${episode.episodeNumber}: Skipping - transcript already exists`);
     continue;
@@ -103,7 +103,7 @@ print.emptyLine();
 // =============================================================================
 print.info('Downloading MP3s...');
 for (const toTranscribe of toTranscribes) {
-  const mp3 = await downloadMp3(toTranscribe);
+  const mp3 = await downloadMp3(toTranscribe, opts.forceDownload);
   if (mp3.status === 'failed') {
     // Remove from toTranscribes
     toTranscribes = toTranscribes.filter(t => t !== toTranscribe);
@@ -155,26 +155,30 @@ print.emptyLine();
 // =============================================================================
 // Summarize
 // =============================================================================
-if (opts.skipSummary) {
-  printAndLog.info('Skipping summarization.');
-  process.exit(0);
-}
-
 print.info('Summarizing...');
 const summaries: Summary[] = [];
 for (const transcript of transcripts) {
-  const res = await promptSummary(transcript, opts.summaryModel, opts.transcribeModel);
-  if (res.ok) {
+  const res = await promptSummary(
+    transcript,
+    opts.summaryModel,
+    opts.transcribeModel,
+    opts.forceSummarize,
+  );
+  if (!res.ok) {
+    printAndLog.warn(
+      `#${transcript.episodeNumber}: Failed ${res.error ? ` - ${res.error}` : ''}`
+    );
+    continue;
+  }
+  if (res.status === 'alreadyExists') {
+    printAndLog.warn(`#${res.episodeNumber}: Skipping - summary already exists`);
+  } else {
     printAndLog.info([
       `#${transcript.episodeNumber}: Saved "${toRelative(res.path)}"`,
       `  Tokens: input ${formatNumber(res.stats.tokenInput)} / output ${formatNumber(res.stats.tokenOutput)}`,
     ]);
-    summaries.push(res);
-  } else {
-    printAndLog.warn(
-      `#${transcript.episodeNumber}: Failed ${res.error ? ` - ${res.error}` : ''}`
-    );
   }
+  summaries.push(res);
 }
 
 if (summaries.length === 0) {

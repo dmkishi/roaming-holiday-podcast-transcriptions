@@ -31,8 +31,12 @@ pnpm transcribe 101 [102 103]
 # Use a different Whisper transcription model
 pnpm transcribe 101 --model small
 
-# Overwrite existing transcripts
-pnpm transcribe 101 --force
+# Force stages to re-run
+pnpm transcribe 101 --force-rss         # Bypass the RSS feed ETag cache
+pnpm transcribe 101 --force-download    # Re-download the MP3
+pnpm transcribe 101 --force-transcribe  # Re-generate the transcript
+pnpm transcribe 101 --force-summarize   # Re-generate the summary
+pnpm transcribe 101 --force-all
 ```
 
 ### Build Site

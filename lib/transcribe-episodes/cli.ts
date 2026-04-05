@@ -5,40 +5,57 @@ interface CliOptions {
   episodeNums: Set<number>;
   transcribeModel: string;
   summaryModel: string;
-  skipSummary: boolean;
-  force: boolean;
+  forceRss: boolean;
+  forceDownload: boolean;
+  forceTranscribe: boolean;
+  forceSummarize: boolean;
 }
 
 export function getCliArgs(args: string[]): CliOptions {
   const argv = minimist<{
     model: string;
     'summary-model': string;
-    'skip-summary': boolean;
-    force: boolean;
+    'force-all': boolean;
+    'force-rss': boolean;
+    'force-download': boolean;
+    'force-transcribe': boolean;
+    'force-summarize': boolean;
   }>(args.slice(2), {
     string: ['model', 'summary-model'],
-    boolean: ['force', 'skip-summary'],
+    boolean: [
+      'force-all',
+      'force-rss',
+      'force-download',
+      'force-transcribe',
+      'force-summarize',
+    ],
     default: {
       model: DEFAULT_WHISPER_MODEL,
       'summary-model': DEFAULT_SUMMARY_MODEL,
-      'skip-summary': false,
-      force: false,
+      'force-all': false,
+      'force-rss': false,
+      'force-download': false,
+      'force-transcribe': false,
+      'force-summarize': false,
     },
   });
 
   const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
   if (episodeNums.size === 0) {
     console.error(
-      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--force] [--skip-summary] [--summary-model ${DEFAULT_SUMMARY_MODEL}]`,
+      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--force-all] [--force-rss] [--force-download] [--force-transcribe] [--force-summarize]`,
     );
     process.exit(1);
   }
 
+  const forceAll = argv['force-all'];
   return {
     episodeNums,
     transcribeModel: argv.model,
     summaryModel: argv['summary-model'],
-    skipSummary: argv['skip-summary'],
-    force: argv.force,
+    forceRss: forceAll || argv['force-rss'],
+    forceDownload: forceAll || argv['force-download'],
+    forceTranscribe: forceAll || argv['force-transcribe'],
+    forceSummarize: forceAll || argv['force-summarize'],
   };
 }

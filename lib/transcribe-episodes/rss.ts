@@ -36,12 +36,14 @@ type RssFeedResponse =
 /**
  * Fetch all items from an RSS feed, serving from cache when unchanged.
  * @todo Error message on fail would be helpful.
- * @todo Force options to bypass cache and re-download feed.
  */
-export async function getAllRssItems(url: string): Promise<RssFeedResponse> {
+export async function getAllRssItems(
+  url: string,
+  force: boolean,
+): Promise<RssFeedResponse> {
   try {
     const cachePaths = cachePathsFor(url);
-    const cacheEtag = readCachedEtag(cachePaths.etag);
+    const cacheEtag = force ? undefined : readCachedEtag(cachePaths.etag);
     const requestHeaders = cacheEtag === undefined
       ? undefined
       : { 'If-None-Match': cacheEtag };

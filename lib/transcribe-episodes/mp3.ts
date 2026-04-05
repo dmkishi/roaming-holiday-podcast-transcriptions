@@ -13,10 +13,13 @@ type Mp3Response =
 
 const BYTES_PER_MB = 1024 * 1024;
 
-export async function downloadMp3(toTranscribe: ToTranscribe): Promise<Mp3Response> {
+export async function downloadMp3(
+  toTranscribe: ToTranscribe,
+  force: boolean,
+): Promise<Mp3Response> {
   const { mp3: { url, path } } = toTranscribe;
 
-  if (existsSync(path)) {
+  if (!force && existsSync(path)) {
     return {
       status: 'alreadyDownloaded',
       sizeMB: Math.round(statSync(path).size / BYTES_PER_MB),
