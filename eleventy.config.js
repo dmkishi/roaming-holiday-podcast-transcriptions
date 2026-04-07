@@ -3,6 +3,7 @@ import { transform as esbuildTransform } from 'esbuild';
 import { minify } from 'html-minifier-terser';
 import postcss from 'postcss';
 import postcssImport from 'postcss-import';
+import postcssPresetEnv from 'postcss-preset-env';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -11,6 +12,15 @@ function pluralize(word, count) {
 }
 
 export default function(eleventyConfig) {
+  /**
+   * - runMode is `build` when `pnpm www:build`
+   * - runMode is `serve` when `pnpm www:dev`
+   */
+  let isProd = true;
+  eleventyConfig.on('eleventy.before', ({ runMode }) => {
+    isProd = runMode === 'build';
+  });
+
   // Bundle and minify CSS
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
@@ -20,7 +30,8 @@ export default function(eleventyConfig) {
 
       return async () => {
         const css = await readFile(inputPath, 'utf8');
-        const result = await postcss([postcssImport, cssnano]).process(css, {
+        const plugins = [postcssImport, ...(isProd ? [postcssPresetEnv] : []), cssnano];
+        const result = await postcss(plugins).process(css, {
           from: inputPath,
         });
         return result.css;
