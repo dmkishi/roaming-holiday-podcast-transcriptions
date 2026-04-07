@@ -4,22 +4,39 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
-      {{- title | default(site.title) -}}
+      {% if title %}
+        {{ title }} — {{ site.title }}
+      {% else %}
+        {{ site.title }}
+      {% endif %}
     </title>
     <link rel="stylesheet" href="{{ '/style.css' | url }}">
     <script src="{{ '/js/timeline.js' | url }}" defer></script>
   </head>
 
   <body>
-    <header class="site-header">
-      <a href="{{ '/' | url }}">
-        {{- site.title -}}
-      </a>
-      <p>This is an unofficial transcript site for the Roaming Holiday podcast. All transcripts and summaries have been machine generated. If you find any errors, please let me know and I will try to fix it.</p>
+    <header class="wrapper">
+      {% set headerTag = "h1" if isIndex else "h2" %}
+      <{{ headerTag }} class="site-header--title">
+        <a class="site-header--link" href="{{ '/' | url }}">
+          {% if not isIndex %}
+            <span class="site-header--arrow">←</span>
+          {% endif %}
+          {{- site.title -}}
+        </a>
+      </{{ headerTag }}>
+
+      <p>This is an <i>unofficial</i> transcript site for the <a href="https://keithcourage.com/rh/">Roaming Holiday podcast</a> by Keith McNally. All transcripts and summaries have been AI generated.</p>
     </header>
 
     <main>
       {{ content | safe }}
     </main>
+
+    <footer class="footer wrapper">
+      <nav class="footer-nav">
+        <a href="#" class="footer-nav--link">↑ <span class="footer-nav--text">Return to top</span></a>
+      </nav>
+    </footer>
   </body>
 </html>

@@ -1,67 +1,79 @@
 ---
+layout: base.njk
 pagination:
   data: episodes
   size: 1
   alias: episode
+  addAllPagesToCollections: true
 permalink: "episodes/{{ episode.episodeNumber }}.html"
-layout: base.njk
+tags: episode
 eleventyComputed:
-  title: "{{ episode.episodeNumber }}. {{ episode.title }} — Roaming Holiday"
+  title: "{{ episode.episodeNumber }}. {{ episode.title }}"
 ---
+{% from "macros/episodeMeta.njk" import episodeMeta %}
 
 <article class="episode">
-  <header class="episode-header">
-    <img src="{{ ('/' + episode.imagePath) | url }}" alt="Episode {{ episode.episodeNumber }}" class="episode-image" width="200" height="200">
-    <div>
-      <h1>{{ episode.episodeNumber }}. {{ episode.title }}</h1>
-      <time datetime="{{ episode.pubDate }}">{{ episode.pubDate | formatDate }}</time>
-      <span class="duration">{{ episode.duration.human }}</span>
-      {%- if episode.location %}
-        <span class="location">{{ episode.location }}</span>
-      {%- endif %}
-      {%- if episode.youtube %}
-        <a href="{{ episode.youtube }}" class="youtube-link" target="_blank" rel="noopener">Watch on YouTube</a>
-      {%- endif %}
-    </div>
+  <header>
+    <img
+      src="{{ ('/' + episode.imagePath) | url }}"
+      alt="Episode {{ episode.episodeNumber }}"
+      class="episode--image"
+    >
+
+    <h1 class="episode--title wrapper">
+      <span class="c-episode-number">#{{ episode.episodeNumber }}</span>
+      {{ episode.title }}
+    </h1>
+    <p class="wrapper">
+      {{- episode.description -}}
+    </p>
+
+    <p class="episode--meta c-episode-meta wrapper">
+      {{- episodeMeta(episode) -}}
+    </p>
   </header>
 
-  <section class="episode-summary">
-    <p>{{ episode.summary }}</p>
-  </section>
+  <div class="episode--content wrapper">
+    <p class="episode--content-warning">All content below have been AI generated.</p>
 
-  {%- if episode.sections.length > 0 %}
-    <nav class="episode-toc">
-      <h2>Sections</h2>
-      <ol class="section-list">
+    <section class="episode--summary">
+      <h2>Summary</h2>
+      <p>{{ episode.summary }}</p>
+    </section>
+
+    {%- if episode.sections.length > 0 %}
+      <nav>
+        <h2>Table of Contents</h2>
+        <ol class="episode--toc">
+          {%- for section in episode.sections %}
+            <li>
+              <a href="#section-{{ section.title | slug }}">
+                {{- section.title -}}
+              </a>
+            </li>
+          {%- endfor %}
+        </ol>
+      </nav>
+    {%- endif %}
+
+    <hr>
+
+    <section class="episode--transcript" data-transcript>
+      {%- for segment in episode.segments %}
         {%- for section in episode.sections %}
-        <li><a href="#section-{{ section.title | slug }}">{{ section.title }}</a></li>
+          {%- if section.segmentIndex == segment.id %}
+            <h2 class="section-title" id="section-{{ section.title | slug }}">
+              {{- loop.index }}. {{ section.title -}}
+            </h2>
+          {%- endif %}
         {%- endfor %}
-      </ol>
-    </nav>
-  {%- endif %}
-
-  {%- if episode.places.length > 0 %}
-  <section class="episode-places">
-    <h2>Places</h2>
-    <ul class="tag-list">
-      {%- for place in episode.places %}
-      <li>{{ place }}</li>
-      {%- endfor %}
-    </ul>
-  </section>
-  {%- endif %}
-
-  <section class="transcript" data-transcript>
-    {%- for segment in episode.segments %}
-      {%- for section in episode.sections %}
-        {%- if section.segmentIndex == segment.id %}
-    <h2 class="section-title" id="section-{{ section.title | slug }}">{{ loop.index }}. {{ section.title }}</h2>
+        {%- if segment.timelineMarker %}
+          <time class="timeline-marker" data-time="{{ segment.start }}">
+            {{- segment.start | formatRoundedTimecode -}}
+          </time>
         {%- endif %}
+        <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">{{ segment.text }}</span>
       {%- endfor %}
-      {%- if segment.timelineMarker %}
-    <time class="timeline-marker" data-time="{{ segment.start }}">{{ segment.start | formatTimestamp }}</time>
-      {%- endif %}
-      <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">{{ segment.text }}</span>
-    {%- endfor %}
-  </section>
+    </section>
+  </div>
 </article>

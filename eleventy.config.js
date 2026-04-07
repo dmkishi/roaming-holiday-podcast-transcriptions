@@ -6,12 +6,16 @@ import postcssImport from 'postcss-import';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-export default function (eleventyConfig) {
+function pluralize(word, count) {
+  return count === 1 ? word : `${word}s`;
+}
+
+export default function(eleventyConfig) {
   // Bundle and minify CSS
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
     outputFileExtension: 'css',
-    compile: async function (_content, inputPath) {
+    compile: async function(_content, inputPath) {
       if (path.basename(inputPath).startsWith('_')) return;
 
       return async () => {
@@ -28,7 +32,7 @@ export default function (eleventyConfig) {
   eleventyConfig.addTemplateFormats('js');
   eleventyConfig.addExtension('js', {
     outputFileExtension: 'js',
-    compile: async function (_content, inputPath) {
+    compile: async function(_content, inputPath) {
       if (path.basename(inputPath).startsWith('_')) return;
 
       return async () => {
@@ -53,19 +57,31 @@ export default function (eleventyConfig) {
   });
 
   /**
-   * Format seconds to a timestamp string.
+   * Format seconds to a timecode string, rounded to the nearest minute.
    * @example
-   * {{ 61 | formatTimestamp }}   // => "1:01"
-   * {{ 3661 | formatTimestamp }} // => "1:01:01"
+   * {{ 65 | formatRoundedTimecode }}   // => "0:01:00"
+   * {{ 3661 | formatRoundedTimecode }} // => "1:01:00"
    */
-  eleventyConfig.addFilter('formatTimestamp', (seconds) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    if (hrs > 0) {
-      return `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
-    return `${mins}:${String(secs).padStart(2, '0')}`;
+  eleventyConfig.addFilter('formatRoundedTimecode', (seconds) => {
+    const totalMins = Math.round(seconds / 60);
+    const hrs = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    return `${hrs}:${String(mins).padStart(2, '0')}:00`;
+  });
+
+  /**
+   * Format seconds to human-readable duration rounded to nearest minute.
+   * @example
+   * {{ 65 | formatRoundedHuman }}   // => "1m"
+   * {{ 3661 | formatRoundedHuman }} // => "1h 1m"
+   */
+  eleventyConfig.addFilter('formatRoundedHuman', (seconds) => {
+    const totalMins = Math.round(seconds / 60);
+    const hrs = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    return hrs > 0
+      ? `${hrs} ${pluralize('hour', hrs)} ${mins} ${pluralize('minute', mins)}`
+      : `${mins} ${pluralize('minute', mins)}`;
   });
 
   /**

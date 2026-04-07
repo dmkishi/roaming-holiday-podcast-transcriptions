@@ -6,8 +6,9 @@ import type { TranscriptSegment } from '@lib/build-www/types.js';
  */
 export function addTimelineMarkers(
   segments: TranscriptSegment[],
-  intervalSeconds = 300,
+  intervalMinutes = 5,
 ): TranscriptSegment[] {
+  const intervalSeconds = intervalMinutes * 60;
   let lastMarker = -1;
 
   return segments.map((seg) => {

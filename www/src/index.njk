@@ -1,24 +1,44 @@
 ---
 layout: base.njk
+isIndex: true
 ---
+{% from "macros/episodeMeta.njk" import episodeMeta %}
 
-<h1>Episodes</h1>
+<ul class="episode-list wrapper">
+  {%- for item in collections.episode | reverse %}
+    {%- set episode = item.data.episode %}
+    <li class="episode-card">
+      <a
+        href="{{ item.url }}"
+        class="episode-card--thumb-link"
+      >
+        <img
+          src="{{ ('/' + episode.imagePath) | url }}"
+          alt="Episode {{ episode.episodeNumber }}"
+          class="episode-card--thumb"
+          loading="lazy"
+        >
+      </a>
 
-<ul class="episode-list">
-{%- for episode in episodes | reverse %}
-  <li class="episode-card">
-    <a href="{{ ('/episodes/' + episode.episodeNumber + '.html') | url }}">
-      <img src="{{ ('/' + episode.imagePath) | url }}" alt="Episode {{ episode.episodeNumber }}" class="episode-thumb" loading="lazy" width="120" height="120">
-      <div class="episode-info">
-        <h2>{{ episode.episodeNumber }}. {{ episode.title }}</h2>
-        <time datetime="{{ episode.pubDate }}">{{ episode.pubDate | formatDate }}</time>
-        <span class="duration">{{ episode.duration.human }}</span>
-        {%- if episode.location %}
-        <span class="location">{{ episode.location }}</span>
-        {%- endif %}
-        <p>{{ episode.summary }}</p>
-      </div>
-    </a>
-  </li>
-{%- endfor %}
+      <header class="episode-card--header">
+        <h2>
+          <a
+            href="{{ item.url }}"
+            class="episode-card--title-link"
+          >
+            <span class="episode-card--episode-number c-episode-number">#{{ episode.episodeNumber }}</span>
+            <span class="episode-card--title">{{ episode.title }}</span
+          </a>
+        </h2>
+
+        <p class="episode-card--description">
+          {{- episode.description -}}
+        </p>
+
+        <p class="episode-card--meta c-episode-meta">
+          {{- episodeMeta(episode) -}}
+        </p>
+      </header>
+    </li>
+  {%- endfor %}
 </ul>

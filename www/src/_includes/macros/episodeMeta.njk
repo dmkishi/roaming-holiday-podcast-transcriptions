@@ -1,0 +1,11 @@
+{% macro episodeMeta(episode) %}
+  <time datetime="{{ episode.pubDate }}">
+    {{- episode.pubDate | formatDate -}}
+  </time>
+  <span class="duration">
+    {{- episode.duration.seconds | formatRoundedHuman -}}
+  </span>
+  {%- if episode.location %}
+    <span class="location">{{ episode.location }}</span>
+  {%- endif %}
+{% endmacro %}
