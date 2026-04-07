@@ -30,6 +30,8 @@ Output
    "language": "en"
 }
 ```
+- `seek` - Audio position in 30 second increments. It is an internal bookkeeping
+  value for Whisper and isn't particularly useful for downstream consumers.
 
 Prompt
 --------------------------------------------------------------------------------
