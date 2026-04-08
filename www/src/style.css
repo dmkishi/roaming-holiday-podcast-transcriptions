@@ -16,10 +16,9 @@
 
   --color-bg: #f0ead6;
   --color-black: #1c1917;
-  --color-black-light: oklch(from var(--color-black) calc(l + .3) c h);
-  --color-muted: #78716c;
+  --color-black-light: oklch(from var(--color-black) calc(l + .333) c h);
+  --color-tint: rgba(from var(--color-black) r g b / 5%);
   --color-warning: rgb(213, 105, 105);
-  --color-tint: rgba(180 83 9 / 8%);
 }
 
 html {
@@ -83,7 +82,7 @@ a {
 
 .c-episode-meta {
   font-size: var(--font-x-small);
-  color: var(--color-muted);
+  color: var(--color-black-light);
   text-transform: uppercase;
 
   & .duration::before,
@@ -295,7 +294,7 @@ a {
   font-family: var(--font-timecode);
   font-size: var(--font-x-small);
   text-align: right;
-  color: var(--color-muted);
+  color: var(--color-black-light);
   user-select: none;
 
   &:first-of-type {
