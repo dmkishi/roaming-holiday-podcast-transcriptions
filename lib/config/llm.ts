@@ -22,8 +22,8 @@ export const SUMMARY_PROMPT = `
   Keith McNally.
 
   Given the episode title, description, and full transcript text, extract:
-  1. **summary**: A concise summary of the episode. Limit to 2–3 sentences,
-     maximum 45 words.
+  1. **summary**: A concise summary of the episode. Limit to 2 sentences,
+     maximum 30 words.
      - Refer to the speaker as "Keith" or "he/him".
      - Do not repeat the title of the podcast or the episode — focus on
        describing the content and themes of the episode.
