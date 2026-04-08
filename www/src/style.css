@@ -49,23 +49,9 @@ a {
   color: var(--color-black);
 }
 
-.footer {
-  margin-top: var(--gutter);
-}
-
-.footer-nav {
-  border-top: 2px solid var(--color-black);
-  padding-top: 10px;
-}
-
-.footer-nav--link {
-  text-decoration: none;
-}
-
-.footer-nav--text {
-  text-decoration: underline;
-}
-
+/* -----------------------------------------------------------------------------
+ * Utility
+ * -------------------------------------------------------------------------- */
 .wrapper {
   width: 100%;
   max-width: var(--max-width);
@@ -127,6 +113,23 @@ a {
   position: absolute;
   right: 102.5%;
   top: -.15em;
+}
+
+.footer {
+  margin-top: var(--gutter);
+}
+
+.footer-nav {
+  border-top: 2px solid var(--color-black);
+  padding-top: 10px;
+}
+
+.footer-nav--link {
+  text-decoration: none;
+}
+
+.footer-nav--text {
+  text-decoration: underline;
 }
 
 /* -----------------------------------------------------------------------------
