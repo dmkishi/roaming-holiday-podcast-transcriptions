@@ -108,6 +108,15 @@ export default function(eleventyConfig) {
     });
   });
 
+  /**
+   * Extract the video ID from a YouTube URL.
+   * @example
+   * {{ 'https://www.youtube.com/watch?v=abc123' | youtubeId }} // => "abc123"
+   */
+  eleventyConfig.addFilter('youtubeId', (url) => {
+    return new URL(url).searchParams.get('v') || '';
+  });
+
   return {
     dir: {
       input: 'www/src',
