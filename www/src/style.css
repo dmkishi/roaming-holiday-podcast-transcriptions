@@ -196,6 +196,37 @@ a {
 .episode--video {
   aspect-ratio: 16/9;
   width: 100%;
+  transition: width .2s ease, box-shadow .2s ease;
+}
+
+.js-video__is-mini {
+  position: fixed;
+  z-index: 1; /* Above .section-title */
+  bottom: var(--space-1);
+  right: var(--space-1);
+  width: 320px;
+  box-shadow: 0 4px 12px rgba(0 0 0 / .3);
+}
+
+.js-miniplayer--close-btn {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  bottom: calc(320px * 9/16 + var(--space-1) + .25rem);
+  right: var(--space-1);
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-black);
+  color: var(--color-bg);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+
+  .js-video__is-mini ~ & {
+    display: block;
+  }
 }
 
 .episode--image {
