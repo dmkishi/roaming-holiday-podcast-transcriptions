@@ -10,9 +10,9 @@
         {{ site.title }}
       {% endif %}
     </title>
-    <link rel="stylesheet" href="{{ '/style.css' | url }}">
+    <link rel="stylesheet" href="{{ '/style.css' | hashUrl }}">
     {% for src in scripts %}
-      <script src="{{ src | url }}" defer></script>
+      <script src="{{ src | hashUrl }}" defer></script>
     {% endfor %}
   </head>
 

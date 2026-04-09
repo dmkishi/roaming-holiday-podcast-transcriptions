@@ -5,6 +5,8 @@ import { minify } from 'html-minifier-terser';
 import postcss from 'postcss';
 import postcssImport from 'postcss-import';
 import postcssPresetEnv from 'postcss-preset-env';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -20,6 +22,15 @@ export default function(eleventyConfig) {
   let isProd = true;
   eleventyConfig.on('eleventy.before', ({ runMode }) => {
     isProd = runMode === 'build';
+  });
+
+  // Append a content-hash query string for cache busting (prod only)
+  eleventyConfig.addFilter('hashUrl', (url) => {
+    if (!isProd) return url;
+    const filePath = path.join('www/src', url);
+    const content = readFileSync(filePath, 'utf8');
+    const hash = createHash('md5').update(content).digest('hex').slice(0, 8);
+    return `${url}?v=${hash}`;
   });
 
   // Bundle and minify CSS
