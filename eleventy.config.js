@@ -68,6 +68,15 @@ export default function(eleventyConfig) {
   });
 
   /**
+   * Format a number with locale-appropriate separators.
+   * @example
+   * {{ 217988 | formatNumber }} // => "217,988"
+   */
+  eleventyConfig.addFilter('formatNumber', (n) => {
+    return Number(n).toLocaleString('en-US');
+  });
+
+  /**
    * Format seconds to a timecode string, rounded to the nearest minute.
    * @example
    * {{ 65 | formatRoundedTimecode }}   // => "0:01:00"

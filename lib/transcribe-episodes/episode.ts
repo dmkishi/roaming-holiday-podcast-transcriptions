@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import type { RssItem } from '@lib/transcribe-episodes/rss.js';
+import type { RssItem } from '@lib/shared/rss.js';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { type Duration, parseDuration } from '@lib/shared/duration.js';
 import { toPrettyJson } from '@lib/shared/strings.js';

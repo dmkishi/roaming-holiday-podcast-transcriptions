@@ -4,12 +4,13 @@ import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover
 import { matchSections } from '@lib/build-www/match-sections.js';
 import { downloadImage } from '@lib/build-www/images.js';
 import { loadOverrides } from '@lib/build-www/overrides.js';
+import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
 import { formatEpisodeNumber } from '@lib/shared/paths.js';
 import { print, printAndLog } from '@lib/shared/print.js';
 import { pluralize, toPrettyJson } from '@lib/shared/strings.js';
-import { ROOT, SITE_EPISODES_DIR } from '@lib/config/paths.js';
+import { ROOT, SITE_DATA_DIR, SITE_EPISODES_DIR } from '@lib/config/paths.js';
 
 // =============================================================================
 // Discover episodes
@@ -85,3 +86,17 @@ for (const { metadata, transcript, summary } of artifacts) {
 
 print.emptyLine();
 printAndLog.info(`Built data for ${built} ${pluralize(built, 'episode')}`);
+
+// =============================================================================
+// Collect and write stats
+// =============================================================================
+print.emptyLine();
+print.info('Collecting stats...');
+try {
+  const stats = await collectStats(artifacts);
+  const statsPath = join(SITE_DATA_DIR, 'stats.json');
+  writeFileSync(statsPath, toPrettyJson(stats));
+  printAndLog.info(`Saved "${relative(ROOT, statsPath)}"`);
+} catch (error) {
+  printAndLog.warn(`Stats collection failed: ${error instanceof Error ? error.message : String(error)}`);
+}

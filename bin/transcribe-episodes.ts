@@ -1,6 +1,6 @@
 import pc from 'picocolors';
 import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
-import { getAllRssItems } from '@lib/transcribe-episodes/rss.js';
+import { getAllRssItems } from '@lib/shared/rss.js';
 import { findEpisodes, saveMetadata } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
 import {

@@ -30,3 +30,31 @@ export interface SiteEpisode {
   location?: string;
   youtube?: string;
 }
+
+// =============================================================================
+// Stats
+// =============================================================================
+export interface EpisodeStat {
+  episodeNumber: number;
+  title: string;
+  pubDate: string;
+  durationSeconds: number;
+}
+
+export interface EpisodeWordStat extends EpisodeStat {
+  wordCount: number;
+}
+
+export interface PodcastStats {
+  totalEpisodes: number;
+  totalDurationSeconds: number;
+  averageEpisodeDurationSeconds: number;
+  longestEpisode: EpisodeStat;
+  shortestEpisode: EpisodeStat;
+  totalTranscribedEpisodes: number;
+  totalTranscribedWordCount: number;
+  averageTranscribedEpisodeWordCount: number;
+  wordiestEpisode: EpisodeWordStat;
+  leastWordiestEpisode: EpisodeWordStat;
+  mostFucks: EpisodeWordStat;
+}
