@@ -21,6 +21,8 @@ export default function(eleventyConfig) {
     isProd = runMode === 'build';
   });
 
+  eleventyConfig.addPassthroughCopy('www/src/img');
+
   // Bundle and minify CSS
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
