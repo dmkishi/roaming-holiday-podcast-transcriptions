@@ -116,6 +116,29 @@ a {
   top: -.15em;
 }
 
+.site-header--about-link {
+  position: relative;
+  top: -.05em;
+  left: .0333em;
+  font-size: var(--font-x-small);
+  text-transform: uppercase;
+  text-decoration-thickness: 1.25px;
+  text-underline-offset: 1.5px;
+
+  &::after {
+    content: '→';
+    position: absolute;
+    top: -.2em;
+    left: calc(100% + .25em);
+  }
+
+  &:active {
+    &&:after {
+      top: calc(-.2em + 1px);
+    }
+  }
+}
+
 .footer {
   margin-top: var(--gutter);
 }
@@ -342,5 +365,20 @@ a {
     width: auto;
     text-align: left;
     margin: 1rem 0 .25rem;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+ * About Page
+ * -------------------------------------------------------------------------- */
+.about-page {
+  line-height: var(--font-line-height-tighter);
+
+  p {
+    margin-bottom: 1em;
+
+    &:first-of-type {
+      font-size: var(--font-large);
+    }
   }
 }

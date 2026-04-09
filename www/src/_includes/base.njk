@@ -27,9 +27,12 @@
         </a>
       </{{ headerTag }}>
 
-      <p class="tighten">
-        {{- site.descriptionHtml | safe }}
-      </p>
+      {% if not isAbout %}
+        <p class="tighten">
+          {{- site.descriptionHtml | safe }}
+          <a href="{{ '/about/' | url }}" class="site-header--about-link">About this site</a>
+        </p>
+      {% endif %}
     </header>
 
     <main>
