@@ -11,8 +11,9 @@
       {% endif %}
     </title>
     <link rel="stylesheet" href="{{ '/style.css' | url }}">
-    <script src="{{ '/js/timeline.js' | url }}" defer></script>
-    <script src="{{ '/js/miniplayer.js' | url }}" defer></script>
+    {% for src in scripts %}
+      <script src="{{ src | url }}" defer></script>
+    {% endfor %}
   </head>
 
   <body>
