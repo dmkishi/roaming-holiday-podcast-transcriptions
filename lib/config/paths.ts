@@ -6,7 +6,6 @@ export const LOG_PATH = resolve(ROOT, 'LOG');
 export const TMP_DIR = '/tmp';
 export const VENV_PYTHON = resolve(ROOT, '.venv/bin/python');
 export const VENV_WHISPER = resolve(ROOT, '.venv/bin/whisper');
-export const DIST_DIR = resolve(ROOT, 'www/dist');
 export const DIST_IMG_DIR = resolve(ROOT, 'www/dist/img');
 export const SITE_DIR = resolve(ROOT, 'www/src');
 export const SITE_DATA_DIR = resolve(ROOT, 'www/src/_data');
