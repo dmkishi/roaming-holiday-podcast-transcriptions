@@ -139,20 +139,20 @@ a {
   }
 }
 
-.footer {
+.site-footer {
   margin-top: var(--gutter);
 }
 
-.footer-nav {
+.site-footer-nav {
   border-top: 2px solid var(--color-black);
   padding-top: 10px;
 }
 
-.footer-nav--link {
+.site-footer-nav--link {
   text-decoration: none;
 }
 
-.footer-nav--text {
+.site-footer-nav--text {
   text-decoration: underline;
 }
 
