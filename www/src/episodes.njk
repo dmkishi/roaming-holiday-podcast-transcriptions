@@ -25,7 +25,7 @@ eleventyComputed:
       ></iframe>
     {% else %}
       <img
-        src="{{ ('/' + episode.imagePath) | url }}"
+        src="{% imageUrl episode.imagePath, 1000 %}"
         alt="Episode {{ episode.episodeNumber }}"
         class="episode--image"
       >

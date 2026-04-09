@@ -1,4 +1,5 @@
 import cssnano from 'cssnano';
+import Image from '@11ty/eleventy-img';
 import { transform as esbuildTransform } from 'esbuild';
 import { minify } from 'html-minifier-terser';
 import postcss from 'postcss';
@@ -20,8 +21,6 @@ export default function(eleventyConfig) {
   eleventyConfig.on('eleventy.before', ({ runMode }) => {
     isProd = runMode === 'build';
   });
-
-  eleventyConfig.addPassthroughCopy('www/src/img');
 
   // Bundle and minify CSS
   eleventyConfig.addTemplateFormats('css');
@@ -67,6 +66,21 @@ export default function(eleventyConfig) {
       });
     }
     return content;
+  });
+
+  eleventyConfig.addShortcode('imageUrl', async (src, width) => {
+    const input = path.join('www/src', src);
+    const metadata = await Image(input, {
+      widths: [width],
+      formats: ['webp'],
+      outputDir: 'www/dist/img',
+      urlPath: '/img/',
+      filenameFormat: (_hash, _src, w, format) => {
+        const name = path.basename(_src, path.extname(_src));
+        return `${name}-${w}w.${format}`;
+      },
+    });
+    return metadata.webp[0].url;
   });
 
   /**

@@ -17,7 +17,7 @@ isIndexPage: true
         class="episode-card--thumb-link"
       >
         <img
-          src="{{ ('/' + episode.imagePath) | url }}"
+          src="{% imageUrl episode.imagePath, 300 %}"
           alt="Episode {{ episode.episodeNumber }}"
           class="episode-card--thumb"
           loading="lazy"
