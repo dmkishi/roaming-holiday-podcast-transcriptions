@@ -1,6 +1,7 @@
 ---
 layout: base.njk
 isIndexPage: true
+eagerImageCount: 5
 ---
 {% from "macros/episodeMeta.njk" import episodeMeta %}
 
@@ -20,7 +21,7 @@ isIndexPage: true
           src="{% imageUrl episode.imagePath, 300 %}"
           alt="Episode {{ episode.episodeNumber }}"
           class="episode-card--thumb"
-          loading="lazy"
+          loading="{% if loop.index <= eagerImageCount %}eager{% else %}lazy{% endif %}"
         >
       </a>
 
