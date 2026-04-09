@@ -255,7 +255,7 @@ a {
   padding: var(--space-1);
   background-color: var(--color-warning);
   color: var(--color-bg);
-  margin-block: 1.5rem -.75rem;
+  margin-block: 1.5rem -1rem;
 }
 
 .episode--toc {
