@@ -19,10 +19,10 @@
     <header class="wrapper">
       {% set headerTag = "h1" if isIndexPage else "h2" %}
       <{{ headerTag }} class="site-header--title">
-        <a class="site-header--link" href="{{ '/' | url }}">
-          {% if not isIndexPage %}
-            <span class="site-header--arrow">←</span>
-          {% endif %}
+        <a
+          href="{{ '/' | url }}"
+          class="site-header--title-link {% if isIndexPage %}site-header--title-link__index-page{% endif %}"
+        >
           {{- site.title -}}
         </a>
       </{{ headerTag }}>
@@ -41,7 +41,7 @@
 
     <footer class="site-footer wrapper">
       <nav class="site-footer-nav">
-        <a href="#" class="site-footer-nav--link">↑ <span class="site-footer-nav--text">Return to top</span></a>
+        <a href="#" class="site-footer--top-link">Return to top</a>
       </nav>
     </footer>
   </body>
