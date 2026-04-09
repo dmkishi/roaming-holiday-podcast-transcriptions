@@ -17,17 +17,17 @@
 
   <body>
     <header class="wrapper">
-      {% set headerTag = "h1" if isIndex else "h2" %}
+      {% set headerTag = "h1" if isIndexPage else "h2" %}
       <{{ headerTag }} class="site-header--title">
         <a class="site-header--link" href="{{ '/' | url }}">
-          {% if not isIndex %}
+          {% if not isIndexPage %}
             <span class="site-header--arrow">←</span>
           {% endif %}
           {{- site.title -}}
         </a>
       </{{ headerTag }}>
 
-      {% if not isAbout %}
+      {% if not isAboutPage %}
         <p class="tighten">
           {{- site.descriptionHtml | safe }}
           <a href="{{ '/about/' | url }}" class="site-header--about-link">About this site</a>
