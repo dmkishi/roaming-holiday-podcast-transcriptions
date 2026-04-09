@@ -13,6 +13,8 @@
   --font-x-large: 2rem; /* 32px - <h1> */
 
   --font-timecode: ui-monospace, 'SF Mono', monospace;
+  --font-line-height-regular: 1.5;
+  --font-line-height-tighter: 1.45;
 
   --color-bg: #f0ead6;
   --color-black: #1c1917;
@@ -38,7 +40,7 @@ body {
 }
 
 body, button, h1, h2, h3, h4, input, label {
-  line-height: 1.5;
+  line-height: var(--font-line-height-regular);
 }
 
 h1 { font-size: var(--font-x-large); }
@@ -61,7 +63,7 @@ a {
 .tighten {
   margin-block: .0625em;
   font-size: var(--font-small);
-  line-height: 1.45;
+  line-height: var(--font-line-height-tighter);
 }
 
 /* -----------------------------------------------------------------------------
