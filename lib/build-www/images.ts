@@ -7,6 +7,10 @@ export type ImageResponse =
   | { status: 'downloaded' | 'alreadyExists'; path: string }
   | { status: 'failed'; path: string; error: string };
 
+/**
+ * Downloads an episode cover image from the given URL and saves it to the site
+ * image directory. Skips the download if it already exists.
+ */
 export async function downloadImage(
   episodeNumber: number,
   imageUrl: string,
