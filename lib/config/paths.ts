@@ -1,8 +1,6 @@
 import { resolve } from 'node:path';
 
-const ROOT = resolve(import.meta.dirname, '../..');
-
-export { ROOT };
+export const ROOT = resolve(import.meta.dirname, '../..');
 export const OUTPUTS_DIR = resolve(ROOT, 'episodes');
 export const LOG_PATH = resolve(ROOT, 'LOG');
 export const TMP_DIR = '/tmp';
