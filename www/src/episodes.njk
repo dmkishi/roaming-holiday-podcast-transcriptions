@@ -8,7 +8,7 @@ pagination:
   size: 1
   alias: episode
   addAllPagesToCollections: true
-permalink: "episodes/{{ episode.episodeNumber }}.html"
+permalink: "{{ episode.url }}"
 tags: episode
 eleventyComputed:
   title: "{{ episode.episodeNumber }}. {{ episode.title }}"

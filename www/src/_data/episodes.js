@@ -18,6 +18,9 @@ export default function() {
   }
 
   return files
-    .map((f) => JSON.parse(readFileSync(join(EPISODES_DIR, f), 'utf8')))
+    .map((f) => {
+      const episode = JSON.parse(readFileSync(join(EPISODES_DIR, f), 'utf8'));
+      return { ...episode, url: `/episodes/${episode.episodeNumber}.html` };
+    })
     .sort((a, b) => a.episodeNumber - b.episodeNumber);
 }

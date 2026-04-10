@@ -39,6 +39,7 @@ export interface EpisodeStat {
   title: string;
   pubDate: string;
   durationSeconds: number;
+  url: string;
 }
 
 export interface EpisodeWordStat extends EpisodeStat {

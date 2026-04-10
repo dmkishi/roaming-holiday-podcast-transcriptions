@@ -72,11 +72,13 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
 
 function toEpisodeStat(item: RssItem): EpisodeStat {
   const match = /RH(\d+)/.exec(item.guid);
+  const episodeNumber = match ? Number(match[1]) : 0;
   return {
-    episodeNumber: match ? Number(match[1]) : 0,
+    episodeNumber,
     title: item.title,
     pubDate: new Date(item.pubDate).toISOString(),
     durationSeconds: parseDuration(item['itunes:duration']).seconds,
+    url: `/episodes/${episodeNumber}.html`,
   };
 }
 
@@ -90,6 +92,7 @@ function toEpisodeWordStat(
     title: metadata.title,
     pubDate: metadata.pubDate,
     durationSeconds: metadata.duration.seconds,
+    url: `/episodes/${metadata.episodeNumber}.html`,
     wordCount,
   };
 }
