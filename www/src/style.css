@@ -263,7 +263,7 @@ a {
   box-shadow: 0 4px 12px rgba(0 0 0 / .3);
 }
 
-.js-miniplayer--close-btn {
+.js-mini-player--close-btn {
   display: none;
   position: fixed;
   z-index: 1;

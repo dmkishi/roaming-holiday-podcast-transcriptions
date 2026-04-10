@@ -11,7 +11,7 @@
   const sentinel = document.querySelector('.js-video-sentinel');
 
   const closeBtn = document.createElement('button');
-  closeBtn.className = 'js-miniplayer--close-btn';
+  closeBtn.className = 'js-mini-player--close-btn';
   closeBtn.textContent = '\u00d7';
   closeBtn.hidden = true;
 
