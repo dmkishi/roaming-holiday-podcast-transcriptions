@@ -50,6 +50,16 @@ h3 { font-size: var(--font-base); }
 
 a {
   color: var(--color-black);
+  transition: background-color .2s ease;
+
+  &:hover {
+    background-color: var(--color-tint);
+    transition: background-color 0s ease;
+  }
+
+  &.no-highlight:hover {
+    background-color: transparent;
+  }
 }
 
 /* -----------------------------------------------------------------------------

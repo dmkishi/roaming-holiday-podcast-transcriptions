@@ -22,7 +22,7 @@
       <{{ headerTag }} class="site-header--title">
         <a
           href="{{ '/' | url }}"
-          class="site-header--title-link {% if isIndexPage %}site-header--title-link__index-page{% endif %}"
+          class="site-header--title-link {% if isIndexPage %}site-header--title-link__index-page{% endif %} no-highlight"
         >
           {{- site.title -}}
         </a>
@@ -42,7 +42,7 @@
 
     <footer class="site-footer wrapper">
       <nav class="site-footer-nav">
-        <a href="#" class="site-footer--top-link">Return to top</a>
+        <a href="#" class="site-footer--top-link no-highlight">Return to top</a>
       </nav>
     </footer>
   </body>

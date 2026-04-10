@@ -15,7 +15,7 @@ eagerImageCount: 5
     <li class="episode-card">
       <a
         href="{{ item.url }}"
-        class="episode-card--thumb-link"
+        class="episode-card--thumb-link no-highlight"
       >
         <img
           src="{% imageUrl episode.imagePath, 300 %}"
@@ -29,7 +29,7 @@ eagerImageCount: 5
         <h2>
           <a
             href="{{ item.url }}"
-            class="episode-card--title-link"
+            class="episode-card--title-link no-highlight"
           >
             <span class="episode-card--episode-number c-episode-number">#{{ episode.episodeNumber }}</span>
             <span class="episode-card--title">{{ episode.title }}</span
