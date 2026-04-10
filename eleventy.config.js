@@ -81,11 +81,12 @@ export default function(eleventyConfig) {
 
   eleventyConfig.addShortcode('imageUrl', async (src, width) => {
     const input = path.join('www/src', src);
+    const subdir = path.relative('img', path.dirname(src));
     const metadata = await Image(input, {
       widths: [width],
       formats: ['webp'],
-      outputDir: 'www/dist/img',
-      urlPath: '/img/',
+      outputDir: path.join('www/dist/img', subdir),
+      urlPath: path.posix.join('/img', subdir, '/'),
       filenameFormat: (_hash, _src, w, format) => {
         const name = path.basename(_src, path.extname(_src));
         return `${name}-${w}w.${format}`;

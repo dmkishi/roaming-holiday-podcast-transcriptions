@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { SITE_IMG_DIR } from '@lib/config/paths.js';
+import { SITE_EPISODES_IMG_DIR } from '@lib/config/paths.js';
 import { formatEpisodeNumber } from '@lib/shared/paths.js';
 
 export type ImageResponse =
@@ -16,14 +16,14 @@ export async function downloadImage(
   imageUrl: string,
 ): Promise<ImageResponse> {
   const filename = `${formatEpisodeNumber(episodeNumber)}.jpg`;
-  const relPath = `img/${filename}`;
-  const destPath = join(SITE_IMG_DIR, filename);
+  const relPath = `img/episodes/${filename}`;
+  const destPath = join(SITE_EPISODES_IMG_DIR, filename);
 
   if (existsSync(destPath)) {
     return { status: 'alreadyExists', path: relPath };
   }
 
-  mkdirSync(SITE_IMG_DIR, { recursive: true });
+  mkdirSync(SITE_EPISODES_IMG_DIR, { recursive: true });
 
   try {
     const res = await fetch(imageUrl);
