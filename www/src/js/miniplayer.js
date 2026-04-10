@@ -4,11 +4,11 @@
   const video = document.querySelector('.js-video');
   if (!video) return;
 
-  // Observe a placeholder "sentinel" instead of the <iframe> to avoid a
-  // feedback loop when `position:fixed` removes it from flow.
-  const sentinel = document.createElement('div');
-  sentinel.className = 'js-video-sentinel';
-  video.parentElement.insertBefore(sentinel, video);
+  /**
+   * Observe a placeholder "sentinel" instead of the <iframe> to avoid a
+   * feedback loop when `position:fixed` removes it from flow.
+   */
+  const sentinel = document.querySelector('.js-video-sentinel');
 
   const closeBtn = document.createElement('button');
   closeBtn.className = 'js-miniplayer--close-btn';

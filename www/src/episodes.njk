@@ -18,14 +18,16 @@ eleventyComputed:
 <article class="episode">
   <header>
     {% if episode.youtube %}
-      <iframe
-        class="episode--video js-video"
-        src="https://www.youtube-nocookie.com/embed/{{ episode.youtube | youtubeId }}"
-        title="Episode {{ episode.episodeNumber }}"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-      ></iframe>
+      <div class="js-video-sentinel">
+        <iframe
+          class="episode--video js-video"
+          src="https://www.youtube-nocookie.com/embed/{{ episode.youtube | youtubeId }}"
+          title="Episode {{ episode.episodeNumber }}"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
     {% else %}
       <img
         src="{% imageUrl episode.imagePath, 1000 %}"
