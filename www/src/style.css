@@ -183,6 +183,7 @@ a {
   &::before {
     content: '↑';
     position: relative;
+    top: -.1em;
     margin-right: .25em;
   }
 
