@@ -119,16 +119,22 @@ export default function(eleventyConfig) {
   /**
    * Format seconds to human-readable duration rounded to nearest minute.
    * @example
-   * {{ 65 | formatRoundedHuman }}   // => "1m"
-   * {{ 3661 | formatRoundedHuman }} // => "1h 1m"
+   * {{ 65 | formatRoundedHuman }}    // => "1m"
+   * {{ 3661 | formatRoundedHuman }}  // => "1h 1m"
+   * {{ 3660 | formatRoundedHuman }}  // => "1h"
+   * {{ 90000 | formatRoundedHuman }} // => "1d 1h"
    */
   eleventyConfig.addFilter('formatRoundedHuman', (seconds) => {
     const totalMins = Math.round(seconds / 60);
-    const hrs = Math.floor(totalMins / 60);
+    const totalHrs = Math.floor(totalMins / 60);
+    const days = Math.floor(totalHrs / 24);
+    const hrs = totalHrs % 24;
     const mins = totalMins % 60;
-    return hrs > 0
-      ? `${hrs} ${pluralize('hour', hrs)} ${mins} ${pluralize('minute', mins)}`
-      : `${mins} ${pluralize('minute', mins)}`;
+    const parts = [];
+    if (days > 0) parts.push(`${days} ${pluralize('day', days)}`);
+    if (hrs > 0) parts.push(`${hrs} ${pluralize('hour', hrs)}`);
+    if (mins > 0) parts.push(`${mins} ${pluralize('minute', mins)}`);
+    return parts.join(' ') || `0 ${pluralize('minute', 0)}`;
   });
 
   /**
