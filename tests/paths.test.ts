@@ -7,6 +7,7 @@ describe('episodePaths', () => {
     const paths = episodePaths({ episodeNumber: 123, model: 'base' });
     expect(basename(paths.metadata)).toBe('123.metadata.json');
     expect(basename(paths.transcript)).toBe('123.transcript__base.json');
+    expect(basename(paths.paragraph)).toBe('123.transcript__base.paragraph.json');
     expect(paths.summary).toBeUndefined();
   });
 
@@ -14,6 +15,7 @@ describe('episodePaths', () => {
     const paths = episodePaths({ episodeNumber: 1, model: 'base' });
     expect(basename(paths.metadata)).toBe('001.metadata.json');
     expect(basename(paths.transcript)).toBe('001.transcript__base.json');
+    expect(basename(paths.paragraph)).toBe('001.transcript__base.paragraph.json');
   });
 
   test('does not over-pad 3+ digit episode numbers', () => {
@@ -24,6 +26,7 @@ describe('episodePaths', () => {
   test('handleizes model name', () => {
     const paths = episodePaths({ episodeNumber: 1, model: 'gpt-4o' });
     expect(basename(paths.transcript)).toBe('001.transcript__gpt-4o.json');
+    expect(basename(paths.paragraph)).toBe('001.transcript__gpt-4o.paragraph.json');
   });
 
   test('includes summary path when summaryModel is provided', () => {
@@ -38,7 +41,7 @@ describe('episodePaths', () => {
 
   test('all paths share the same directory', () => {
     const paths = episodePaths({ episodeNumber: 1, model: 'base', summaryModel: 'gpt-4o' });
-    const dirs = [paths.metadata, paths.transcript, paths.summary!].map(
+    const dirs = [paths.metadata, paths.transcript, paths.paragraph, paths.summary!].map(
       (p) => p.replace(basename(p), ''),
     );
     expect(new Set(dirs).size).toBe(1);

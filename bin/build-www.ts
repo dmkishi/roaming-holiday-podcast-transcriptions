@@ -1,9 +1,11 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
-import { matchSections } from '@lib/build-www/match-sections.js';
+// Summary-derived section matching temporarily shelved — see plan.
+// import { matchSections } from '@lib/build-www/match-sections.js';
 import { downloadImage } from '@lib/build-www/images.js';
 import { loadOverrides } from '@lib/build-www/overrides.js';
+import { groupByParagraphBreaks } from '@lib/build-www/paragraphs.js';
 import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
@@ -41,7 +43,7 @@ const overrides = loadOverrides();
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
 let built = 0;
 
-for (const { metadata, transcript, summary } of artifacts) {
+for (const { metadata, paragraph } of artifacts) {
   const ep = metadata.episodeNumber;
 
   const image = await downloadImage(ep, metadata.imageUrl);
@@ -49,15 +51,17 @@ for (const { metadata, transcript, summary } of artifacts) {
     printAndLog.warn(`#${ep}: Image download failed - ${image.error}`);
   }
 
-  const { sections, unmatched } = matchSections(summary.sections, transcript.segments);
-  if (unmatched.length > 0) {
-    printAndLog.warn([
-      `#${ep}: ${unmatched.length} unmatched ${pluralize(unmatched.length, 'section')}:`,
-      ...unmatched.map((title) => `  "${title}"`),
-    ]);
-  }
+  // Summary-derived section matching temporarily shelved — see plan.
+  // const { sections, unmatched } = matchSections(summary.sections, paragraph.segments);
+  // if (unmatched.length > 0) {
+  //   printAndLog.warn([
+  //     `#${ep}: ${unmatched.length} unmatched ${pluralize(unmatched.length, 'section')}:`,
+  //     ...unmatched.map((title) => `  "${title}"`),
+  //   ]);
+  // }
 
-  const segments = addTimelineMarkers(transcript.segments);
+  const segments = addTimelineMarkers(paragraph.segments);
+  const paragraphs = groupByParagraphBreaks(segments, paragraph.breaks);
   const override = overrides.get(ep);
 
   const episode: SiteEpisode = {
@@ -69,11 +73,11 @@ for (const { metadata, transcript, summary } of artifacts) {
     imageUrl: metadata.imageUrl,
     mp3Url: metadata.mp3Url,
     imagePath: image.path,
-    segments,
-    sections,
-    summary: summary.summary,
-    places: summary.places,
-    keywords: summary.keywords,
+    paragraphs,
+    // sections,
+    // summary: summary.summary,
+    // places: summary.places,
+    // keywords: summary.keywords,
     location: override?.location,
     youtube: override?.youtube,
   };

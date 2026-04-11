@@ -33,7 +33,7 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
 
   const totalTranscribedEpisodes = artifacts.length;
   const wordStats = artifacts.map((a) =>
-    toEpisodeWordStat(a, a.transcript.text.split(/\s+/).filter(Boolean).length),
+    toEpisodeWordStat(a, fullText(a).split(/\s+/).filter(Boolean).length),
   );
   const totalTranscribedWordCount = wordStats.reduce(
     (sum, s) => sum + s.wordCount,
@@ -49,7 +49,7 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
     b.wordCount < a.wordCount ? b : a,
   );
   const fuckStats = artifacts.map((a) =>
-    toEpisodeWordStat(a, (a.transcript.text.match(/fuck/gi) ?? []).length),
+    toEpisodeWordStat(a, (fullText(a).match(/fuck/gi) ?? []).length),
   );
   const mostFucks = fuckStats.reduce((a, b) =>
     b.wordCount > a.wordCount ? b : a,
@@ -68,6 +68,10 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
     leastWordiestEpisode,
     mostFucks,
   };
+}
+
+function fullText(artifacts: EpisodeArtifacts): string {
+  return artifacts.paragraph.text.join(' ');
 }
 
 function toEpisodeStat(item: RssItem): EpisodeStat {

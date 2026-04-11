@@ -1,7 +1,6 @@
 import type { Duration } from '@lib/shared/duration.js';
 
 export interface TranscriptSegment {
-  id: number;
   start: number;
   end: number;
   text: string;
@@ -22,11 +21,12 @@ export interface SiteEpisode {
   imageUrl: string;
   mp3Url: string;
   imagePath: string;
-  segments: TranscriptSegment[];
-  sections: ResolvedSection[];
-  summary: string;
-  places: string[];
-  keywords: string[];
+  paragraphs: TranscriptSegment[][];
+  // Summary-derived fields are temporarily shelved — see plan.
+  // sections: ResolvedSection[];
+  // summary: string;
+  // places: string[];
+  // keywords: string[];
   location?: string;
   youtube?: string;
 }

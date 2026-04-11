@@ -197,6 +197,10 @@ a {
 /* -----------------------------------------------------------------------------
  * Index Page
  * -------------------------------------------------------------------------- */
+.episodes--timeline {
+  margin-block: 1rem 2rem;
+}
+
 .episode-list {
   display: flex;
   flex-direction: column;
@@ -326,6 +330,10 @@ a {
 
 .episode--transcript {
   position: relative;
+
+  p {
+    margin-top: 1.4em;
+  }
 }
 
 .episode--transcript span[data-start] {

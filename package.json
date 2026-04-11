@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "transcribe": "tsx --env-file=.env bin/transcribe-episodes.ts",
+    "paragraphs": "tsx bin/build-paragraphs.ts",
     "summarize": "tsx --env-file=.env bin/summarize-transcript.ts",
     "www:build": "tsx bin/build-www.ts && eleventy",
     "www:build:data-only": "tsx bin/build-www.ts",

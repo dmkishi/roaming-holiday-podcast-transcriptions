@@ -14,6 +14,7 @@ export function episodePaths(params: {
 }): {
   metadata: string;
   transcript: string;
+  paragraph: string;
   summary: string | undefined;
 } {
   const code = formatEpisodeNumber(params.episodeNumber);
@@ -21,6 +22,7 @@ export function episodePaths(params: {
   return {
     metadata: join(OUTPUTS_DIR, `${code}.metadata.json`),
     transcript: join(OUTPUTS_DIR, `${code}.transcript__${model}.json`),
+    paragraph: join(OUTPUTS_DIR, `${code}.transcript__${model}.paragraph.json`),
     // Unlikely to have surprising falsy values.
     // oxlint-disable-next-line typescript/strict-boolean-expressions
     summary: params.summaryModel
@@ -56,10 +58,9 @@ export function findTranscripts(
   episodeNumber: number,
 ): { path: string; model: string }[] {
   const code = formatEpisodeNumber(episodeNumber);
-  const transcriptPattern = new RegExp(`^${code}\\.transcript__(.+)\\.json$`);
+  const transcriptPattern = new RegExp(`^${code}\\.transcript__([^.]+)\\.json$`);
 
   const matches = readdirSync(OUTPUTS_DIR)
-    .filter((f) => !f.includes('.summary__'))
     .map((f) => transcriptPattern.exec(f))
     .filter((m) => m !== null);
   return matches.map((m) => ({

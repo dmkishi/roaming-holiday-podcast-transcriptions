@@ -1,7 +1,9 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { OUTPUTS_DIR } from '@lib/config/paths.js';
-import { TranscriptFileSchema, SummaryFileSchema } from '@lib/shared/schemas.js';
+import { ParagraphFileSchema } from '@lib/shared/schemas.js';
+// Summary path temporarily shelved — see plan.
+// import { SummaryFileSchema } from '@lib/shared/schemas.js';
 import type { z } from 'zod';
 
 interface MetadataFile {
@@ -16,8 +18,8 @@ interface MetadataFile {
 
 export interface EpisodeArtifacts {
   metadata: MetadataFile;
-  transcript: z.infer<typeof TranscriptFileSchema> & { segments: NonNullable<z.infer<typeof TranscriptFileSchema>['segments']> };
-  summary: z.infer<typeof SummaryFileSchema>;
+  paragraph: z.infer<typeof ParagraphFileSchema>;
+  // summary: z.infer<typeof SummaryFileSchema>;
 }
 
 export type DiscoveryResult =
@@ -26,8 +28,9 @@ export type DiscoveryResult =
 
 /**
  * Scan the outputs directory and return a result per metadata file. Episodes
- * missing a transcript, summary, or segments are returned as `{ ok: false }`
- * entries so the caller can report the skip with a reason.
+ * missing a transcript or its paragraph sidecar are returned as
+ * `{ ok: false }` entries so the caller can report the skip with a reason.
+ * The paragraph sidecar is the authoritative source of segments downstream.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
   const files = readdirSync(OUTPUTS_DIR);
@@ -44,7 +47,8 @@ export function discoverEpisodes(): DiscoveryResult[] {
 
     const transcriptFile = files.find((f) =>
       f.startsWith(`${prefix}.transcript__`)
-      && !f.includes('.summary__'),
+      && !f.includes('.summary__')
+      && !f.includes('.paragraph'),
     );
 
     if (transcriptFile === undefined) {
@@ -52,34 +56,40 @@ export function discoverEpisodes(): DiscoveryResult[] {
       continue;
     }
 
-    const summaryFile = files.find((f) =>
-      f.startsWith(transcriptFile.replace('.json', '.summary__')),
-    );
+    // Summary lookup temporarily shelved — see plan.
+    // const summaryFile = files.find((f) =>
+    //   f.startsWith(transcriptFile.replace('.json', '.summary__')),
+    // );
+    //
+    // if (summaryFile === undefined) {
+    //   results.push({ ok: false, episodeNumber: ep, reason: 'No summary found' });
+    //   continue;
+    // }
 
-    if (summaryFile === undefined) {
-      results.push({ ok: false, episodeNumber: ep, reason: 'No summary found' });
+    const paragraphFileName = transcriptFile.replace('.json', '.paragraph.json');
+    if (!files.includes(paragraphFileName)) {
+      results.push({ ok: false, episodeNumber: ep, reason: 'No paragraph sidecar found' });
       continue;
     }
 
-    const transcript = TranscriptFileSchema.parse(
-      JSON.parse(readFileSync(join(OUTPUTS_DIR, transcriptFile), 'utf8')),
+    const paragraph = ParagraphFileSchema.parse(
+      JSON.parse(readFileSync(join(OUTPUTS_DIR, paragraphFileName), 'utf8')),
     );
 
-    if (transcript.segments === undefined || transcript.segments.length === 0) {
-      results.push({ ok: false, episodeNumber: ep, reason: 'No segments in transcript' });
+    if (paragraph.segments.length === 0) {
+      results.push({ ok: false, episodeNumber: ep, reason: 'No segments in paragraph sidecar' });
       continue;
     }
 
-    const summary = SummaryFileSchema.parse(
-      JSON.parse(readFileSync(join(OUTPUTS_DIR, summaryFile), 'utf8')),
-    );
+    // const summary = SummaryFileSchema.parse(
+    //   JSON.parse(readFileSync(join(OUTPUTS_DIR, summaryFile), 'utf8')),
+    // );
 
     results.push({
       ok: true,
       artifacts: {
         metadata,
-        transcript: { ...transcript, segments: transcript.segments },
-        summary,
+        paragraph,
       },
     });
   }

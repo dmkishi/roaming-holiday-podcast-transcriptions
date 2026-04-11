@@ -52,12 +52,14 @@ eleventyComputed:
   <div class="episode--content wrapper">
     <p class="episode--content-warning">All content below have been AI generated.</p>
 
-    <section class="episode--summary">
-      <h2>Summary</h2>
-      <p>{{ episode.summary }}</p>
-    </section>
+    {%- if episode.summary %}
+      <section class="episode--summary">
+        <h2>Summary</h2>
+        <p>{{ episode.summary }}</p>
+      </section>
+    {%- endif %}
 
-    {%- if episode.sections.length > 0 %}
+    {%- if episode.sections and episode.sections.length > 0 %}
       <nav>
         <h2>Table of Contents</h2>
         <ol class="episode--toc">
@@ -75,20 +77,26 @@ eleventyComputed:
     <hr>
 
     <section class="episode--transcript" data-transcript>
-      {%- for segment in episode.segments %}
-        {%- for section in episode.sections %}
-          {%- if section.segmentIndex == segment.id %}
-            <h2 class="section-title" id="section-{{ section.title | slug }}">
-              {{- loop.index }}. {{ section.title -}}
-            </h2>
-          {%- endif %}
-        {%- endfor %}
-        {%- if segment.timelineMarker %}
-          <time class="timeline-marker" data-time="{{ segment.start }}">
-            {{- segment.start | formatRoundedTimecode -}}
-          </time>
-        {%- endif %}
-        <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">{{ segment.text }}</span>
+      {%- for paragraph in episode.paragraphs %}
+        <p>
+          {%- for segment in paragraph %}
+            {%- if episode.sections %}
+              {%- for section in episode.sections %}
+                {%- if section.segmentIndex == segment.id %}
+                  <h2 class="section-title" id="section-{{ section.title | slug }}">
+                    {{- loop.index }}. {{ section.title -}}
+                  </h2>
+                {%- endif %}
+              {%- endfor %}
+            {%- endif %}
+            {%- if segment.timelineMarker %}
+              <time class="timeline-marker" data-time="{{ segment.start }}">
+                {{- segment.start | formatRoundedTimecode -}}
+              </time>
+            {%- endif %}
+            <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">{{ segment.text }}</span>
+          {%- endfor %}
+        </p>
       {%- endfor %}
     </section>
   </div>

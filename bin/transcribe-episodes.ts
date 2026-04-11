@@ -7,6 +7,7 @@ import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript,
 } from '@lib/transcribe-episodes/transcript.js';
+import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
 import { toRelative } from '@lib/transcribe-episodes/paths.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
@@ -149,6 +150,30 @@ for (const toTranscribe of toTranscribes) {
 if (transcripts.length === 0) {
   printAndLog.error('No transcripts generated.');
   process.exit(1);
+}
+print.emptyLine();
+
+// =============================================================================
+// Build paragraphs
+// =============================================================================
+print.info('Building paragraphs...');
+for (const transcript of transcripts) {
+  const res = writeParagraphs(transcript, opts.transcribeModel, opts.forceParagraph);
+  if (!res.ok) {
+    printAndLog.warn(
+      `#${transcript.episodeNumber}: Failed${res.error ? ` - ${res.error}` : ''}`,
+    );
+    continue;
+  }
+  if (res.status === 'alreadyExists') {
+    printAndLog.warn(`#${res.episodeNumber}: Skipping - paragraph file already exists`);
+  } else {
+    printAndLog.info([
+      `#${transcript.episodeNumber}: Saved "${toRelative(res.path)}"`,
+      `  Paragraphs: ${formatNumber(res.stats.paragraphs)}`,
+      `  Segments:   ${formatNumber(res.stats.segments)}`,
+    ]);
+  }
 }
 print.emptyLine();
 
