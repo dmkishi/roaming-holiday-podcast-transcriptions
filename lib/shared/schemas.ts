@@ -12,6 +12,11 @@ const SegmentSchema = z.object({
   text: z.string(),
 });
 
+export const VadOutputSchema = z.object({
+  duration: z.number(),
+  speech: z.array(z.object({ start: z.number(), end: z.number() })),
+});
+
 export const TranscriptFileSchema = z.object({
   text: z.string().default(''),
   segments: z.array(SegmentSchema).optional(),

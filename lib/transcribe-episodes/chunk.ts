@@ -1,0 +1,292 @@
+import { execFile, spawn } from 'node:child_process';
+import { basename, join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { promisify } from 'node:util';
+import { TranscriptFileSchema, VadOutputSchema } from '@lib/shared/schemas.js';
+import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/config/paths.js';
+
+export interface Gap {
+  start: number;
+  end: number;
+  duration: number;
+}
+
+export interface ChunkSpec {
+  index: number;
+  startSeconds: number;
+  endSeconds: number;
+  path: string;
+}
+
+export interface CutPointOptions {
+  targetChunkMinutes: number;
+  initialWindowMinutes: number;
+  maxWindowMinutes: number;
+}
+
+export interface MergedTranscript {
+  text: string;
+  segments: { id: number; start: number; end: number; text: string }[];
+}
+
+const execFileAsync = promisify(execFile);
+
+export const CHUNK_TARGET_MINUTES = 15;
+export const CHUNK_INITIAL_WINDOW_MINUTES = 2;
+export const CHUNK_MAX_WINDOW_MINUTES = 6;
+export const MIN_GAP_SECONDS = .4;
+
+// ---------------------------------------------------------------------------
+// Pure functions
+// ---------------------------------------------------------------------------
+/**
+ * Given speech intervals and total duration, return non-speech gaps of at
+ * least `minGapSeconds`.
+ */
+export function gapsFromSpeech(
+  speech: readonly { start: number; end: number }[],
+  totalDuration: number,
+  minGapSeconds: number,
+): Gap[] {
+  const gaps: Gap[] = [];
+
+  if (speech.length > 0 && speech[0]!.start > 0) {
+    const duration = speech[0]!.start;
+    if (duration >= minGapSeconds) {
+      gaps.push({ start: 0, end: speech[0]!.start, duration });
+    }
+  }
+
+  for (let i = 0; i < speech.length - 1; i++) {
+    const gapStart = speech[i]!.end;
+    const gapEnd = speech[i + 1]!.start;
+    const duration = gapEnd - gapStart;
+    if (duration >= minGapSeconds) {
+      gaps.push({ start: gapStart, end: gapEnd, duration });
+    }
+  }
+
+  if (speech.length > 0 && speech.at(-1)!.end < totalDuration) {
+    const gapStart = speech.at(-1)!.end;
+    const duration = totalDuration - gapStart;
+    if (duration >= minGapSeconds) {
+      gaps.push({ start: gapStart, end: totalDuration, duration });
+    }
+  }
+
+  if (speech.length === 0 && totalDuration > 0) {
+    gaps.push({ start: 0, end: totalDuration, duration: totalDuration });
+  }
+
+  return gaps;
+}
+
+/**
+ * Choose cut points for chunking. Always includes 0 and totalDuration.
+ *
+ * For each target boundary, picks the midpoint of the longest gap within
+ * a search window that widens incrementally. Falls back to a hard cut at
+ * the exact target time if no gap is found.
+ */
+export function chooseCutPoints(
+  gaps: readonly Gap[],
+  totalDuration: number,
+  opts: CutPointOptions,
+): number[] {
+  const targetChunkSeconds = opts.targetChunkMinutes * 60;
+
+  if (totalDuration <= targetChunkSeconds) {
+    return [0, totalDuration];
+  }
+
+  const cuts: number[] = [0];
+  let target = targetChunkSeconds;
+
+  while (target < totalDuration) {
+    const bestGap = findBestGap(gaps, target, opts);
+    const cutPoint = bestGap ? (bestGap.start + bestGap.end) / 2 : target;
+
+    if (totalDuration - cutPoint > targetChunkSeconds * 0.1) {
+      cuts.push(cutPoint);
+    }
+
+    target = cutPoint + targetChunkSeconds;
+  }
+
+  cuts.push(totalDuration);
+  return cuts;
+}
+
+/**
+ * Find the best gap near a target time within a given window range.
+ * Prefers the longest gap; ties broken by proximity to target.
+ */
+function findBestGap(
+  gaps: readonly Gap[],
+  target: number,
+  opts: CutPointOptions,
+): Gap | undefined {
+  const step = opts.initialWindowMinutes * 60;
+  const max = opts.maxWindowMinutes * 60;
+  for (let window = step; window <= max; window += step) {
+    const lo = target - window;
+    const hi = target + window;
+    const candidates = gaps.filter((g) => g.end > lo && g.start < hi);
+
+    if (candidates.length > 0) {
+      return candidates.reduce((a, b) => {
+        if (b.duration !== a.duration) return b.duration > a.duration ? b : a;
+        const distA = Math.abs((a.start + a.end) / 2 - target);
+        const distB = Math.abs((b.start + b.end) / 2 - target);
+        return distB < distA ? b : a;
+      });
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Merge per-chunk Whisper JSON outputs into a single transcript. Offsets
+ * every segment's start/end by the chunk's position in the original audio
+ * and reassigns sequential ids.
+ */
+export function mergeChunkTranscripts(
+  chunks: readonly { startSeconds: number; json: unknown }[],
+): MergedTranscript {
+  const segments: MergedTranscript['segments'] = [];
+  const texts: string[] = [];
+
+  for (const chunk of chunks) {
+    const parsed = TranscriptFileSchema.parse(chunk.json);
+    if (parsed.text) {
+      texts.push(parsed.text.trim());
+    }
+    if (parsed.segments) {
+      for (const seg of parsed.segments) {
+        segments.push({
+          id: segments.length,
+          start: seg.start + chunk.startSeconds,
+          end: seg.end + chunk.startSeconds,
+          text: seg.text,
+        });
+      }
+    }
+  }
+
+  return { text: texts.join(' '), segments };
+}
+
+// -----------------------------------------------------------------------------
+// I/O helpers
+// -----------------------------------------------------------------------------
+/**
+ * Decode the source MP3 to 16 kHz mono s16le PCM at `/tmp/<base>.pcm`.
+ */
+export async function decodePcm(mp3Path: string): Promise<string> {
+  await checkFfmpegInstalled();
+  const pcmPath = join(TMP_DIR, `${tmpBase(mp3Path)}.pcm`);
+  await execFileAsync(FFMPEG, [
+    '-y', '-i', mp3Path,
+    '-ac', '1', '-ar', '16000', '-f', 's16le',
+    pcmPath,
+  ]);
+  return pcmPath;
+}
+
+/**
+ * Run Silero VAD on a PCM file and return total duration and speech intervals.
+ */
+export async function detectSpeechIntervals(
+  pcmPath: string,
+): Promise<{
+  duration: number;
+  speech: { start: number; end: number }[];
+}> {
+  const { stdout } = await execFileAsync(VENV_PYTHON, [VAD_SCRIPT, pcmPath]);
+  return VadOutputSchema.parse(JSON.parse(stdout));
+}
+
+/**
+ * Cut the source MP3 into chunks using ffmpeg stream copy (no re-encode).
+ */
+export async function splitMp3IntoChunks(
+  mp3Path: string,
+  cutPoints: readonly number[],
+): Promise<ChunkSpec[]> {
+  const base = tmpBase(mp3Path);
+  const chunks: ChunkSpec[] = [];
+
+  for (let i = 0; i < cutPoints.length - 1; i++) {
+    const startSeconds = cutPoints[i]!;
+    const endSeconds = cutPoints[i + 1]!;
+    const chunkPath = join(TMP_DIR, `${base}.chunk-${String(i).padStart(2, '0')}.mp3`);
+
+    await execFileAsync(FFMPEG, [
+      '-y',
+      '-ss', String(startSeconds),
+      '-to', String(endSeconds),
+      '-i', mp3Path,
+      '-c', 'copy',
+      chunkPath,
+    ]);
+
+    chunks.push({ index: i, startSeconds, endSeconds, path: chunkPath });
+  }
+
+  return chunks;
+}
+
+/**
+ * Run Whisper on a single chunk MP3.
+ */
+export async function whisperChunk(
+  chunkPath: string,
+  model: string,
+  prompt: string,
+  whisperBin: string,
+): Promise<{ jsonPath: string; exitCode: number | null }> {
+  const args = [
+    chunkPath,
+    '--model', model,
+    '--output_format', 'json',
+    '--output_dir', TMP_DIR,
+    '--language', 'en',
+    '--verbose', 'True',
+    '--initial_prompt', prompt,
+  ];
+
+  const exitCode = await new Promise<number | null>((resolve) => {
+    const proc = spawn(whisperBin, args, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    proc.on('close', (code) => { resolve(code); });
+  });
+
+  const jsonName = basename(chunkPath).replace(/\.[^.]+$/, '') + '.json';
+  return { jsonPath: join(TMP_DIR, jsonName), exitCode };
+}
+
+/**
+ * Read and parse a Whisper JSON output file.
+ */
+export function readWhisperJson(jsonPath: string): unknown {
+  return JSON.parse(readFileSync(jsonPath, 'utf8')) as unknown;
+}
+
+/**
+ * Verify that ffmpeg is available on PATH.
+ */
+async function checkFfmpegInstalled(): Promise<void> {
+  try {
+    await execFileAsync(FFMPEG, ['-version']);
+  } catch {
+    throw new Error(
+      'ffmpeg not found on PATH.\n' +
+      'Install it: brew install ffmpeg',
+    );
+  }
+}
+
+function tmpBase(mp3Path: string): string {
+  return basename(mp3Path).replace(/\.[^.]+$/, '');
+}

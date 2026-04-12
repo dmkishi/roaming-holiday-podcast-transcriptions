@@ -9,9 +9,13 @@ Install
 pnpm install
 
 # OpenAI Whisper is a Python package. (i) Create a Python venv (environment
-# manager) at `.venv` then (ii) pip install into it.
+# manager) at `.venv` then (ii) pip install into it. Silero VAD is used to
+# split long audio files into chunks before transcription.
 python3 -m venv .venv
-.venv/bin/pip install openai-whisper
+.venv/bin/pip install openai-whisper silero-vad
+
+# ffmpeg is required for audio decoding and chunking.
+brew install ffmpeg
 
 # Copy the example env file and add your OpenAI API key (for summarizing
 # transcripts).

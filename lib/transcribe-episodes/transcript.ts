@@ -1,14 +1,18 @@
-import { execFile, spawn } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFile } from 'node:child_process';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { promisify } from 'node:util';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
-import { TranscriptFileSchema } from '@lib/shared/schemas.js';
 import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/config/paths.js';
+import {
+  CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES, MIN_GAP_SECONDS,
+  decodePcm, detectSpeechIntervals, gapsFromSpeech, chooseCutPoints,
+  splitMp3IntoChunks, whisperChunk, readWhisperJson, mergeChunkTranscripts,
+} from '@lib/transcribe-episodes/chunk.js';
 
 export interface ToTranscribe {
   episodeNumber: number;
@@ -131,9 +135,9 @@ export async function makeToTranscribe(
 }
 
 /**
- * Runs PythonOpenAI Whisper on an episode with an initial prompt and saves the
- * transcript to disk. Returns transcript metadata on success but the transcript
- * content is not returned directly and must be re-read.
+ * Runs Whisper on an episode in ~15-minute chunks split on speech gaps
+ * detected by Silero VAD. Merges per-chunk outputs into a single
+ * transcript with absolute timestamps and saves it to disk.
  */
 export async function promptTranscript(
   toTranscribe: ToTranscribe,
@@ -145,60 +149,65 @@ export async function promptTranscript(
         `Whisper not found at ${VENV_WHISPER}\n` +
         'Set up the Python venv:\n' +
         '  python3 -m venv .venv\n' +
-        '  .venv/bin/pip install openai-whisper',
+        '  .venv/bin/pip install openai-whisper silero-vad',
       );
     }
 
-    const args = [
-      toTranscribe.mp3.path,
-      '--model', model,
-      '--output_format', 'json',
-      '--output_dir', TMP_DIR,
-      '--language', 'en',
-      '--verbose', 'True',
-      '--initial_prompt', toTranscribe.prompt.payload,
-    ];
+    // Decode MP3 to PCM and feed to Silero VAD to find speech intervals.
+    const pcmPath = await decodePcm(toTranscribe.mp3.path);
+    const { duration: totalDuration, speech: speechIntervals }
+      = await detectSpeechIntervals(pcmPath);
 
-    const startTime = performance.now();
-
-    const exitCode = await new Promise<number | null>((resolvePromise) => {
-      const proc = spawn(VENV_WHISPER, args, {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-      proc.on('close', (code) => { resolvePromise(code); });
+    // Find speech gaps and choose cut points.
+    const gaps = gapsFromSpeech(speechIntervals, totalDuration, MIN_GAP_SECONDS);
+    const cutPoints = chooseCutPoints(gaps, totalDuration, {
+      targetChunkMinutes: CHUNK_TARGET_MINUTES,
+      initialWindowMinutes: CHUNK_INITIAL_WINDOW_MINUTES,
+      maxWindowMinutes: CHUNK_MAX_WINDOW_MINUTES,
     });
+
+    // Whisper each chunk sequentially.
+    const startTime = performance.now();
+    const chunks = await splitMp3IntoChunks(toTranscribe.mp3.path, cutPoints);
+    const chunkResults: { startSeconds: number; json: unknown }[] = [];
+
+    for (const chunk of chunks) {
+      const { jsonPath, exitCode } = await whisperChunk(
+        chunk.path, model, toTranscribe.prompt.payload, VENV_WHISPER,
+      );
+
+      if (exitCode !== 0) {
+        return {
+          ok: false,
+          error: `Whisper exited with code ${exitCode} on chunk ${chunk.index}`,
+        };
+      }
+
+      if (!existsSync(jsonPath)) {
+        return {
+          ok: false,
+          error: `Whisper output not found at ${jsonPath} for chunk ${chunk.index}`,
+        };
+      }
+
+      chunkResults.push({
+        startSeconds: chunk.startSeconds,
+        json: readWhisperJson(jsonPath),
+      });
+    }
 
     const workDuration = fromSeconds((performance.now() - startTime) / 1000);
 
-    if (exitCode !== 0) {
-      return {
-        ok: false,
-        error: `Whisper exited with code ${exitCode}`,
-      };
+    // Merge all chunk transcripts with rebased timestamps.
+    const merged = mergeChunkTranscripts(chunkResults);
+
+    if (merged.text === '') {
+      return { ok: false, error: 'Whisper transcript is empty' };
     }
 
-    const whisperOutputName = basename(toTranscribe.mp3.path).replace(/\.[^.]+$/, '') + '.json';
-    const whisperOutputPath = join(TMP_DIR, whisperOutputName);
-
-    if (!existsSync(whisperOutputPath)) {
-      return {
-        ok: false,
-        error: `Whisper output not found at ${whisperOutputPath}`,
-      };
-    }
-
-    const json = readFileSync(whisperOutputPath, 'utf8');
-    const { text } = TranscriptFileSchema.parse(JSON.parse(json));
-
-    if (text === '') {
-      return {
-        ok: false,
-        error: 'Whisper transcript is empty',
-      };
-    }
-
-    const wordCount = text.split(/\s+/).filter(Boolean).length;
-    const characterCount = text.length;
+    const wordCount = merged.text.split(/\s+/).filter(Boolean).length;
+    const characterCount = merged.text.length;
+    const json = JSON.stringify(merged);
 
     mkdirSync(dirname(toTranscribe.path), { recursive: true });
     writeFileSync(toTranscribe.path, json);
