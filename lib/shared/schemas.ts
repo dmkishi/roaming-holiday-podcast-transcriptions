@@ -1,15 +1,15 @@
 import { z } from 'zod';
 
+export const MetadataFileSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+});
+
 const SegmentSchema = z.object({
   id: z.number(),
   start: z.number(),
   end: z.number(),
   text: z.string(),
-});
-
-export const MetadataFileSchema = z.object({
-  title: z.string(),
-  description: z.string(),
 });
 
 export const TranscriptFileSchema = z.object({
