@@ -1,8 +1,7 @@
 import { readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { handleize } from '@lib/shared/strings.js';
-import { formatEpisodeNumber } from '@lib/shared/paths.js';
-import { OUTPUTS_DIR, ROOT } from '@lib/config/paths.js';
+import { OUTPUTS_DIR, ROOT } from '@lib/shared/paths.js';
+import { formatEpisodeNumber, handleize } from '@lib/shared/strings.js';
 
 /**
  * Returns all artifact paths for a given episode/model combination.

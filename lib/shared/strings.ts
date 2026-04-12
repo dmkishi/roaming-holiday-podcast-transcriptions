@@ -12,6 +12,10 @@ export function formatNumber(n: number): string {
   return n.toLocaleString('en-US');
 }
 
+export function formatEpisodeNumber(episodeNumber: number): string {
+  return String(episodeNumber).padStart(3, '0');
+}
+
 export function handleize(str: string): string {
   return str
     .toLowerCase()

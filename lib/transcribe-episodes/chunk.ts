@@ -2,8 +2,8 @@ import { execFile, spawn } from 'node:child_process';
 import { basename, join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
+import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/shared/paths.js';
 import { TranscriptFileSchema, VadOutputSchema } from '@lib/shared/schemas.js';
-import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/config/paths.js';
 
 export interface Gap {
   start: number;

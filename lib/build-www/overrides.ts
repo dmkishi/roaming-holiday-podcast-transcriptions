@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse } from 'yaml';
 import { z } from 'zod';
-import { SITE_DIR } from '@lib/config/paths.js';
+import { SITE_DIR } from '@lib/shared/paths.js';
 
 const EpisodeOverrideSchema = z.object({
   location: z.string().optional(),

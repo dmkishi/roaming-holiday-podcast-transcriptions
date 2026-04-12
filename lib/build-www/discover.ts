@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { OUTPUTS_DIR } from '@lib/config/paths.js';
+import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 import { ParagraphFileSchema } from '@lib/shared/schemas.js';
 // Summary path temporarily shelved — see plan.
 // import { SummaryFileSchema } from '@lib/shared/schemas.js';

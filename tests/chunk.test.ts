@@ -7,9 +7,9 @@ import {
 } from '@lib/transcribe-episodes/chunk.js';
 
 const defaultOpts: CutPointOptions = {
-  targetChunkSeconds: 900,
-  initialWindow: 120,
-  maxWindow: 360,
+  targetChunkMinutes: 15,
+  initialWindowMinutes: 2,
+  maxWindowMinutes: 6,
 };
 
 // ---------------------------------------------------------------------------

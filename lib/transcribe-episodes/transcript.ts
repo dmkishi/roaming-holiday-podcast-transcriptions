@@ -7,7 +7,7 @@ import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
-import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/config/paths.js';
+import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
 import {
   CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES, MIN_GAP_SECONDS,
   decodePcm, detectSpeechIntervals, gapsFromSpeech, chooseCutPoints,

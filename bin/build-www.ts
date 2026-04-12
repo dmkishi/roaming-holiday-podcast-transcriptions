@@ -9,10 +9,9 @@ import { groupByParagraphBreaks } from '@lib/build-www/paragraphs.js';
 import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
-import { formatEpisodeNumber } from '@lib/shared/paths.js';
+import { ROOT, SITE_DATA_DIR, SITE_EPISODES_DIR } from '@lib/shared/paths.js';
 import { print, printAndLog } from '@lib/shared/print.js';
-import { pluralize, toPrettyJson } from '@lib/shared/strings.js';
-import { ROOT, SITE_DATA_DIR, SITE_EPISODES_DIR } from '@lib/config/paths.js';
+import { formatEpisodeNumber, pluralize, toPrettyJson } from '@lib/shared/strings.js';
 
 // =============================================================================
 // Discover episodes
