@@ -369,7 +369,7 @@ a {
   color: var(--color-black-light);
   user-select: none;
 
-  &:first-of-type {
+  .episode--transcript > p:first-child & {
     display: none;
   }
 }
