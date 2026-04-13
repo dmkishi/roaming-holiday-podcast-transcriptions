@@ -10,9 +10,7 @@ export const VadOutputSchema = z.object({
   speech: z.array(z.object({ start: z.number(), end: z.number() })),
 });
 
-export const VadFileSchema = z.object({
-  duration: z.number(),
-  speech: z.array(z.object({ start: z.number(), end: z.number() })),
+export const VadFileSchema = VadOutputSchema.extend({
   gaps: z.array(z.object({ start: z.number(), end: z.number(), duration: z.number() })),
 });
 
@@ -28,11 +26,7 @@ export const TranscriptFileSchema = z.object({
   segments: z.array(SegmentSchema).optional(),
 });
 
-const ParagraphSegmentSchema = z.object({
-  start: z.number(),
-  end: z.number(),
-  text: z.string(),
-});
+const ParagraphSegmentSchema = SegmentSchema.omit({ id: true });
 
 export const ParagraphFileSchema = z.object({
   segments: z.array(z.array(ParagraphSegmentSchema)),
