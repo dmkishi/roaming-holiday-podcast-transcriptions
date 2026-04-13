@@ -4,15 +4,17 @@ import { basename, dirname, join } from 'node:path';
 import { promisify } from 'node:util';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import {
-  CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
   chooseCutPoints, splitMp3IntoChunks, whisperChunk, mergeChunkTranscripts,
 } from '@lib/transcribe-episodes/chunk.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
-import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
 import { VadFileSchema } from '@lib/shared/schemas.js';
+import { WHISPER_PROMPT } from '@lib/config/llm.js';
+import {
+  CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
+} from '@lib/config/vad.js';
 
 export interface ToTranscribe {
   episodeNumber: number;

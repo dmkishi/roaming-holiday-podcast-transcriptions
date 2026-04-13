@@ -25,10 +25,6 @@ interface MergedTranscript {
 
 const execFileAsync = promisify(execFile);
 
-export const CHUNK_TARGET_MINUTES = 15;
-export const CHUNK_INITIAL_WINDOW_MINUTES = 2;
-export const CHUNK_MAX_WINDOW_MINUTES = 6;
-
 /**
  * Choose cut points for chunking. Always includes 0 and totalDuration.
  *

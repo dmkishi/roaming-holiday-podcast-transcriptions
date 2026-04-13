@@ -6,8 +6,7 @@ import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
 import { TranscriptFileSchema, ParagraphFileSchema, VadFileSchema } from '@lib/shared/schemas.js';
 import { toPrettyJson } from '@lib/shared/strings.js';
-
-const PARAGRAPH_GAP_SECONDS_VAD = 1.3;
+import { PARAGRAPH_GAP_SECONDS } from '@lib/config/vad.js';
 
 type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
 
@@ -146,7 +145,7 @@ export function writeParagraphs(
     }
 
     const vad = VadFileSchema.parse(JSON.parse(readFileSync(vadPath, 'utf8')));
-    const breaks = buildParagraphBreaks(segments, vad.gaps, PARAGRAPH_GAP_SECONDS_VAD);
+    const breaks = buildParagraphBreaks(segments, vad.gaps, PARAGRAPH_GAP_SECONDS);
     const simplifiedSegments = segments.map(({ start, end, text }) => ({ start, end, text }));
     const text = buildParagraphTexts(simplifiedSegments, breaks);
     const payload = ParagraphFileSchema.parse({ text, breaks, segments: simplifiedSegments });
