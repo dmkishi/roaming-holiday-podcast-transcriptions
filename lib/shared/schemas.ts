@@ -35,9 +35,7 @@ const ParagraphSegmentSchema = z.object({
 });
 
 export const ParagraphFileSchema = z.object({
-  text: z.array(z.string()),
-  breaks: z.array(z.number().int().nonnegative()),
-  segments: z.array(ParagraphSegmentSchema),
+  segments: z.array(z.array(ParagraphSegmentSchema)),
 });
 
 export const SummaryFileSchema = z.object({

@@ -71,7 +71,10 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
 }
 
 function fullText(artifacts: EpisodeArtifacts): string {
-  return artifacts.paragraph.text.join(' ');
+  return artifacts.paragraph.segments
+    .flat()
+    .map((s) => s.text.trim())
+    .join(' ');
 }
 
 function toEpisodeStat(item: RssItem): EpisodeStat {

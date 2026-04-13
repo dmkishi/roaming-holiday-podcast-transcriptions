@@ -5,7 +5,6 @@ import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover
 // import { matchSections } from '@lib/build-www/match-sections.js';
 import { downloadImage } from '@lib/build-www/images.js';
 import { loadOverrides } from '@lib/build-www/overrides.js';
-import { groupByParagraphBreaks } from '@lib/build-www/paragraphs.js';
 import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
@@ -59,8 +58,7 @@ for (const { metadata, paragraph } of artifacts) {
   //   ]);
   // }
 
-  const segments = addTimelineMarkers(paragraph.segments);
-  const paragraphs = groupByParagraphBreaks(segments, paragraph.breaks);
+  const paragraphs = addTimelineMarkers(paragraph.segments);
   const override = overrides.get(ep);
 
   const episode: SiteEpisode = {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buildParagraphBreaks, buildParagraphTexts } from '@lib/transcribe-episodes/paragraph.js';
+import { buildParagraphBreaks } from '@lib/transcribe-episodes/paragraph.js';
 
 interface TestSegment {
   id: number;
@@ -92,49 +92,3 @@ describe('buildParagraphBreaks', () => {
   });
 });
 
-describe('buildParagraphTexts', () => {
-  test('single paragraph joins all segments', () => {
-    const segments = [
-      { text: ' Hello world.' },
-      { text: ' How are you?' },
-    ];
-    expect(buildParagraphTexts(segments, [0])).toEqual([
-      'Hello world. How are you?',
-    ]);
-  });
-
-  test('two paragraphs partition the segments at the break', () => {
-    const segments = [
-      { text: ' First.' },
-      { text: ' Still first.' },
-      { text: ' Second.' },
-      { text: ' Also second.' },
-    ];
-    expect(buildParagraphTexts(segments, [0, 2])).toEqual([
-      'First. Still first.',
-      'Second. Also second.',
-    ]);
-  });
-
-  test('trims whitespace from each segment before joining', () => {
-    const segments = [
-      { text: '   Leading spaces.' },
-      { text: 'Trailing spaces.   ' },
-    ];
-    expect(buildParagraphTexts(segments, [0])).toEqual([
-      'Leading spaces. Trailing spaces.',
-    ]);
-  });
-
-  test('output length matches breaks length', () => {
-    const segments = [
-      { text: 'a' },
-      { text: 'b' },
-      { text: 'c' },
-      { text: 'd' },
-    ];
-    const result = buildParagraphTexts(segments, [0, 1, 3]);
-    expect(result).toHaveLength(3);
-    expect(result).toEqual(['a', 'b c', 'd']);
-  });
-});
