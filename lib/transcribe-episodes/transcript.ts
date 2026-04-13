@@ -49,7 +49,6 @@ export interface Transcript {
 export type TranscriptResponse = FailResponse | Transcript;
 
 export const PROMPT_TOKEN_LIMIT = 224;
-
 const execFileAsync = promisify(execFile);
 
 /**
