@@ -92,7 +92,7 @@ export async function makePrompt(title: string, description?: string): Promise<{
     description,
     WHISPER_PROMPT.names.join(', '),
     WHISPER_PROMPT.basicInfo,
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).join('. ').replace('..', '.');
 
   const tokenCount = await countTokens(prompt);
   const isOverLimit = tokenCount > PROMPT_TOKEN_LIMIT;
