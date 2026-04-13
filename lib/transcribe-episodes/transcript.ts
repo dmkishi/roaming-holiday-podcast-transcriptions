@@ -90,7 +90,7 @@ export async function makePrompt(title: string, description?: string): Promise<{
   const prompt = [
     title,
     description,
-    WHISPER_PROMPT.placeNames,
+    WHISPER_PROMPT.names.join(', '),
     WHISPER_PROMPT.basicInfo,
   ].filter(Boolean).join(' ');
 

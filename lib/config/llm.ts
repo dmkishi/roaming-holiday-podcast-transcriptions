@@ -7,9 +7,14 @@ export const DEFAULT_SUMMARY_MODEL = 'gpt-4.1';
  * Whisper to recognize and spell them correctly.
  */
 export const WHISPER_PROMPT = {
-  // List place names often mentioned in the podcast that may be or are misheard
-  // or misspelled by the model.
-  placeNames: '7-Eleven, Ediya Coffee, Moontan Trail, Tim Hortons.',
+  // List names (places, brands, etc.) often mentioned in the podcast that may
+  // be or are misheard or misspelled by the model.
+  names: [
+    '7-Eleven',
+    'Ediya Coffee',
+    'Moontan Trail',
+    'Tim Hortons',
+  ],
   basicInfo: '"Roaming Holiday" by Keith McNally of Fredericton, New Brunswick.',
 } as const;
 
