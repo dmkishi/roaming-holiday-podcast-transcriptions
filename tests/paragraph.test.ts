@@ -12,70 +12,83 @@ function seg(id: number, start: number, end: number, text: string): TestSegment 
   return { id, start, end, text };
 }
 
-describe('buildParagraphBreaks', () => {
-  test('single segment returns [0]', () => {
-    const segments = [seg(0, 0, 5, 'Hello world.')];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0]);
-  });
+function gap(start: number, end: number) {
+  return { start, end, duration: end - start };
+}
 
-  test('breaks when both gap and period conditions are met', () => {
+describe('buildParagraphBreaks', () => {
+  test('breaks when VAD gap falls between segments and segment ends with period', () => {
     const segments = [
       seg(0, 0, 5, 'First sentence.'),
-      seg(1, 8, 12, 'Second sentence.'),
+      seg(1, 7, 12, 'Second sentence.'),
     ];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0, 1]);
+    const gaps = [gap(5, 7)];
+    expect(buildParagraphBreaks(segments, gaps, 1)).toEqual([0, 1]);
   });
 
-  test('does not break on gap without period', () => {
+  test('does not break when segment lacks sentence-ending punctuation', () => {
     const segments = [
       seg(0, 0, 5, 'Unfinished thought'),
-      seg(1, 10, 15, 'continues here.'),
+      seg(1, 7, 12, 'continues here.'),
     ];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0]);
+    const gaps = [gap(5, 7)];
+    expect(buildParagraphBreaks(segments, gaps, 1)).toEqual([0]);
   });
 
-  test('does not break on period without sufficient gap', () => {
+  test('does not break when VAD gap is below threshold', () => {
     const segments = [
       seg(0, 0, 5, 'First sentence.'),
       seg(1, 5.5, 10, 'Second sentence.'),
     ];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0]);
+    const gaps = [gap(5, 5.5)];
+    expect(buildParagraphBreaks(segments, gaps, 1)).toEqual([0]);
   });
 
-  test('gap exactly at threshold triggers a break', () => {
+  test('breaks on question mark and exclamation mark', () => {
+    const segments = [
+      seg(0, 0, 5, 'Is this working?'),
+      seg(1, 7, 12, 'Yes it is!'),
+      seg(2, 14, 18, 'Great.'),
+    ];
+    const gaps = [gap(5, 7), gap(12, 14)];
+    expect(buildParagraphBreaks(segments, gaps, 1)).toEqual([0, 1, 2]);
+  });
+
+  test('multiple VAD gaps produce multiple breaks', () => {
     const segments = [
       seg(0, 0, 5, 'First.'),
-      seg(1, 7, 10, 'Second.'),
+      seg(1, 7, 12, 'Second.'),
+      seg(2, 14, 18, 'Third.'),
+      seg(3, 20, 25, 'Fourth.'),
     ];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0, 1]);
+    const gaps = [gap(5, 7), gap(12, 14), gap(18, 20)];
+    expect(buildParagraphBreaks(segments, gaps, 1)).toEqual([0, 1, 2, 3]);
   });
 
-  test('trailing whitespace does not prevent period detection', () => {
+  test('empty gaps returns [0]', () => {
     const segments = [
-      seg(0, 0, 5, 'First sentence.   '),
-      seg(1, 8, 12, 'Second.'),
+      seg(0, 0, 5, 'Only segment.'),
     ];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0, 1]);
+    expect(buildParagraphBreaks(segments, [], 1)).toEqual([0]);
   });
 
-  test('multiple breaks across a longer transcript', () => {
+  test('ignores VAD gap that falls before all segments or after all segments', () => {
     const segments = [
-      seg(0, 0, 5, 'Intro.'),
-      seg(1, 8, 12, 'Middle one.'),
-      seg(2, 13, 18, 'More middle.'),
-      seg(3, 21, 25, 'End.'),
+      seg(0, 5, 10, 'First.'),
+      seg(1, 12, 18, 'Second.'),
     ];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0, 1, 3]);
+    const gaps = [gap(0, 4), gap(19, 22)];
+    expect(buildParagraphBreaks(segments, gaps, 1)).toEqual([0]);
   });
 
-  test('gap tuning: smaller threshold produces more breaks', () => {
+  test('does not produce duplicate break indices', () => {
     const segments = [
       seg(0, 0, 5, 'First.'),
-      seg(1, 6.2, 10, 'Second.'),
-      seg(2, 13, 18, 'Third.'),
+      seg(1, 10, 15, 'Second.'),
     ];
-    expect(buildParagraphBreaks(segments, 2)).toEqual([0, 2]);
-    expect(buildParagraphBreaks(segments, 1)).toEqual([0, 1, 2]);
+    // Two gaps that both map to the same segment boundary
+    const gaps = [gap(5, 7), gap(7, 10)];
+    expect(buildParagraphBreaks(segments, gaps, 1)).toEqual([0, 1]);
   });
 });
 

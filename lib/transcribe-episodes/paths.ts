@@ -12,6 +12,7 @@ export function episodePaths(params: {
   summaryModel?: string;
 }): {
   metadata: string;
+  vad: string;
   transcript: string;
   paragraph: string;
   summary: string | undefined;
@@ -20,6 +21,7 @@ export function episodePaths(params: {
   const model = handleize(params.model);
   return {
     metadata: join(OUTPUTS_DIR, `${code}.metadata.json`),
+    vad: join(OUTPUTS_DIR, `${code}.vad.json`),
     transcript: join(OUTPUTS_DIR, `${code}.transcript__${model}.json`),
     paragraph: join(OUTPUTS_DIR, `${code}.transcript__${model}.paragraph.json`),
     // Unlikely to have surprising falsy values.

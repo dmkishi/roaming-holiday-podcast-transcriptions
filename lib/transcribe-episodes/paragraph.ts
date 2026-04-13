@@ -4,10 +4,10 @@ import { dirname } from 'node:path';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
-import { TranscriptFileSchema, ParagraphFileSchema } from '@lib/shared/schemas.js';
+import { TranscriptFileSchema, ParagraphFileSchema, VadFileSchema } from '@lib/shared/schemas.js';
 import { toPrettyJson } from '@lib/shared/strings.js';
 
-const PARAGRAPH_GAP_SECONDS = 1;
+const PARAGRAPH_GAP_SECONDS_VAD = 1.3;
 
 type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
 
@@ -33,30 +33,56 @@ export type Paragraphs =
 
 export type ParagraphsResponse = FailResponse | Paragraphs;
 
+function endsSentence(text: string): boolean {
+  const trimmed = text.trimEnd();
+  return trimmed.endsWith('.') || trimmed.endsWith('?') || trimmed.endsWith('!');
+}
+
 /**
- * Computes the indices at which paragraphs begin in the given segment array.
+ * Returns the index of the last segment whose `end` time is at or before
+ * `time`, using binary search. Returns -1 when no segment qualifies.
+ */
+function findSegmentBeforeTime(segments: Segment[], time: number): number {
+  let lo = 0;
+  let hi = segments.length - 1;
+  let result = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >>> 1;
+    if (segments[mid]!.end <= time) {
+      result = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return result;
+}
+
+/**
+ * Computes paragraph break indices using VAD-detected speech gaps.
  *
- * A paragraph break is inserted between segment N and segment N+1 when both:
- *   1. The gap between them is at least `gapSeconds`
- *   2. `segments[N].text` ends with a period
+ * For each VAD gap above `paragraphGapSeconds`, a binary search locates the
+ * Whisper segment that precedes the gap midpoint. A break is inserted after
+ * that segment when it ends with sentence-ending punctuation (`.`, `?`, `!`).
  *
- * The returned array always begins with `0` (the first paragraph begins at
- * the first segment). A single-paragraph transcript returns `[0]`. Caller
- * must ensure `segments` is non-empty.
+ * The returned array always begins with `0`. Caller must ensure `segments`
+ * is non-empty.
  */
 export function buildParagraphBreaks(
   segments: Segment[],
-  gapSeconds: number,
+  vadGaps: readonly { start: number; end: number; duration: number }[],
+  paragraphGapSeconds: number,
 ): number[] {
   const breaks: number[] = [0];
-  for (let i = 0; i < segments.length - 1; i++) {
-    const current = segments[i]!;
-    const next = segments[i + 1]!;
-    const gap = next.start - current.end;
-    const endsWithPeriod = current.text.trimEnd().endsWith('.');
-    if (gap >= gapSeconds && endsWithPeriod) {
-      breaks.push(i + 1);
-    }
+  for (const gap of vadGaps) {
+    if (gap.duration < paragraphGapSeconds) continue;
+    const midpoint = (gap.start + gap.end) / 2;
+    const segIndex = findSegmentBeforeTime(segments, midpoint);
+    if (segIndex < 0 || segIndex >= segments.length - 1) continue;
+    const breakIndex = segIndex + 1;
+    if (!endsSentence(segments[segIndex]!.text)) continue;
+    if (breaks.at(-1) === breakIndex) continue;
+    breaks.push(breakIndex);
   }
   return breaks;
 }
@@ -87,7 +113,7 @@ export function writeParagraphs(
   force: boolean,
 ): ParagraphsResponse {
   try {
-    const { paragraph: path } = episodePaths({
+    const { paragraph: path, vad: vadPath } = episodePaths({
       episodeNumber: transcript.episodeNumber,
       model: transcriptModel,
     });
@@ -112,7 +138,15 @@ export function writeParagraphs(
       };
     }
 
-    const breaks = buildParagraphBreaks(segments, PARAGRAPH_GAP_SECONDS);
+    if (!existsSync(vadPath)) {
+      return {
+        ok: false,
+        error: `VAD file not found: ${vadPath}`,
+      };
+    }
+
+    const vad = VadFileSchema.parse(JSON.parse(readFileSync(vadPath, 'utf8')));
+    const breaks = buildParagraphBreaks(segments, vad.gaps, PARAGRAPH_GAP_SECONDS_VAD);
     const simplifiedSegments = segments.map(({ start, end, text }) => ({ start, end, text }));
     const text = buildParagraphTexts(simplifiedSegments, breaks);
     const payload = ParagraphFileSchema.parse({ text, breaks, segments: simplifiedSegments });

@@ -13,6 +13,8 @@ import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
+import { VadFileSchema } from '@lib/shared/schemas.js';
+import { toPrettyJson } from '@lib/shared/strings.js';
 
 export interface ToTranscribe {
   episodeNumber: number;
@@ -152,13 +154,24 @@ export async function promptTranscript(
       );
     }
 
-    // Decode MP3 to PCM and feed to Silero VAD to find speech intervals.
+    // Decode MP3 to PCM, write to `/tmp`, and feed to Silero VAD to find speech
+    // intervals.
     const pcmPath = await decodePcm(toTranscribe.mp3.path);
     const { duration: totalDuration, speech: speechIntervals }
       = await detectSpeechIntervals(pcmPath);
 
     // Find speech gaps and choose cut points.
     const gaps = gapsFromSpeech(speechIntervals, totalDuration, MIN_GAP_SECONDS);
+
+    // Write VAD output for downstream paragraph building.
+    const { vad: vadPath } = episodePaths({ episodeNumber: toTranscribe.episodeNumber, model });
+    mkdirSync(dirname(vadPath), { recursive: true });
+    writeFileSync(vadPath, toPrettyJson(VadFileSchema.parse({
+      duration: totalDuration,
+      speech: speechIntervals,
+      gaps,
+    })));
+
     const cutPoints = chooseCutPoints(gaps, totalDuration, {
       targetChunkMinutes: CHUNK_TARGET_MINUTES,
       initialWindowMinutes: CHUNK_INITIAL_WINDOW_MINUTES,

@@ -6,6 +6,7 @@ describe('episodePaths', () => {
   test('produces correct filenames for a basic episode', () => {
     const paths = episodePaths({ episodeNumber: 123, model: 'base' });
     expect(basename(paths.metadata)).toBe('123.metadata.json');
+    expect(basename(paths.vad)).toBe('123.vad.json');
     expect(basename(paths.transcript)).toBe('123.transcript__base.json');
     expect(basename(paths.paragraph)).toBe('123.transcript__base.paragraph.json');
     expect(paths.summary).toBeUndefined();
@@ -39,9 +40,16 @@ describe('episodePaths', () => {
     expect(basename(paths.summary!)).toBe('042.transcript__base.summary__gpt-4o.json');
   });
 
+  test('vad path is model-independent', () => {
+    const a = episodePaths({ episodeNumber: 1, model: 'base' });
+    const b = episodePaths({ episodeNumber: 1, model: 'large-v3' });
+    expect(a.vad).toBe(b.vad);
+    expect(basename(a.vad)).toBe('001.vad.json');
+  });
+
   test('all paths share the same directory', () => {
     const paths = episodePaths({ episodeNumber: 1, model: 'base', summaryModel: 'gpt-4o' });
-    const dirs = [paths.metadata, paths.transcript, paths.paragraph, paths.summary!].map(
+    const dirs = [paths.metadata, paths.vad, paths.transcript, paths.paragraph, paths.summary!].map(
       (p) => p.replace(basename(p), ''),
     );
     expect(new Set(dirs).size).toBe(1);
