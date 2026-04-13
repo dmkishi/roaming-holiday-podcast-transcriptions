@@ -7,6 +7,7 @@ interface CliOptions {
   summaryModel: string;
   forceRss: boolean;
   forceDownload: boolean;
+  forceVad: boolean;
   forceTranscribe: boolean;
   forceParagraph: boolean;
   forceSummarize: boolean;
@@ -19,6 +20,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     'force-all': boolean;
     'force-rss': boolean;
     'force-download': boolean;
+    'force-vad': boolean;
     'force-transcribe': boolean;
     'force-paragraph': boolean;
     'force-summarize': boolean;
@@ -28,6 +30,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-all',
       'force-rss',
       'force-download',
+      'force-vad',
       'force-transcribe',
       'force-paragraph',
       'force-summarize',
@@ -38,6 +41,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-all': false,
       'force-rss': false,
       'force-download': false,
+      'force-vad': false,
       'force-transcribe': false,
       'force-paragraph': false,
       'force-summarize': false,
@@ -47,7 +51,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
   if (episodeNums.size === 0) {
     console.error(
-      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--force-all] [--force-rss] [--force-download] [--force-transcribe] [--force-paragraph] [--force-summarize]`,
+      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-transcribe] [--force-paragraph] [--force-summarize]`,
     );
     process.exit(1);
   }
@@ -59,6 +63,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     summaryModel: argv['summary-model'],
     forceRss: forceAll || argv['force-rss'],
     forceDownload: forceAll || argv['force-download'],
+    forceVad: forceAll || argv['force-vad'],
     forceTranscribe: forceAll || argv['force-transcribe'],
     forceParagraph: forceAll || argv['force-paragraph'],
     forceSummarize: forceAll || argv['force-summarize'],

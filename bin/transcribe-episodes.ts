@@ -3,6 +3,7 @@ import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/shared/rss.js';
 import { findEpisodes, saveMetadata } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
+import { runVad } from '@lib/transcribe-episodes/vad.js';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript,
@@ -121,6 +122,32 @@ for (const toTranscribe of toTranscribes) {
 
 if (toTranscribes.length === 0) {
   printAndLog.error('No MP3s could be downloaded to transcribe.');
+  process.exit(1);
+}
+print.emptyLine();
+
+// =============================================================================
+// Run VAD (find audio gaps)
+// =============================================================================
+print.info('Running VAD...');
+for (const toTranscribe of toTranscribes) {
+  const res = await runVad(
+    toTranscribe.episodeNumber,
+    toTranscribe.mp3.path,
+    opts.forceVad,
+  );
+  if (!res.ok) {
+    toTranscribes = toTranscribes.filter(t => t !== toTranscribe);
+    printAndLog.warn(`#${toTranscribe.episodeNumber}: Failed${res.error ? ` - ${res.error}` : ''}`);
+  } else if (res.status === 'alreadyExists') {
+    printAndLog.warn(`#${toTranscribe.episodeNumber}: Skipping - VAD file already exists`);
+  } else {
+    printAndLog.info(`#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`);
+  }
+}
+
+if (toTranscribes.length === 0) {
+  printAndLog.error('VAD failed for all episodes.');
   process.exit(1);
 }
 print.emptyLine();

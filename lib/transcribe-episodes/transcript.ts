@@ -1,12 +1,11 @@
 import { execFile } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { promisify } from 'node:util';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import {
-  CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES, MIN_GAP_SECONDS,
-  decodePcm, detectSpeechIntervals, gapsFromSpeech, chooseCutPoints,
-  splitMp3IntoChunks, whisperChunk, readWhisperJson, mergeChunkTranscripts,
+  CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
+  chooseCutPoints, splitMp3IntoChunks, whisperChunk, mergeChunkTranscripts,
 } from '@lib/transcribe-episodes/chunk.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
@@ -14,7 +13,6 @@ import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js'
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
 import { VadFileSchema } from '@lib/shared/schemas.js';
-import { toPrettyJson } from '@lib/shared/strings.js';
 
 export interface ToTranscribe {
   episodeNumber: number;
@@ -154,25 +152,14 @@ export async function promptTranscript(
       );
     }
 
-    // Decode MP3 to PCM, write to `/tmp`, and feed to Silero VAD to find speech
-    // intervals.
-    const pcmPath = await decodePcm(toTranscribe.mp3.path);
-    const { duration: totalDuration, speech: speechIntervals }
-      = await detectSpeechIntervals(pcmPath);
-
-    // Find speech gaps and choose cut points.
-    const gaps = gapsFromSpeech(speechIntervals, totalDuration, MIN_GAP_SECONDS);
-
-    // Write VAD output for downstream paragraph building.
+    // Read pre-computed VAD file for chunk splitting.
     const { vad: vadPath } = episodePaths({ episodeNumber: toTranscribe.episodeNumber, model });
-    mkdirSync(dirname(vadPath), { recursive: true });
-    writeFileSync(vadPath, toPrettyJson(VadFileSchema.parse({
-      duration: totalDuration,
-      speech: speechIntervals,
-      gaps,
-    })));
+    if (!existsSync(vadPath)) {
+      return { ok: false, error: `VAD file not found: ${vadPath}` };
+    }
+    const vad = VadFileSchema.parse(JSON.parse(readFileSync(vadPath, 'utf8')));
 
-    const cutPoints = chooseCutPoints(gaps, totalDuration, {
+    const cutPoints = chooseCutPoints(vad.gaps, vad.duration, {
       targetChunkMinutes: CHUNK_TARGET_MINUTES,
       initialWindowMinutes: CHUNK_INITIAL_WINDOW_MINUTES,
       maxWindowMinutes: CHUNK_MAX_WINDOW_MINUTES,
@@ -204,7 +191,7 @@ export async function promptTranscript(
 
       chunkResults.push({
         startSeconds: chunk.startSeconds,
-        json: readWhisperJson(jsonPath),
+        json: JSON.parse(readFileSync(jsonPath, 'utf8')) as unknown,
       });
     }
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
+import { gapsFromSpeech } from '@lib/transcribe-episodes/vad.js';
 import {
-  gapsFromSpeech,
   chooseCutPoints,
   mergeChunkTranscripts,
   type CutPointOptions,

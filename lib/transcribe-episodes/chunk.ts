@@ -1,17 +1,11 @@
 import { execFile, spawn } from 'node:child_process';
 import { basename, join } from 'node:path';
-import { readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
-import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/shared/paths.js';
-import { TranscriptFileSchema, VadOutputSchema } from '@lib/shared/schemas.js';
+import type { Gap } from '@lib/transcribe-episodes/vad.js';
+import { TMP_DIR, FFMPEG } from '@lib/shared/paths.js';
+import { TranscriptFileSchema } from '@lib/shared/schemas.js';
 
-export interface Gap {
-  start: number;
-  end: number;
-  duration: number;
-}
-
-export interface ChunkSpec {
+interface ChunkSpec {
   index: number;
   startSeconds: number;
   endSeconds: number;
@@ -24,7 +18,7 @@ export interface CutPointOptions {
   maxWindowMinutes: number;
 }
 
-export interface MergedTranscript {
+interface MergedTranscript {
   text: string;
   segments: { id: number; start: number; end: number; text: string }[];
 }
@@ -34,52 +28,6 @@ const execFileAsync = promisify(execFile);
 export const CHUNK_TARGET_MINUTES = 15;
 export const CHUNK_INITIAL_WINDOW_MINUTES = 2;
 export const CHUNK_MAX_WINDOW_MINUTES = 6;
-export const MIN_GAP_SECONDS = .4;
-
-// ---------------------------------------------------------------------------
-// Pure functions
-// ---------------------------------------------------------------------------
-/**
- * Given speech intervals and total duration, return non-speech gaps of at
- * least `minGapSeconds`.
- */
-export function gapsFromSpeech(
-  speech: readonly { start: number; end: number }[],
-  totalDuration: number,
-  minGapSeconds: number,
-): Gap[] {
-  const gaps: Gap[] = [];
-
-  if (speech.length > 0 && speech[0]!.start > 0) {
-    const duration = speech[0]!.start;
-    if (duration >= minGapSeconds) {
-      gaps.push({ start: 0, end: speech[0]!.start, duration });
-    }
-  }
-
-  for (let i = 0; i < speech.length - 1; i++) {
-    const gapStart = speech[i]!.end;
-    const gapEnd = speech[i + 1]!.start;
-    const duration = gapEnd - gapStart;
-    if (duration >= minGapSeconds) {
-      gaps.push({ start: gapStart, end: gapEnd, duration });
-    }
-  }
-
-  if (speech.length > 0 && speech.at(-1)!.end < totalDuration) {
-    const gapStart = speech.at(-1)!.end;
-    const duration = totalDuration - gapStart;
-    if (duration >= minGapSeconds) {
-      gaps.push({ start: gapStart, end: totalDuration, duration });
-    }
-  }
-
-  if (speech.length === 0 && totalDuration > 0) {
-    gaps.push({ start: 0, end: totalDuration, duration: totalDuration });
-  }
-
-  return gaps;
-}
 
 /**
  * Choose cut points for chunking. Always includes 0 and totalDuration.
@@ -180,40 +128,13 @@ export function mergeChunkTranscripts(
 // I/O helpers
 // -----------------------------------------------------------------------------
 /**
- * Decode the source MP3 to 16 kHz mono s16le PCM at `/tmp/<base>.pcm`.
- */
-export async function decodePcm(mp3Path: string): Promise<string> {
-  await checkFfmpegInstalled();
-  const pcmPath = join(TMP_DIR, `${tmpBase(mp3Path)}.pcm`);
-  await execFileAsync(FFMPEG, [
-    '-y', '-i', mp3Path,
-    '-ac', '1', '-ar', '16000', '-f', 's16le',
-    pcmPath,
-  ]);
-  return pcmPath;
-}
-
-/**
- * Run Silero VAD on a PCM file and return total duration and speech intervals.
- */
-export async function detectSpeechIntervals(
-  pcmPath: string,
-): Promise<{
-  duration: number;
-  speech: { start: number; end: number }[];
-}> {
-  const { stdout } = await execFileAsync(VENV_PYTHON, [VAD_SCRIPT, pcmPath]);
-  return VadOutputSchema.parse(JSON.parse(stdout));
-}
-
-/**
  * Cut the source MP3 into chunks using ffmpeg stream copy (no re-encode).
  */
 export async function splitMp3IntoChunks(
   mp3Path: string,
   cutPoints: readonly number[],
 ): Promise<ChunkSpec[]> {
-  const base = tmpBase(mp3Path);
+  const base = basename(mp3Path).replace(/\.[^.]+$/, '');
   const chunks: ChunkSpec[] = [];
 
   for (let i = 0; i < cutPoints.length - 1; i++) {
@@ -264,29 +185,4 @@ export async function whisperChunk(
 
   const jsonName = basename(chunkPath).replace(/\.[^.]+$/, '') + '.json';
   return { jsonPath: join(TMP_DIR, jsonName), exitCode };
-}
-
-/**
- * Read and parse a Whisper JSON output file.
- */
-export function readWhisperJson(jsonPath: string): unknown {
-  return JSON.parse(readFileSync(jsonPath, 'utf8')) as unknown;
-}
-
-/**
- * Verify that ffmpeg is available on PATH.
- */
-async function checkFfmpegInstalled(): Promise<void> {
-  try {
-    await execFileAsync(FFMPEG, ['-version']);
-  } catch {
-    throw new Error(
-      'ffmpeg not found on PATH.\n' +
-      'Install it: brew install ffmpeg',
-    );
-  }
-}
-
-function tmpBase(mp3Path: string): string {
-  return basename(mp3Path).replace(/\.[^.]+$/, '');
 }
