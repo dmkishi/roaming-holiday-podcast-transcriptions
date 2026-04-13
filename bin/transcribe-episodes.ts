@@ -113,9 +113,9 @@ for (const toTranscribe of toTranscribes) {
     const episodeNumber = toTranscribe.episodeNumber;
     const action = mp3.status === 'downloaded' ? 'Downloaded' : 'Already downloaded';
     const path = toTranscribe.mp3.path;
-    const timestamp = toTranscribe.mp3.audioDuration.timestamp;
+    const duration = toTranscribe.mp3.audioDuration.timestamp;
     const sizeMB = mp3.sizeMB;
-    printAndLog.info(`#${episodeNumber}: ${action} "${path}" (${timestamp}, ${sizeMB} MB)`);
+    printAndLog.info(`#${episodeNumber}: ${action} "${path}" (${duration}, ${sizeMB} MB)`);
   }
 }
 
