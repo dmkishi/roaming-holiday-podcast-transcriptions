@@ -13,7 +13,7 @@ import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js
 import { toRelative } from '@lib/transcribe-episodes/paths.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { print, printAndLog } from '@lib/shared/print.js';
-import { RSS_FEED_URL } from '@lib/config/podcast.js';
+import { RSS_FEED_URL } from '@lib/config/rss.js';
 
 // =============================================================================
 // Parse CLI args

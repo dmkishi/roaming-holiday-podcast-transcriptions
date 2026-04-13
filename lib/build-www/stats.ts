@@ -2,7 +2,7 @@ import { parseDuration } from '@lib/shared/duration.js';
 import { getAllRssItems, type RssItem } from '@lib/shared/rss.js';
 import type { EpisodeArtifacts } from '@lib/build-www/discover.js';
 import type { PodcastStats, EpisodeStat, EpisodeWordStat } from '@lib/build-www/types.js';
-import { RSS_FEED_URL } from '@lib/config/podcast.js';
+import { RSS_FEED_URL } from '@lib/config/rss.js';
 
 /**
  * Fetch the RSS feed and combine it with built artifacts to produce aggregate
