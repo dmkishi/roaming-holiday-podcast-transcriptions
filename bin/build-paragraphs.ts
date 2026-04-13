@@ -1,6 +1,7 @@
 import { getParagraphsCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { findTranscripts, toRelative } from '@lib/transcribe-episodes/paths.js';
 import { writeParagraphs, type ParagraphInput } from '@lib/transcribe-episodes/paragraph.js';
+import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { print, printAndLog } from '@lib/shared/print.js';
 import { formatNumber, pluralize } from '@lib/shared/strings.js';
 
@@ -73,5 +74,28 @@ for (const { transcriptModel, ...input } of loaded) {
 
 if (generatedCount === 0) {
   printAndLog.warn('No paragraph files generated.');
+}
+print.emptyLine();
+
+// =============================================================================
+// Group paragraphs
+// =============================================================================
+print.info('Grouping paragraphs...');
+for (const { transcriptModel, ...input } of loaded) {
+  const res = writeParagraphGroups(input, transcriptModel, opts.force);
+  if (!res.ok) {
+    printAndLog.warn(
+      `#${input.episodeNumber}: Failed${res.error ? ` - ${res.error}` : ''}`,
+    );
+    continue;
+  }
+  if (res.status === 'alreadyExists') {
+    printAndLog.warn(`#${res.episodeNumber}: Skipping - paragraphGroup file already exists`);
+  } else {
+    printAndLog.info([
+      `#${input.episodeNumber}: Saved "${toRelative(res.path)}"`,
+      `  Groups:     ${formatNumber(res.stats.groups)}`,
+    ]);
+  }
 }
 print.emptyLine();

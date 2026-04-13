@@ -10,6 +10,7 @@ interface CliOptions {
   forceVad: boolean;
   forceTranscribe: boolean;
   forceParagraph: boolean;
+  forceParagraphGroup: boolean;
   forceSummarize: boolean;
 }
 
@@ -23,6 +24,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     'force-vad': boolean;
     'force-transcribe': boolean;
     'force-paragraph': boolean;
+    'force-paragraph-group': boolean;
     'force-summarize': boolean;
   }>(args.slice(2), {
     string: ['model', 'summary-model'],
@@ -33,6 +35,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-vad',
       'force-transcribe',
       'force-paragraph',
+      'force-paragraph-group',
       'force-summarize',
     ],
     default: {
@@ -44,6 +47,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-vad': false,
       'force-transcribe': false,
       'force-paragraph': false,
+      'force-paragraph-group': false,
       'force-summarize': false,
     },
   });
@@ -51,7 +55,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
   if (episodeNums.size === 0) {
     console.error(
-      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-transcribe] [--force-paragraph] [--force-summarize]`,
+      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-transcribe] [--force-paragraph] [--force-paragraph-group] [--force-summarize]`,
     );
     process.exit(1);
   }
@@ -59,7 +63,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   // Forcing a stage cascades to every downstream stage that consumes its
   // output, so a single flag regenerates the whole dependent tail instead of
   // leaving stale cached artifacts. Pipeline:
-  //   rss → download → vad → transcribe → {paragraph, summarize}
+  //   rss → download → vad → transcribe → {paragraph → paragraphGroup, summarize}
   // `force-rss` is intentionally isolated: refetching the RSS only refreshes
   // metadata and does not invalidate downloaded MP3s.
   const forceAll = argv['force-all'];
@@ -68,6 +72,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const forceVad = forceDownload || argv['force-vad'];
   const forceTranscribe = forceVad || argv['force-transcribe'];
   const forceParagraph = forceTranscribe || argv['force-paragraph'];
+  const forceParagraphGroup = forceParagraph || argv['force-paragraph-group'];
   const forceSummarize = forceTranscribe || argv['force-summarize'];
   return {
     episodeNums,
@@ -78,6 +83,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     forceVad,
     forceTranscribe,
     forceParagraph,
+    forceParagraphGroup,
     forceSummarize,
   };
 }

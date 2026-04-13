@@ -32,6 +32,10 @@ export const ParagraphFileSchema = z.object({
   segments: z.array(z.array(ParagraphSegmentSchema)),
 });
 
+export const ParagraphGroupFileSchema = z.object({
+  groupStarts: z.array(z.number().int().nonnegative()),
+});
+
 export const SummaryFileSchema = z.object({
   summary: z.string(),
   sections: z.array(z.object({ title: z.string(), sentences: z.string() })),

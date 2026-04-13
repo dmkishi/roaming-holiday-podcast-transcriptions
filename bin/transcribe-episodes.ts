@@ -9,6 +9,7 @@ import {
   type ToTranscribe, type Transcript,
 } from '@lib/transcribe-episodes/transcript.js';
 import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
+import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
 import { toRelative } from '@lib/transcribe-episodes/paths.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
@@ -199,6 +200,29 @@ for (const transcript of transcripts) {
       `#${transcript.episodeNumber}: Saved "${toRelative(res.path)}"`,
       `  Paragraphs: ${formatNumber(res.stats.paragraphs)}`,
       `  Segments:   ${formatNumber(res.stats.segments)}`,
+    ]);
+  }
+}
+print.emptyLine();
+
+// =============================================================================
+// Group paragraphs
+// =============================================================================
+print.info('Grouping paragraphs...');
+for (const transcript of transcripts) {
+  const res = writeParagraphGroups(transcript, opts.transcribeModel, opts.forceParagraphGroup);
+  if (!res.ok) {
+    printAndLog.warn(
+      `#${transcript.episodeNumber}: Failed${res.error ? ` - ${res.error}` : ''}`,
+    );
+    continue;
+  }
+  if (res.status === 'alreadyExists') {
+    printAndLog.warn(`#${res.episodeNumber}: Skipping - paragraphGroup file already exists`);
+  } else {
+    printAndLog.info([
+      `#${transcript.episodeNumber}: Saved "${toRelative(res.path)}"`,
+      `  Groups:     ${formatNumber(res.stats.groups)}`,
     ]);
   }
 }

@@ -22,6 +22,7 @@ export interface SiteEpisode {
   mp3Url: string;
   imagePath: string;
   paragraphs: TranscriptSegment[][];
+  groupStarts: number[];
   // Summary-derived fields are temporarily shelved — see plan.
   // sections: ResolvedSection[];
   // summary: string;

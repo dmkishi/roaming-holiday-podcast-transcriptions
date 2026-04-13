@@ -15,6 +15,7 @@ export function episodePaths(params: {
   vad: string;
   transcript: string;
   paragraph: string;
+  paragraphGroup: string;
   summary: string | undefined;
 } {
   const code = formatEpisodeNumber(params.episodeNumber);
@@ -24,6 +25,7 @@ export function episodePaths(params: {
     vad: join(OUTPUTS_DIR, `${code}.vad.json`),
     transcript: join(OUTPUTS_DIR, `${code}.transcript__${model}.json`),
     paragraph: join(OUTPUTS_DIR, `${code}.transcript__${model}.paragraph.json`),
+    paragraphGroup: join(OUTPUTS_DIR, `${code}.transcript__${model}.paragraphGroup.json`),
     // Unlikely to have surprising falsy values.
     // oxlint-disable-next-line typescript/strict-boolean-expressions
     summary: params.summaryModel

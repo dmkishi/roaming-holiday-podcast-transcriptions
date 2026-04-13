@@ -334,6 +334,11 @@ a {
   p {
     margin-top: 1.4em;
   }
+
+  hr {
+    width: 33%;
+    margin: 3rem auto;
+  }
 }
 
 .episode--transcript span[data-start] {

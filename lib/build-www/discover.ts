@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { OUTPUTS_DIR } from '@lib/shared/paths.js';
-import { ParagraphFileSchema } from '@lib/shared/schemas.js';
+import { ParagraphFileSchema, ParagraphGroupFileSchema } from '@lib/shared/schemas.js';
 // Summary path temporarily shelved — see plan.
 // import { SummaryFileSchema } from '@lib/shared/schemas.js';
 import type { z } from 'zod';
@@ -19,6 +19,7 @@ interface MetadataFile {
 export interface EpisodeArtifacts {
   metadata: MetadataFile;
   paragraph: z.infer<typeof ParagraphFileSchema>;
+  groupStarts: number[];
   // summary: z.infer<typeof SummaryFileSchema>;
 }
 
@@ -28,9 +29,10 @@ export type DiscoveryResult =
 
 /**
  * Scan the outputs directory and return a result per metadata file. Episodes
- * missing a transcript or its paragraph sidecar are returned as
- * `{ ok: false }` entries so the caller can report the skip with a reason.
- * The paragraph sidecar is the authoritative source of segments downstream.
+ * missing a transcript, paragraph sidecar, or paragraph group sidecar are
+ * returned as `{ ok: false }` entries so the caller can report the skip with
+ * a reason. The paragraph sidecar is the authoritative source of segments
+ * downstream.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
   const files = readdirSync(OUTPUTS_DIR);
@@ -81,6 +83,16 @@ export function discoverEpisodes(): DiscoveryResult[] {
       continue;
     }
 
+    const paragraphGroupFileName = transcriptFile.replace('.json', '.paragraphGroup.json');
+    if (!files.includes(paragraphGroupFileName)) {
+      results.push({ ok: false, episodeNumber: ep, reason: 'No paragraph group sidecar found' });
+      continue;
+    }
+
+    const { groupStarts } = ParagraphGroupFileSchema.parse(
+      JSON.parse(readFileSync(join(OUTPUTS_DIR, paragraphGroupFileName), 'utf8')),
+    );
+
     // const summary = SummaryFileSchema.parse(
     //   JSON.parse(readFileSync(join(OUTPUTS_DIR, summaryFile), 'utf8')),
     // );
@@ -90,6 +102,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
       artifacts: {
         metadata,
         paragraph,
+        groupStarts,
       },
     });
   }
