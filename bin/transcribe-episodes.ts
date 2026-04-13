@@ -3,7 +3,7 @@ import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/shared/rss.js';
 import { findEpisodes, saveMetadata } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
-import { runVad } from '@lib/transcribe-episodes/vad.js';
+import { runVad } from '@lib/transcribe-episodes/audioVad.js';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript,

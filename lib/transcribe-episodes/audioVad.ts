@@ -7,7 +7,7 @@ import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/shared/paths.js';
 import { VadFileSchema, VadOutputSchema } from '@lib/shared/schemas.js';
 import { toPrettyJson } from '@lib/shared/strings.js';
-import { MIN_GAP_SECONDS } from '@lib/config/vad.js';
+import { MIN_GAP_SECONDS } from '@lib/config/audio.js';
 
 export interface Gap {
   start: number;

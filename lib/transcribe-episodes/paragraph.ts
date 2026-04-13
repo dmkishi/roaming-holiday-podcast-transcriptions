@@ -6,7 +6,7 @@ import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
 import { TranscriptFileSchema, ParagraphFileSchema, VadFileSchema } from '@lib/shared/schemas.js';
 import { toPrettyJson } from '@lib/shared/strings.js';
-import { PARAGRAPH_GAP_SECONDS } from '@lib/config/vad.js';
+import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 
 type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
 

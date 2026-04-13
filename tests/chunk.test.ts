@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { gapsFromSpeech } from '@lib/transcribe-episodes/vad.js';
+import { gapsFromSpeech } from '@lib/transcribe-episodes/audioVad.js';
 import {
   chooseCutPoints,
   mergeChunkTranscripts,
   type CutPointOptions,
-} from '@lib/transcribe-episodes/chunk.js';
+} from '@lib/transcribe-episodes/audioChunk.js';
 
 const defaultOpts: CutPointOptions = {
   targetChunkMinutes: 15,
