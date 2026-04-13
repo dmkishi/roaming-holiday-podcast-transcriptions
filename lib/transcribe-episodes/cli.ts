@@ -56,17 +56,29 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     process.exit(1);
   }
 
+  // Forcing a stage cascades to every downstream stage that consumes its
+  // output, so a single flag regenerates the whole dependent tail instead of
+  // leaving stale cached artifacts. Pipeline:
+  //   rss → download → vad → transcribe → {paragraph, summarize}
+  // `force-rss` is intentionally isolated: refetching the RSS only refreshes
+  // metadata and does not invalidate downloaded MP3s.
   const forceAll = argv['force-all'];
+  const forceRss = forceAll || argv['force-rss'];
+  const forceDownload = forceAll || argv['force-download'];
+  const forceVad = forceDownload || argv['force-vad'];
+  const forceTranscribe = forceVad || argv['force-transcribe'];
+  const forceParagraph = forceTranscribe || argv['force-paragraph'];
+  const forceSummarize = forceTranscribe || argv['force-summarize'];
   return {
     episodeNums,
     transcribeModel: argv.model,
     summaryModel: argv['summary-model'],
-    forceRss: forceAll || argv['force-rss'],
-    forceDownload: forceAll || argv['force-download'],
-    forceVad: forceAll || argv['force-vad'],
-    forceTranscribe: forceAll || argv['force-transcribe'],
-    forceParagraph: forceAll || argv['force-paragraph'],
-    forceSummarize: forceAll || argv['force-summarize'],
+    forceRss,
+    forceDownload,
+    forceVad,
+    forceTranscribe,
+    forceParagraph,
+    forceSummarize,
   };
 }
 
