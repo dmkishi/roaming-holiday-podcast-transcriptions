@@ -49,6 +49,7 @@
     "prefer-template": "off",
     "sort-imports": "off", // Disagree on sort order.
     "sort-keys": "off", // Disagree on sort order.
+    "unicorn/filename-case": "off", // Flags "node:child_process"
 
     /* Perf */
     "no-useless-call": "error",
