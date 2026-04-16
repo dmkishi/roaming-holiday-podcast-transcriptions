@@ -1,12 +1,12 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join } from 'node:path';
 import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
 import { downloadImage } from '@lib/build-www/images.js';
 import { loadOverrides } from '@lib/build-www/overrides.js';
 import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
-import { ROOT, SITE_DATA_DIR, SITE_EPISODES_DIR } from '@lib/shared/paths.js';
+import { SITE_DATA_DIR, SITE_EPISODES_DIR, toRelative } from '@lib/shared/paths.js';
 import { print, printAndLog } from '@lib/shared/print.js';
 import { formatEpisodeNumber, pluralize, toPrettyJson } from '@lib/shared/strings.js';
 
@@ -68,7 +68,7 @@ for (const { metadata, paragraph, groupStarts, summary } of artifacts) {
 
   const filepath = join(SITE_EPISODES_DIR, `${formatEpisodeNumber(ep)}.json`);
   writeFileSync(filepath, toPrettyJson(episode));
-  printAndLog.info(`#${ep}: Saved "${relative(ROOT, filepath)}"`);
+  printAndLog.info(`#${ep}: Saved "${toRelative(filepath)}"`);
   built++;
 }
 
@@ -84,7 +84,7 @@ try {
   const stats = await collectStats(artifacts);
   const statsPath = join(SITE_DATA_DIR, 'stats.json');
   writeFileSync(statsPath, toPrettyJson(stats));
-  printAndLog.info(`Saved "${relative(ROOT, statsPath)}"`);
+  printAndLog.info(`Saved "${toRelative(statsPath)}"`);
 } catch (error) {
   printAndLog.warn(`Stats collection failed: ${error instanceof Error ? error.message : String(error)}`);
 }

@@ -12,9 +12,10 @@ import {
 import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
-import { episodePaths, findTranscripts, toRelative } from '@lib/transcribe-episodes/paths.js';
+import { episodePaths, findTranscripts } from '@lib/transcribe-episodes/paths.js';
 import { MetadataFileSchema } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
+import { toRelative } from '@lib/shared/paths.js';
 import { print, printAndLog } from '@lib/shared/print.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
 

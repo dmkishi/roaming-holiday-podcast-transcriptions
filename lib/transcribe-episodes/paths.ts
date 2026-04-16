@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs';
-import { join, relative } from 'node:path';
-import { OUTPUTS_DIR, ROOT } from '@lib/shared/paths.js';
+import { join } from 'node:path';
+import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 import { formatEpisodeNumber, handleize } from '@lib/shared/strings.js';
 
 /**
@@ -70,8 +70,4 @@ export function findTranscripts(
     path: join(OUTPUTS_DIR, m[0]),
     model: m[1]!,
   }));
-}
-
-export function toRelative(absolutePath: string): string {
-  return relative(ROOT, absolutePath);
 }
