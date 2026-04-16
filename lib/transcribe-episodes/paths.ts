@@ -29,7 +29,7 @@ export function episodePaths(params: {
     // Unlikely to have surprising falsy values.
     // oxlint-disable-next-line typescript/strict-boolean-expressions
     summary: params.summaryModel
-      ? join(OUTPUTS_DIR, `${code}.transcript__${model}.summary__${handleize(params.summaryModel)}.json`)
+      ? join(OUTPUTS_DIR, `${code}.transcript__${model}.summary__${handleize(params.summaryModel)}.txt`)
       : undefined,
   };
 }

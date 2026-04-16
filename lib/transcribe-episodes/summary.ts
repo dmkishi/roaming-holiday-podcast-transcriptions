@@ -1,12 +1,10 @@
 import OpenAI from 'openai';
-import { zodResponseFormat } from 'openai/helpers/zod';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import { TranscriptFileSchema, SummaryFileSchema } from '@lib/shared/schemas.js';
+import { TranscriptFileSchema } from '@lib/shared/schemas.js';
 import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
-import { toPrettyJson } from '@lib/shared/strings.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
 export type SummaryInput = Pick<Transcript, 'episodeNumber' | 'path' | 'title' | 'description'>;
@@ -56,42 +54,34 @@ export async function promptSummary(
     }
 
     const userMessage = [
-      `"${transcript.title}"`,
-      '',
+      `Title: "${transcript.title}"`,
       `Description: ${transcript.description}`,
-      '',
-      'Transcript:',
-      text,
+      `Transcript: ${text}`,
     ].join('\n');
 
-    const response = await client.chat.completions.create({
+    const response = await client.responses.create({
       model: summaryModel,
-      messages: [
-        { role: 'system', content: SUMMARY_PROMPT },
-        { role: 'user', content: userMessage },
-      ],
-      response_format: zodResponseFormat(SummaryFileSchema, 'episode_summary'),
+      instructions: SUMMARY_PROMPT,
+      input: userMessage,
     });
 
-    const content = response.choices[0]?.message.content ?? '';
-    if (content === '') {
+    if (response.output_text === '') {
       return {
         ok: false,
         error: 'Empty response from OpenAI',
       };
     }
 
-    const parsed = SummaryFileSchema.parse(JSON.parse(content));
     mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, toPrettyJson(parsed));
+    writeFileSync(path, response.output_text);
 
     return {
       ok: true,
       episodeNumber: transcript.episodeNumber,
       path,
       stats: {
-        tokenInput: response.usage?.prompt_tokens ?? 0,
-        tokenOutput: response.usage?.completion_tokens ?? 0,
+        tokenInput: response.usage?.input_tokens ?? 0,
+        tokenOutput: response.usage?.output_tokens ?? 0,
       },
     };
   } catch (error) {

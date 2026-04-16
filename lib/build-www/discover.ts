@@ -2,8 +2,6 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 import { ParagraphFileSchema, ParagraphGroupFileSchema } from '@lib/shared/schemas.js';
-// Summary path temporarily shelved — see plan.
-// import { SummaryFileSchema } from '@lib/shared/schemas.js';
 import type { z } from 'zod';
 
 interface MetadataFile {
@@ -20,7 +18,7 @@ export interface EpisodeArtifacts {
   metadata: MetadataFile;
   paragraph: z.infer<typeof ParagraphFileSchema>;
   groupStarts: number[];
-  // summary: z.infer<typeof SummaryFileSchema>;
+  summary: string;
 }
 
 export type DiscoveryResult =
@@ -58,15 +56,14 @@ export function discoverEpisodes(): DiscoveryResult[] {
       continue;
     }
 
-    // Summary lookup temporarily shelved — see plan.
-    // const summaryFile = files.find((f) =>
-    //   f.startsWith(transcriptFile.replace('.json', '.summary__')),
-    // );
-    //
-    // if (summaryFile === undefined) {
-    //   results.push({ ok: false, episodeNumber: ep, reason: 'No summary found' });
-    //   continue;
-    // }
+    const summaryFile = files.find((f) =>
+      f.startsWith(transcriptFile.replace('.json', '.summary__')),
+    );
+
+    if (summaryFile === undefined) {
+      results.push({ ok: false, episodeNumber: ep, reason: 'No summary found' });
+      continue;
+    }
 
     const paragraphFileName = transcriptFile.replace('.json', '.paragraph.json');
     if (!files.includes(paragraphFileName)) {
@@ -93,16 +90,13 @@ export function discoverEpisodes(): DiscoveryResult[] {
       JSON.parse(readFileSync(join(OUTPUTS_DIR, paragraphGroupFileName), 'utf8')),
     );
 
-    // const summary = SummaryFileSchema.parse(
-    //   JSON.parse(readFileSync(join(OUTPUTS_DIR, summaryFile), 'utf8')),
-    // );
-
     results.push({
       ok: true,
       artifacts: {
         metadata,
         paragraph,
         groupStarts,
+        summary: readFileSync(join(OUTPUTS_DIR, summaryFile), 'utf8'),
       },
     });
   }

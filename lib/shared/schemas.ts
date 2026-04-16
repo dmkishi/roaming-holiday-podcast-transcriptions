@@ -35,7 +35,3 @@ export const ParagraphFileSchema = z.object({
 export const ParagraphGroupFileSchema = z.object({
   groupStarts: z.array(z.number().int().nonnegative()),
 });
-
-export const SummaryFileSchema = z.object({
-  summary: z.string(),
-});

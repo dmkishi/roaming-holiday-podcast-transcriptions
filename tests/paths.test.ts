@@ -32,12 +32,12 @@ describe('episodePaths', () => {
 
   test('includes summary path when summaryModel is provided', () => {
     const paths = episodePaths({ episodeNumber: 42, model: 'base', summaryModel: 'gpt-4o' });
-    expect(basename(paths.summary!)).toBe('042.transcript__base.summary__gpt-4o.json');
+    expect(basename(paths.summary!)).toBe('042.transcript__base.summary__gpt-4o.txt');
   });
 
   test('handleizes summary model name', () => {
     const paths = episodePaths({ episodeNumber: 42, model: 'base', summaryModel: 'gpt-4o' });
-    expect(basename(paths.summary!)).toBe('042.transcript__base.summary__gpt-4o.json');
+    expect(basename(paths.summary!)).toBe('042.transcript__base.summary__gpt-4o.txt');
   });
 
   test('vad path is model-independent', () => {
