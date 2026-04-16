@@ -12,50 +12,30 @@ type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[num
 
 export type ParagraphInput = Pick<Transcript, 'episodeNumber' | 'path'>;
 
-export type Paragraphs =
-  | {
-      ok: true;
-      status: 'generated';
-      episodeNumber: number;
-      path: string;
-      stats: {
-        paragraphs: number;
-        segments: number;
-      };
-    }
-  | {
-      ok: true;
-      status: 'alreadyExists';
-      episodeNumber: number;
-      path: string;
-    };
+export interface Paragraphs {
+  ok: true;
+  episodeNumber: number;
+  path: string;
+  stats: {
+    paragraphs: number;
+  };
+}
 
 export type ParagraphsResponse = FailResponse | Paragraphs;
 
 /**
  * Reads a transcript file, computes paragraph breaks, and writes a sidecar
- * `.paragraph.json` file alongside it. Skips when the sidecar already exists
- * unless `force` is true.
+ * `.paragraph.json` file alongside it. Always overwrites.
  */
 export function writeParagraphs(
   transcript: ParagraphInput,
   transcriptModel: string,
-  force: boolean,
 ): ParagraphsResponse {
   try {
     const { paragraph: path, vad: vadPath } = episodePaths({
       episodeNumber: transcript.episodeNumber,
       model: transcriptModel,
     });
-
-    if (!force && existsSync(path)) {
-      return {
-        ok: true,
-        status: 'alreadyExists',
-        episodeNumber: transcript.episodeNumber,
-        path,
-      };
-    }
 
     const { segments } = TranscriptFileSchema.parse(
       JSON.parse(readFileSync(transcript.path, 'utf8')),
@@ -89,12 +69,10 @@ export function writeParagraphs(
 
     return {
       ok: true,
-      status: 'generated',
       episodeNumber: transcript.episodeNumber,
       path,
       stats: {
         paragraphs: paragraphs.length,
-        segments: segments.length,
       },
     };
   } catch (error) {

@@ -13,34 +13,26 @@ import { PARAGRAPH_GROUP_GAP_SECONDS } from '@lib/config/audio.js';
 
 export type ParagraphGroupInput = Pick<Transcript, 'episodeNumber'>;
 
-export type ParagraphGroups =
-  | {
-      ok: true;
-      status: 'generated';
-      episodeNumber: number;
-      path: string;
-      stats: {
-        groups: number;
-      };
-    }
-  | {
-      ok: true;
-      status: 'alreadyExists';
-      episodeNumber: number;
-      path: string;
-    };
+export interface ParagraphGroups {
+  ok: true;
+  episodeNumber: number;
+  path: string;
+  stats: {
+    groups: number;
+  };
+}
 
 export type ParagraphGroupsResponse = FailResponse | ParagraphGroups;
 
 /**
  * Reads the paragraph and VAD sidecars and writes `*.paragraphGroup.json` which
  * lists paragraph indices where a new paragraph group starts according to the
- * intervening VAD silence is at least PARAGRAPH_GROUP_GAP_SECONDS.
+ * intervening VAD silence is at least PARAGRAPH_GROUP_GAP_SECONDS. Always
+ * overwrites.
  */
 export function writeParagraphGroups(
   transcript: ParagraphGroupInput,
   transcriptModel: string,
-  force: boolean,
 ): ParagraphGroupsResponse {
   try {
     const { paragraph: paragraphPath, paragraphGroup: path, vad: vadPath } =
@@ -48,15 +40,6 @@ export function writeParagraphGroups(
         episodeNumber: transcript.episodeNumber,
         model: transcriptModel,
       });
-
-    if (!force && existsSync(path)) {
-      return {
-        ok: true,
-        status: 'alreadyExists',
-        episodeNumber: transcript.episodeNumber,
-        path,
-      };
-    }
 
     if (!existsSync(paragraphPath)) {
       return { ok: false, error: `Paragraph file not found: ${paragraphPath}` };
@@ -80,7 +63,6 @@ export function writeParagraphGroups(
 
     return {
       ok: true,
-      status: 'generated',
       episodeNumber: transcript.episodeNumber,
       path,
       stats: {

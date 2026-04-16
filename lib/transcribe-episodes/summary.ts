@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
-import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { TranscriptFileSchema, SummaryFileSchema } from '@lib/shared/schemas.js';
@@ -11,23 +11,15 @@ import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
 export type SummaryInput = Pick<Transcript, 'episodeNumber' | 'path' | 'title' | 'description'>;
 
-export type Summary =
-  | {
-      ok: true;
-      status: 'generated';
-      episodeNumber: number;
-      path: string;
-      stats: {
-        tokenInput: number;
-        tokenOutput: number;
-      };
-    }
-  | {
-      ok: true;
-      status: 'alreadyExists';
-      episodeNumber: number;
-      path: string;
-    };
+export interface Summary {
+  ok: true;
+  episodeNumber: number;
+  path: string;
+  stats: {
+    tokenInput: number;
+    tokenOutput: number;
+  };
+}
 
 export type SummaryResponse = FailResponse | Summary;
 
@@ -37,7 +29,6 @@ export async function promptSummary(
   transcript: SummaryInput,
   summaryModel: string,
   transcriptModel: string,
-  force: boolean,
 ): Promise<SummaryResponse> {
   try {
     const { summary: path = '' } = episodePaths({
@@ -50,15 +41,6 @@ export async function promptSummary(
       return {
         ok: false,
         error: 'Could not derive summary path',
-      };
-    }
-
-    if (!force && existsSync(path)) {
-      return {
-        ok: true,
-        status: 'alreadyExists',
-        episodeNumber: transcript.episodeNumber,
-        path,
       };
     }
 
@@ -105,7 +87,6 @@ export async function promptSummary(
 
     return {
       ok: true,
-      status: 'generated',
       episodeNumber: transcript.episodeNumber,
       path,
       stats: {

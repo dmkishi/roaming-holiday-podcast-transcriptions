@@ -32,6 +32,7 @@
    */
   "rules": {
     /* Pedantic */
+    "max-lines": "off",
     "max-lines-per-function": "off",
 
     /* Style */
