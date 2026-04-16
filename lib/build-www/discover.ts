@@ -3,19 +3,10 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 import { ParagraphFileSchema, ParagraphGroupFileSchema } from '@lib/shared/schemas.js';
-
-interface MetadataFile {
-  episodeNumber: number;
-  title: string;
-  description: string;
-  pubDate: string;
-  duration: { seconds: number; timestamp: string; human: string };
-  imageUrl: string;
-  mp3Url: string;
-}
+import type { EpisodeFile } from '@lib/transcribe-episodes/episode.js';
 
 export interface EpisodeArtifacts {
-  metadata: MetadataFile;
+  metadata: EpisodeFile;
   paragraph: z.infer<typeof ParagraphFileSchema>;
   groupStarts: number[];
   summary: string;
@@ -39,7 +30,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
 
   for (const metaFile of metadataFiles) {
     // oxlint-disable-next-line typescript/no-unsafe-assignment
-    const metadata: MetadataFile = JSON.parse(
+    const metadata: EpisodeFile = JSON.parse(
       readFileSync(join(OUTPUTS_DIR, metaFile), 'utf8'),
     );
     const ep = metadata.episodeNumber;

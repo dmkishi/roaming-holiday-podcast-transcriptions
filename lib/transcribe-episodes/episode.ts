@@ -15,6 +15,8 @@ export interface Episode {
   mp3Url: string;
 }
 
+export type EpisodeFile = Omit<Episode, 'pubDate'> & { pubDate: string };
+
 export function findEpisodes(
   rssItems: RssItem[],
   episodeNumbers: Set<number>,
