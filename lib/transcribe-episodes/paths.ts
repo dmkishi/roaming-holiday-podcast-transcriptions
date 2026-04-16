@@ -6,27 +6,22 @@ import { formatEpisodeNumber } from '@lib/shared/strings.js';
 /**
  * Returns all artifact paths for a given episode.
  */
-export function episodePaths(params: {
-  episodeNumber: number;
-  includeSummary?: boolean;
-}): {
+export function episodePaths(episodeNumber: number): {
   metadata: string;
   vad: string;
   transcript: string;
   paragraph: string;
   paragraphGroup: string;
-  summary: string | undefined;
+  summary: string;
 } {
-  const code = formatEpisodeNumber(params.episodeNumber);
+  const code = formatEpisodeNumber(episodeNumber);
   return {
     metadata: join(OUTPUTS_DIR, `${code}.metadata.json`),
     vad: join(OUTPUTS_DIR, `${code}.vad.json`),
     transcript: join(OUTPUTS_DIR, `${code}.transcript.json`),
     paragraph: join(OUTPUTS_DIR, `${code}.transcript.paragraph.json`),
     paragraphGroup: join(OUTPUTS_DIR, `${code}.transcript.paragraphGroup.json`),
-    summary: params.includeSummary === true
-      ? join(OUTPUTS_DIR, `${code}.transcript.summary.txt`)
-      : undefined,
+    summary: join(OUTPUTS_DIR, `${code}.transcript.summary.txt`),
   };
 }
 

@@ -28,17 +28,7 @@ export async function promptSummary(
   summaryModel: string,
 ): Promise<SummaryResponse> {
   try {
-    const { summary: path = '' } = episodePaths({
-      episodeNumber: transcript.episodeNumber,
-      includeSummary: true,
-    });
-
-    if (path === '') {
-      return {
-        ok: false,
-        error: 'Could not derive summary path',
-      };
-    }
+    const { summary: path } = episodePaths(transcript.episodeNumber);
 
     const { text } = TranscriptFileSchema.parse(
       JSON.parse(readFileSync(transcript.path, 'utf8')),

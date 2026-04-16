@@ -114,7 +114,7 @@ export async function makeToTranscribe(
   }
 
   const prompt = await makePrompt(episode.title, episode.description);
-  const { transcript: path } = episodePaths({ episodeNumber: episode.episodeNumber });
+  const { transcript: path } = episodePaths(episode.episodeNumber);
 
   return {
     episodeNumber: episode.episodeNumber,
@@ -154,7 +154,7 @@ export async function promptTranscript(
     }
 
     // Read pre-computed VAD file for chunk splitting.
-    const { vad: vadPath } = episodePaths({ episodeNumber: toTranscribe.episodeNumber });
+    const { vad: vadPath } = episodePaths(toTranscribe.episodeNumber);
     if (!existsSync(vadPath)) {
       return { ok: false, error: `VAD file not found: ${vadPath}` };
     }

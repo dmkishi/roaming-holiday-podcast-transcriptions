@@ -64,7 +64,7 @@ function loadTranscriptsFromDisk(): TailItem[] {
     let title = '';
     let description = '';
     if (runSummary) {
-      const { metadata: metadataPath } = episodePaths({ episodeNumber });
+      const { metadata: metadataPath } = episodePaths(episodeNumber);
       try {
         ({ title, description } = MetadataFileSchema.parse(
           JSON.parse(readFileSync(metadataPath, 'utf8')),

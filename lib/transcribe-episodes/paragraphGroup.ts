@@ -35,9 +35,7 @@ export function writeParagraphGroups(
 ): ParagraphGroupsResponse {
   try {
     const { paragraph: paragraphPath, paragraphGroup: path, vad: vadPath } =
-      episodePaths({
-        episodeNumber: transcript.episodeNumber,
-      });
+      episodePaths(transcript.episodeNumber);
 
     if (!existsSync(paragraphPath)) {
       return { ok: false, error: `Paragraph file not found: ${paragraphPath}` };

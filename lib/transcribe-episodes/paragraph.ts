@@ -31,9 +31,7 @@ export function writeParagraphs(
   transcript: ParagraphInput,
 ): ParagraphsResponse {
   try {
-    const { paragraph: path, vad: vadPath } = episodePaths({
-      episodeNumber: transcript.episodeNumber,
-    });
+    const { paragraph: path, vad: vadPath } = episodePaths(transcript.episodeNumber);
 
     const { segments } = TranscriptFileSchema.parse(
       JSON.parse(readFileSync(transcript.path, 'utf8')),
