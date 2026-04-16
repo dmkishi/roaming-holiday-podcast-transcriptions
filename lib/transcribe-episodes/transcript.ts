@@ -108,8 +108,8 @@ export async function makeToTranscribe(
   episode: Episode,
   force: boolean,
 ): Promise<ToTranscribe | undefined> {
-  const { transcript: path } = episodePaths(episode.episodeNumber);
-  if (existsSync(path) && !force) {
+  const { transcript: transcriptPath } = episodePaths(episode.episodeNumber);
+  if (existsSync(transcriptPath) && !force) {
     return undefined;
   }
 
@@ -129,7 +129,7 @@ export async function makeToTranscribe(
       tokenCount: prompt.tokenCount,
       isOverLimit: prompt.isOverLimit,
     },
-    path,
+    path: transcriptPath,
   };
 }
 
