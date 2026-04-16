@@ -47,7 +47,7 @@ export function findEpisodes(
 export function saveMetadata(
   episode: Episode,
 ): string {
-  const { metadata: filepath } = episodePaths({ episodeNumber: episode.episodeNumber, model: '' });
+  const { metadata: filepath } = episodePaths({ episodeNumber: episode.episodeNumber });
   mkdirSync(dirname(filepath), { recursive: true });
   writeFileSync(filepath, toPrettyJson(episode));
   return filepath;

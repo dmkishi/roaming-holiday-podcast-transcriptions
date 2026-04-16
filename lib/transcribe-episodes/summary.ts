@@ -26,12 +26,10 @@ const client = new OpenAI();
 export async function promptSummary(
   transcript: SummaryInput,
   summaryModel: string,
-  transcriptModel: string,
 ): Promise<SummaryResponse> {
   try {
     const { summary: path = '' } = episodePaths({
       episodeNumber: transcript.episodeNumber,
-      model: transcriptModel,
       summaryModel,
     });
 

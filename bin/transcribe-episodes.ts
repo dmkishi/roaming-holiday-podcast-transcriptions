@@ -12,22 +12,19 @@ import {
 import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
-import { episodePaths, findTranscripts } from '@lib/transcribe-episodes/paths.js';
+import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
 import { MetadataFileSchema } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
 
-// Shared shape consumed by paragraph / paragraphGroup / summarize stages. In
-// full-pipeline mode all items share `opts.transcribeModel`; in `--only-*`
-// mode each item carries the model discovered on disk.
+// Shared shape consumed by paragraph, paragraphGroup, and summarize stages.
 interface TailItem {
   episodeNumber: number;
   path: string;
   title: string;
   description: string;
-  transcriptModel: string;
 }
 
 // =============================================================================
@@ -58,22 +55,16 @@ function loadTranscriptsFromDisk(): TailItem[] {
   print.info('Loading existing transcripts...');
   const items: TailItem[] = [];
   for (const episodeNumber of opts.episodeNums) {
-    const matches = findTranscripts(episodeNumber);
-    if (matches.length === 0) {
+    const path = findTranscript(episodeNumber);
+    if (path === undefined) {
       printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
       continue;
     }
-    if (matches.length > 1) {
-      const models = matches.map((m) => m.model).join(', ');
-      printLog.warn(`#${episodeNumber}: Multiple transcripts found (${models}) - skipping`);
-      continue;
-    }
-    const { path, model } = matches[0]!;
 
     let title = '';
     let description = '';
     if (runSummary) {
-      const { metadata: metadataPath } = episodePaths({ episodeNumber, model: '' });
+      const { metadata: metadataPath } = episodePaths({ episodeNumber });
       try {
         ({ title, description } = MetadataFileSchema.parse(
           JSON.parse(readFileSync(metadataPath, 'utf8')),
@@ -85,8 +76,8 @@ function loadTranscriptsFromDisk(): TailItem[] {
       }
     }
 
-    items.push({ episodeNumber, path, title, description, transcriptModel: model });
-    printLog.info(`#${episodeNumber}: Loaded "${toRelative(path)}" (${model})`);
+    items.push({ episodeNumber, path, title, description });
+    printLog.info(`#${episodeNumber}: Loaded "${toRelative(path)}"`);
   }
 
   if (items.length === 0) {
@@ -148,7 +139,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   print.info('Preparing for transcription...');
   let toTranscribes: ToTranscribe[] = [];
   for (const episode of episodes) {
-    const toTranscribe = await makeToTranscribe(episode, opts.transcribeModel, opts.forceTranscribe);
+    const toTranscribe = await makeToTranscribe(episode, opts.forceTranscribe);
     if (!toTranscribe) {
       printLog.warn(`#${episode.episodeNumber}: Skipping - transcript already exists`);
       continue;
@@ -254,7 +245,6 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
     path: t.path,
     title: t.title,
     description: t.description,
-    transcriptModel: opts.transcribeModel,
   }));
 }
 
@@ -264,7 +254,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
 if (runParagraph) {
   print.info('Building paragraphs...');
   for (const item of tailItems) {
-    const res = writeParagraphs(item, item.transcriptModel);
+    const res = writeParagraphs(item);
     if (!res.ok) {
       printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
@@ -280,7 +270,7 @@ if (runParagraph) {
 
   print.info('Building paragraph groups...');
   for (const item of tailItems) {
-    const res = writeParagraphGroups(item, item.transcriptModel);
+    const res = writeParagraphGroups(item);
     if (!res.ok) {
       printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
@@ -302,7 +292,7 @@ if (runSummary) {
   print.info('Summarizing...');
   const summaries: Summary[] = [];
   for (const item of tailItems) {
-    const res = await promptSummary(item, opts.summaryModel, item.transcriptModel);
+    const res = await promptSummary(item, opts.summaryModel);
     if (!res.ok) {
       printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`

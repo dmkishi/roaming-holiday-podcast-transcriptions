@@ -37,7 +37,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
     const prefix = metaFile.replace('.metadata.json', '');
 
     const transcriptFile = files.find((f) =>
-      f.startsWith(`${prefix}.transcript__`)
+      f.startsWith(`${prefix}.transcript.`)
       && !f.includes('.summary__')
       && !f.includes('.paragraph'),
     );

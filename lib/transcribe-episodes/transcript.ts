@@ -106,16 +106,15 @@ export async function makePrompt(title: string, description?: string): Promise<{
  */
 export async function makeToTranscribe(
   episode: Episode,
-  model: string,
   force: boolean,
 ): Promise<ToTranscribe | undefined> {
-  const alreadyTranscribed = findTranscript(episode.episodeNumber, model) !== undefined
+  const alreadyTranscribed = findTranscript(episode.episodeNumber) !== undefined;
   if (alreadyTranscribed && !force) {
     return undefined;
   }
 
   const prompt = await makePrompt(episode.title, episode.description);
-  const { transcript: path } = episodePaths({ episodeNumber: episode.episodeNumber, model });
+  const { transcript: path } = episodePaths({ episodeNumber: episode.episodeNumber });
 
   return {
     episodeNumber: episode.episodeNumber,
@@ -155,7 +154,7 @@ export async function promptTranscript(
     }
 
     // Read pre-computed VAD file for chunk splitting.
-    const { vad: vadPath } = episodePaths({ episodeNumber: toTranscribe.episodeNumber, model });
+    const { vad: vadPath } = episodePaths({ episodeNumber: toTranscribe.episodeNumber });
     if (!existsSync(vadPath)) {
       return { ok: false, error: `VAD file not found: ${vadPath}` };
     }

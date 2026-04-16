@@ -37,7 +37,7 @@ export async function runVad(
   force: boolean,
 ): Promise<VadResponse> {
   try {
-    const { vad: vadPath } = episodePaths({ episodeNumber, model: '' });
+    const { vad: vadPath } = episodePaths({ episodeNumber });
 
     if (!force && existsSync(vadPath)) {
       return {

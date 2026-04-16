@@ -29,12 +29,10 @@ export type ParagraphsResponse = FailResponse | Paragraphs;
  */
 export function writeParagraphs(
   transcript: ParagraphInput,
-  transcriptModel: string,
 ): ParagraphsResponse {
   try {
     const { paragraph: path, vad: vadPath } = episodePaths({
       episodeNumber: transcript.episodeNumber,
-      model: transcriptModel,
     });
 
     const { segments } = TranscriptFileSchema.parse(

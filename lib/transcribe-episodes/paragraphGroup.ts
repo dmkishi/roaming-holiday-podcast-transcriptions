@@ -32,13 +32,11 @@ export type ParagraphGroupsResponse = FailResponse | ParagraphGroups;
  */
 export function writeParagraphGroups(
   transcript: ParagraphGroupInput,
-  transcriptModel: string,
 ): ParagraphGroupsResponse {
   try {
     const { paragraph: paragraphPath, paragraphGroup: path, vad: vadPath } =
       episodePaths({
         episodeNumber: transcript.episodeNumber,
-        model: transcriptModel,
       });
 
     if (!existsSync(paragraphPath)) {
