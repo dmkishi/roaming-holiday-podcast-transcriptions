@@ -8,7 +8,7 @@ import {
 } from '@lib/transcribe-episodes/audioChunk.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
-import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
+import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
 import { VadFileSchema } from '@lib/shared/schemas.js';
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
@@ -108,13 +108,12 @@ export async function makeToTranscribe(
   episode: Episode,
   force: boolean,
 ): Promise<ToTranscribe | undefined> {
-  const alreadyTranscribed = findTranscript(episode.episodeNumber) !== undefined;
-  if (alreadyTranscribed && !force) {
+  const { transcript: path } = episodePaths(episode.episodeNumber);
+  if (existsSync(path) && !force) {
     return undefined;
   }
 
   const prompt = await makePrompt(episode.title, episode.description);
-  const { transcript: path } = episodePaths(episode.episodeNumber);
 
   return {
     episodeNumber: episode.episodeNumber,

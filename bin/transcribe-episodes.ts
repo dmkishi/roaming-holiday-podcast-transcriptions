@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/shared/rss.js';
 import { findEpisodes, saveMetadata } from '@lib/transcribe-episodes/episode.js';
@@ -12,7 +12,7 @@ import {
 import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
-import { episodePaths, findTranscript } from '@lib/transcribe-episodes/paths.js';
+import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { MetadataFileSchema } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
@@ -48,8 +48,8 @@ function loadTranscriptsFromDisk(): TailItem[] {
   print.info('Loading existing transcripts...');
   const items: TailItem[] = [];
   for (const episodeNumber of opts.episodeNums) {
-    const path = findTranscript(episodeNumber);
-    if (path === undefined) {
+    const { transcript: path } = episodePaths(episodeNumber);
+    if (!existsSync(path)) {
       printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
       continue;
     }
