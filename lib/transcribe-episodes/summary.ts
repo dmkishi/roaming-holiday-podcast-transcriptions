@@ -28,29 +28,26 @@ export async function promptSummary(
   summaryModel: string,
 ): Promise<SummaryResponse> {
   try {
-    const { summary: path } = episodePaths(transcript.episodeNumber);
-
-    const { text } = TranscriptFileSchema.parse(
+    const { summary: summaryPath } = episodePaths(transcript.episodeNumber);
+    const { text: transcriptionText } = TranscriptFileSchema.parse(
       JSON.parse(readFileSync(transcript.path, 'utf8')),
     );
 
-    if (!text) {
+    if (!transcriptionText) {
       return {
         ok: false,
         error: 'Transcript text is empty',
       };
     }
 
-    const userMessage = [
-      `Title: "${transcript.title}"`,
-      `Description: ${transcript.description}`,
-      `Transcript: ${text}`,
-    ].join('\n');
-
     const response = await client.responses.create({
       model: summaryModel,
       instructions: SUMMARY_PROMPT,
-      input: userMessage,
+      input: [
+        `Title: "${transcript.title}"`,
+        `Description: ${transcript.description}`,
+        `Transcript: ${transcriptionText}`,
+      ].join('\n'),
     });
 
     if (response.output_text === '') {
@@ -60,13 +57,13 @@ export async function promptSummary(
       };
     }
 
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, response.output_text);
+    mkdirSync(dirname(summaryPath), { recursive: true });
+    writeFileSync(summaryPath, response.output_text);
 
     return {
       ok: true,
       episodeNumber: transcript.episodeNumber,
-      path,
+      path: summaryPath,
       stats: {
         tokenInput: response.usage?.input_tokens ?? 0,
         tokenOutput: response.usage?.output_tokens ?? 0,
