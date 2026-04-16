@@ -12,7 +12,12 @@ export const WHISPER_PROMPT = {
   names: [
     '7-Eleven',
     'Ediya Coffee',
+    'Family Mart',
+    'Hi-Chew',
+    'Jeju Island',
+    'Louisa Coffee',
     'Moontan Trail',
+    'Olle Trail',
     'Tim Hortons',
   ],
   basicInfo: '"Roaming Holiday" by Keith McNally of Fredericton, New Brunswick.',
