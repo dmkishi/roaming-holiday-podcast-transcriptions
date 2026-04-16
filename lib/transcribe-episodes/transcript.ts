@@ -172,7 +172,10 @@ export async function promptTranscript(
 
     for (const chunk of chunks) {
       const { jsonPath, exitCode } = await whisperChunk(
-        chunk.path, model, toTranscribe.prompt.payload, VENV_WHISPER,
+        chunk.path,
+        model,
+        toTranscribe.prompt.payload,
+        VENV_WHISPER,
       );
 
       if (exitCode !== 0) {
