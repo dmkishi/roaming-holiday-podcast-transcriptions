@@ -16,7 +16,7 @@ import { episodePaths, findTranscripts } from '@lib/transcribe-episodes/paths.js
 import { MetadataFileSchema } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
-import { print, printAndLog } from '@lib/shared/print.js';
+import { print, printLog } from '@lib/shared/print.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
 
 // Shared shape consumed by paragraph / paragraphGroup / summarize stages. In
@@ -44,7 +44,7 @@ const banner = [
 ];
 if (runTranscript) banner.push(`  Whisper model: ${opts.transcribeModel}`);
 if (runSummary) banner.push(`  Summary model: ${opts.summaryModel}`);
-printAndLog.info(banner);
+printLog.info(banner);
 print.emptyLine();
 
 const tailItems: TailItem[] = runTranscript
@@ -60,12 +60,12 @@ function loadTranscriptsFromDisk(): TailItem[] {
   for (const episodeNumber of opts.episodeNums) {
     const matches = findTranscripts(episodeNumber);
     if (matches.length === 0) {
-      printAndLog.warn(`#${episodeNumber}: No transcript found - skipping`);
+      printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
       continue;
     }
     if (matches.length > 1) {
       const models = matches.map((m) => m.model).join(', ');
-      printAndLog.warn(`#${episodeNumber}: Multiple transcripts found (${models}) - skipping`);
+      printLog.warn(`#${episodeNumber}: Multiple transcripts found (${models}) - skipping`);
       continue;
     }
     const { path, model } = matches[0]!;
@@ -80,17 +80,17 @@ function loadTranscriptsFromDisk(): TailItem[] {
         ));
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
-        printAndLog.warn(`#${episodeNumber}: Failed to load metadata - ${msg} - skipping`);
+        printLog.warn(`#${episodeNumber}: Failed to load metadata - ${msg} - skipping`);
         continue;
       }
     }
 
     items.push({ episodeNumber, path, title, description, transcriptModel: model });
-    printAndLog.info(`#${episodeNumber}: Loaded "${toRelative(path)}" (${model})`);
+    printLog.info(`#${episodeNumber}: Loaded "${toRelative(path)}" (${model})`);
   }
 
   if (items.length === 0) {
-    printAndLog.error('No transcripts to process.');
+    printLog.error('No transcripts to process.');
     process.exit(1);
   }
   print.emptyLine();
@@ -107,10 +107,10 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   print.info('Fetching RSS feed...');
   const feed = await getAllRssItems(RSS_FEED_URL, opts.forceRss);
   if (feed.status === 'failed') {
-    printAndLog.error(`Failed to fetch RSS feed <${RSS_FEED_URL}>`);
+    printLog.error(`Failed to fetch RSS feed <${RSS_FEED_URL}>`);
     process.exit(1);
   }
-  printAndLog.info(`RSS feed: ${feed.items.length} items (${pc.blue(feed.status)})`);
+  printLog.info(`RSS feed: ${feed.items.length} items (${pc.blue(feed.status)})`);
 
   // ===========================================================================
   // Make episode metadata
@@ -119,22 +119,22 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   const foundEpisodeNums = episodes.map((e) => e.episodeNumber);
   if (episodes.length < opts.episodeNums.size) {
     if (episodes.length === 0) {
-      printAndLog.error('No episodes found');
+      printLog.error('No episodes found');
       process.exit(1);
     }
     const missingEpisodeNums = [...opts.episodeNums].filter((num) => !foundEpisodeNums.includes(num));
-    printAndLog.warn(
+    printLog.warn(
       `${pluralize(missingEpisodeNums.length, 'Episode')} NOT found: ${missingEpisodeNums.map((num) => pc.red(num)).join(', ')}`,
     );
   } else {
-    printAndLog.info(
+    printLog.info(
       `Found all requested ${pluralize(foundEpisodeNums.length, 'episode')}: ${foundEpisodeNums.join(', ')}`,
     );
   }
 
   for (const episode of episodes) {
     const filepath = saveMetadata(episode);
-    printAndLog.info([
+    printLog.info([
       `#${episode.episodeNumber}: Saved "${toRelative(filepath)}"`,
       `  Title:        "${episode.title}"`,
       `  Publish date: ${formatDate(episode.pubDate)}`,
@@ -150,17 +150,17 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   for (const episode of episodes) {
     const toTranscribe = await makeToTranscribe(episode, opts.transcribeModel, opts.forceTranscribe);
     if (!toTranscribe) {
-      printAndLog.warn(`#${episode.episodeNumber}: Skipping - transcript already exists`);
+      printLog.warn(`#${episode.episodeNumber}: Skipping - transcript already exists`);
       continue;
     }
 
     if (toTranscribe.prompt.isOverLimit) {
-      printAndLog.warn([
+      printLog.warn([
         `#${toTranscribe.episodeNumber}: Prompt token count ${toTranscribe.prompt.tokenCount}/${PROMPT_TOKEN_LIMIT}`,
         '  Prompt token count exceeds limit - PROMPT MAY BE TRUNCATED!',
       ]);
     } else {
-      printAndLog.info(
+      printLog.info(
         `#${toTranscribe.episodeNumber}: Prompt token count ${toTranscribe.prompt.tokenCount}/${PROMPT_TOKEN_LIMIT}`,
       );
     }
@@ -169,7 +169,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   }
 
   if (toTranscribes.length === 0) {
-    printAndLog.info('No episodes to transcribe.');
+    printLog.info('No episodes to transcribe.');
     process.exit(0);
   }
   print.emptyLine();
@@ -189,12 +189,12 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
       const path = toTranscribe.mp3.path;
       const duration = toTranscribe.mp3.audioDuration.timestamp;
       const sizeMB = mp3.sizeMB;
-      printAndLog.info(`#${episodeNumber}: ${action} "${path}" (${duration}, ${sizeMB} MB)`);
+      printLog.info(`#${episodeNumber}: ${action} "${path}" (${duration}, ${sizeMB} MB)`);
     }
   }
 
   if (toTranscribes.length === 0) {
-    printAndLog.error('No MP3s could be downloaded to transcribe.');
+    printLog.error('No MP3s could be downloaded to transcribe.');
     process.exit(1);
   }
   print.emptyLine();
@@ -207,16 +207,16 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
     const res = await runVad(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceVad);
     if (!res.ok) {
       toTranscribes = toTranscribes.filter((t) => t !== toTranscribe);
-      printAndLog.warn(`#${toTranscribe.episodeNumber}: Failed${res.error ? ` - ${res.error}` : ''}`);
+      printLog.warn(`#${toTranscribe.episodeNumber}: Failed${res.error ? ` - ${res.error}` : ''}`);
     } else if (res.status === 'alreadyExists') {
-      printAndLog.warn(`#${toTranscribe.episodeNumber}: Skipping - VAD file already exists`);
+      printLog.warn(`#${toTranscribe.episodeNumber}: Skipping - VAD file already exists`);
     } else {
-      printAndLog.info(`#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`);
+      printLog.info(`#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`);
     }
   }
 
   if (toTranscribes.length === 0) {
-    printAndLog.error('VAD failed for all episodes.');
+    printLog.error('VAD failed for all episodes.');
     process.exit(1);
   }
   print.emptyLine();
@@ -231,7 +231,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
     if (res.ok) {
       const { audioDuration, workDuration } = res.stats;
       const workPercentage = Math.round((workDuration.seconds / audioDuration.seconds) * 100);
-      printAndLog.info([
+      printLog.info([
         `#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`,
         `  Work time:  ${workDuration.human} (${workPercentage}% of ${audioDuration.timestamp})`,
         `  Words:      ${formatNumber(res.stats.words)}`,
@@ -239,12 +239,12 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
       ]);
       transcripts.push(res);
     } else {
-      printAndLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? ` - ${res.error}` : ''}`);
+      printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? ` - ${res.error}` : ''}`);
     }
   }
 
   if (transcripts.length === 0) {
-    printAndLog.error('No transcripts generated.');
+    printLog.error('No transcripts generated.');
     process.exit(1);
   }
   print.emptyLine();
@@ -266,12 +266,12 @@ if (runParagraph) {
   for (const item of tailItems) {
     const res = writeParagraphs(item, item.transcriptModel);
     if (!res.ok) {
-      printAndLog.warn(
+      printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
       );
       continue;
     }
-    printAndLog.info([
+    printLog.info([
       `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
       `  Paragraphs: ${formatNumber(res.stats.paragraphs)}`,
     ]);
@@ -282,12 +282,12 @@ if (runParagraph) {
   for (const item of tailItems) {
     const res = writeParagraphGroups(item, item.transcriptModel);
     if (!res.ok) {
-      printAndLog.warn(
+      printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
       );
       continue;
     }
-    printAndLog.info([
+    printLog.info([
       `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
       `  Groups: ${formatNumber(res.stats.groups)}`,
     ]);
@@ -304,12 +304,12 @@ if (runSummary) {
   for (const item of tailItems) {
     const res = await promptSummary(item, opts.summaryModel, item.transcriptModel);
     if (!res.ok) {
-      printAndLog.warn(
+      printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`
       );
       continue;
     }
-    printAndLog.info([
+    printLog.info([
       `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
       `  Tokens: input ${formatNumber(res.stats.tokenInput)} / output ${formatNumber(res.stats.tokenOutput)}`,
     ]);
@@ -317,7 +317,7 @@ if (runSummary) {
   }
 
   if (summaries.length === 0) {
-    printAndLog.error('No summaries generated.');
+    printLog.error('No summaries generated.');
     process.exit(1);
   }
   print.emptyLine();

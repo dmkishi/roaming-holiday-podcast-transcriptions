@@ -14,7 +14,7 @@ export const print = {
   emptyLine: () => { console.log(''); },
 };
 
-export const printAndLog = {
+export const printLog = {
   info: (msg: string | string[]) => { const m = joinLines(msg); print.info(m); log.info(m); },
   warn: (msg: string | string[]) => { const m = joinLines(msg); print.warn(m); log.warn(m); },
   error: (msg: string | string[]) => { const m = joinLines(msg); print.error(m); log.error(m); },

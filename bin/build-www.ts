@@ -7,7 +7,7 @@ import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
 import { SITE_DATA_DIR, SITE_EPISODES_DIR, toRelative } from '@lib/shared/paths.js';
-import { print, printAndLog } from '@lib/shared/print.js';
+import { print, printLog } from '@lib/shared/print.js';
 import { formatEpisodeNumber, pluralize, toPrettyJson } from '@lib/shared/strings.js';
 
 // =============================================================================
@@ -20,15 +20,15 @@ for (const result of discoveries) {
   if (result.ok) {
     artifacts.push(result.artifacts);
   } else {
-    printAndLog.warn(`#${result.episodeNumber}: Skipping - ${result.reason}`);
+    printLog.warn(`#${result.episodeNumber}: Skipping - ${result.reason}`);
   }
 }
 
 if (artifacts.length === 0) {
-  printAndLog.warn('No complete episodes found.');
+  printLog.warn('No complete episodes found.');
   process.exit(0);
 }
-printAndLog.info(`Discovered ${artifacts.length} ${pluralize(artifacts.length, 'episode')}`);
+printLog.info(`Discovered ${artifacts.length} ${pluralize(artifacts.length, 'episode')}`);
 print.emptyLine();
 
 // =============================================================================
@@ -44,7 +44,7 @@ for (const { metadata, paragraph, groupStarts, summary } of artifacts) {
 
   const image = await downloadImage(ep, metadata.imageUrl);
   if (image.status === 'failed') {
-    printAndLog.warn(`#${ep}: Image download failed - ${image.error}`);
+    printLog.warn(`#${ep}: Image download failed - ${image.error}`);
   }
 
   const paragraphs = addTimelineMarkers(paragraph.segments);
@@ -68,12 +68,12 @@ for (const { metadata, paragraph, groupStarts, summary } of artifacts) {
 
   const filepath = join(SITE_EPISODES_DIR, `${formatEpisodeNumber(ep)}.json`);
   writeFileSync(filepath, toPrettyJson(episode));
-  printAndLog.info(`#${ep}: Saved "${toRelative(filepath)}"`);
+  printLog.info(`#${ep}: Saved "${toRelative(filepath)}"`);
   built++;
 }
 
 print.emptyLine();
-printAndLog.info(`Built data for ${built} ${pluralize(built, 'episode')}`);
+printLog.info(`Built data for ${built} ${pluralize(built, 'episode')}`);
 
 // =============================================================================
 // Collect and write stats
@@ -84,7 +84,7 @@ try {
   const stats = await collectStats(artifacts);
   const statsPath = join(SITE_DATA_DIR, 'stats.json');
   writeFileSync(statsPath, toPrettyJson(stats));
-  printAndLog.info(`Saved "${toRelative(statsPath)}"`);
+  printLog.info(`Saved "${toRelative(statsPath)}"`);
 } catch (error) {
-  printAndLog.warn(`Stats collection failed: ${error instanceof Error ? error.message : String(error)}`);
+  printLog.warn(`Stats collection failed: ${error instanceof Error ? error.message : String(error)}`);
 }
