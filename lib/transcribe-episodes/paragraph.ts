@@ -2,15 +2,14 @@ import type { z } from 'zod';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
-import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
-import { TranscriptFileSchema, ParagraphFileSchema, VadFileSchema } from '@lib/shared/schemas.js';
+import type { FailResponse, TailItem } from '@lib/transcribe-episodes/types.js';
+import {
+  ParagraphFileSchema, TranscriptFileSchema, VadFileSchema,
+} from '@lib/shared/schemas.js';
 import { toPrettyJson } from '@lib/shared/strings.js';
 import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 
 type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
-
-export type ParagraphInput = Pick<Transcript, 'episodeNumber' | 'path'>;
 
 export interface Paragraphs {
   ok: true;
@@ -28,7 +27,7 @@ export type ParagraphsResponse = FailResponse | Paragraphs;
  * `.paragraph.json` file alongside it. Always overwrites.
  */
 export function writeParagraphs(
-  transcript: ParagraphInput,
+  transcript: TailItem,
 ): ParagraphsResponse {
   try {
     const { paragraph: path, vad: vadPath } = episodePaths(transcript.episodeNumber);

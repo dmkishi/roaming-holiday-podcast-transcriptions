@@ -17,15 +17,8 @@ import { MetadataFileSchema } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
+import type { TailItem } from '@lib/transcribe-episodes/types.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
-
-// Shared shape consumed by paragraph, paragraphGroup, and summarize stages.
-interface TailItem {
-  episodeNumber: number;
-  path: string;
-  title: string;
-  description: string;
-}
 
 // =============================================================================
 // Parse CLI args

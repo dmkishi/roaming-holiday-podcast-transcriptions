@@ -1,13 +1,10 @@
 import OpenAI from 'openai';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import { TranscriptFileSchema } from '@lib/shared/schemas.js';
-import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
+import type { FailResponse, TailItem } from '@lib/transcribe-episodes/types.js';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
+import { TranscriptFileSchema } from '@lib/shared/schemas.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
-
-export type SummaryInput = Pick<Transcript, 'episodeNumber' | 'path' | 'title' | 'description'>;
 
 export interface Summary {
   ok: true;
@@ -24,7 +21,7 @@ export type SummaryResponse = FailResponse | Summary;
 const client = new OpenAI();
 
 export async function promptSummary(
-  transcript: SummaryInput,
+  transcript: TailItem,
   summaryModel: string,
 ): Promise<SummaryResponse> {
   try {

@@ -1,17 +1,12 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { episodePaths } from '@lib/transcribe-episodes/paths.js';
-import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import type { Transcript } from '@lib/transcribe-episodes/transcript.js';
+import type { FailResponse, TailItem } from '@lib/transcribe-episodes/types.js';
 import {
-  ParagraphFileSchema,
-  ParagraphGroupFileSchema,
-  VadFileSchema,
+  ParagraphFileSchema, ParagraphGroupFileSchema, VadFileSchema,
 } from '@lib/shared/schemas.js';
 import { toPrettyJson } from '@lib/shared/strings.js';
 import { PARAGRAPH_GROUP_GAP_SECONDS } from '@lib/config/audio.js';
-
-export type ParagraphGroupInput = Pick<Transcript, 'episodeNumber'>;
 
 export interface ParagraphGroups {
   ok: true;
@@ -31,7 +26,7 @@ export type ParagraphGroupsResponse = FailResponse | ParagraphGroups;
  * overwrites.
  */
 export function writeParagraphGroups(
-  transcript: ParagraphGroupInput,
+  transcript: TailItem,
 ): ParagraphGroupsResponse {
   try {
     const { paragraph: paragraphPath, paragraphGroup: path, vad: vadPath } =
