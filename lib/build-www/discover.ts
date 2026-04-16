@@ -1,8 +1,8 @@
+import type { z } from 'zod';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 import { ParagraphFileSchema, ParagraphGroupFileSchema } from '@lib/shared/schemas.js';
-import type { z } from 'zod';
 
 interface MetadataFile {
   episodeNumber: number;
