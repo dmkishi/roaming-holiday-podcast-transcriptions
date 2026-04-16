@@ -30,7 +30,7 @@ export async function promptSummary(
   try {
     const { summary: path = '' } = episodePaths({
       episodeNumber: transcript.episodeNumber,
-      summaryModel,
+      includeSummary: true,
     });
 
     if (path === '') {

@@ -1,14 +1,14 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { OUTPUTS_DIR } from '@lib/shared/paths.js';
-import { formatEpisodeNumber, handleize } from '@lib/shared/strings.js';
+import { formatEpisodeNumber } from '@lib/shared/strings.js';
 
 /**
  * Returns all artifact paths for a given episode.
  */
 export function episodePaths(params: {
   episodeNumber: number;
-  summaryModel?: string;
+  includeSummary?: boolean;
 }): {
   metadata: string;
   vad: string;
@@ -24,10 +24,8 @@ export function episodePaths(params: {
     transcript: join(OUTPUTS_DIR, `${code}.transcript.json`),
     paragraph: join(OUTPUTS_DIR, `${code}.transcript.paragraph.json`),
     paragraphGroup: join(OUTPUTS_DIR, `${code}.transcript.paragraphGroup.json`),
-    // Unlikely to have surprising falsy values.
-    // oxlint-disable-next-line typescript/strict-boolean-expressions
-    summary: params.summaryModel
-      ? join(OUTPUTS_DIR, `${code}.transcript.summary__${handleize(params.summaryModel)}.txt`)
+    summary: params.includeSummary === true
+      ? join(OUTPUTS_DIR, `${code}.transcript.summary.txt`)
       : undefined,
   };
 }

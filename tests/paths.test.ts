@@ -24,18 +24,13 @@ describe('episodePaths', () => {
     expect(basename(paths.metadata)).toBe('1234.metadata.json');
   });
 
-  test('includes summary path when summaryModel is provided', () => {
-    const paths = episodePaths({ episodeNumber: 42, summaryModel: 'gpt-4o' });
-    expect(basename(paths.summary!)).toBe('042.transcript.summary__gpt-4o.txt');
-  });
-
-  test('handleizes summary model name', () => {
-    const paths = episodePaths({ episodeNumber: 42, summaryModel: 'GPT 4o' });
-    expect(basename(paths.summary!)).toBe('042.transcript.summary__gpt-4o.txt');
+  test('includes summary path when includeSummary is true', () => {
+    const paths = episodePaths({ episodeNumber: 42, includeSummary: true });
+    expect(basename(paths.summary!)).toBe('042.transcript.summary.txt');
   });
 
   test('all paths share the same directory', () => {
-    const paths = episodePaths({ episodeNumber: 1, summaryModel: 'gpt-4o' });
+    const paths = episodePaths({ episodeNumber: 1, includeSummary: true });
     const dirs = [paths.metadata, paths.vad, paths.transcript, paths.paragraph, paths.summary!].map(
       (p) => p.replace(basename(p), ''),
     );

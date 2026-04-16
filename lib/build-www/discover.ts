@@ -38,7 +38,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
 
     const transcriptFile = files.find((f) =>
       f.startsWith(`${prefix}.transcript.`)
-      && !f.includes('.summary__')
+      && !f.includes('.summary')
       && !f.includes('.paragraph'),
     );
 
@@ -48,7 +48,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
     }
 
     const summaryFile = files.find((f) =>
-      f.startsWith(transcriptFile.replace('.json', '.summary__')),
+      f === transcriptFile.replace('.json', '.summary.txt'),
     );
 
     if (summaryFile === undefined) {
