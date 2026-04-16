@@ -1,8 +1,17 @@
 import { z } from 'zod';
 
 export const MetadataFileSchema = z.object({
+  episodeNumber: z.number().int().positive(),
   title: z.string(),
   description: z.string(),
+  pubDate: z.string(),
+  duration: z.object({
+    seconds: z.number(),
+    timestamp: z.string(),
+    human: z.string(),
+  }),
+  imageUrl: z.string(),
+  mp3Url: z.string(),
 });
 
 export const VadOutputSchema = z.object({

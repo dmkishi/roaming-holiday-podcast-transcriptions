@@ -1,13 +1,12 @@
-import type { z } from 'zod';
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { OUTPUTS_DIR } from '@lib/shared/paths.js';
-import { ParagraphFileSchema, ParagraphGroupFileSchema } from '@lib/shared/schemas.js';
-import type { EpisodeFile } from '@lib/transcribe-episodes/episode.js';
+import {
+  hasParagraph, hasParagraphGroup, hasSummary, hasTranscript,
+  listEpisodeNumbers, readMetadata, readParagraph, readParagraphGroup, readSummary,
+  type MetadataFile, type ParagraphFile,
+} from '@lib/shared/artifacts.js';
 
 export interface EpisodeArtifacts {
-  metadata: EpisodeFile;
-  paragraph: z.infer<typeof ParagraphFileSchema>;
+  metadata: MetadataFile;
+  paragraph: ParagraphFile;
   groupStarts: number[];
   summary: string;
 }
@@ -24,62 +23,34 @@ export type DiscoveryResult =
  * downstream.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
-  const files = readdirSync(OUTPUTS_DIR);
-  const metadataFiles = files.filter((f) => f.endsWith('.metadata.json'));
   const results: DiscoveryResult[] = [];
 
-  for (const metaFile of metadataFiles) {
-    // oxlint-disable-next-line typescript/no-unsafe-assignment
-    const metadata: EpisodeFile = JSON.parse(
-      readFileSync(join(OUTPUTS_DIR, metaFile), 'utf8'),
-    );
-    const ep = metadata.episodeNumber;
-    const prefix = metaFile.replace('.metadata.json', '');
+  for (const episodeNumber of listEpisodeNumbers()) {
+    const metadata = readMetadata(episodeNumber);
 
-    const transcriptFile = files.find((f) =>
-      f.startsWith(`${prefix}.transcript.`)
-      && !f.includes('.summary')
-      && !f.includes('.paragraph'),
-    );
-
-    if (transcriptFile === undefined) {
-      results.push({ ok: false, episodeNumber: ep, reason: 'No transcript found' });
+    if (!hasTranscript(episodeNumber)) {
+      results.push({ ok: false, episodeNumber, reason: 'No transcript found' });
       continue;
     }
-
-    const summaryFile = files.find((f) =>
-      f === transcriptFile.replace('.json', '.summary.txt'),
-    );
-
-    if (summaryFile === undefined) {
-      results.push({ ok: false, episodeNumber: ep, reason: 'No summary found' });
+    if (!hasSummary(episodeNumber)) {
+      results.push({ ok: false, episodeNumber, reason: 'No summary found' });
       continue;
     }
-
-    const paragraphFileName = transcriptFile.replace('.json', '.paragraph.json');
-    if (!files.includes(paragraphFileName)) {
-      results.push({ ok: false, episodeNumber: ep, reason: 'No paragraph sidecar found' });
+    if (!hasParagraph(episodeNumber)) {
+      results.push({ ok: false, episodeNumber, reason: 'No paragraph sidecar found' });
       continue;
     }
-
-    const paragraph = ParagraphFileSchema.parse(
-      JSON.parse(readFileSync(join(OUTPUTS_DIR, paragraphFileName), 'utf8')),
-    );
-
+    const paragraph = readParagraph(episodeNumber);
     if (paragraph.segments.length === 0) {
-      results.push({ ok: false, episodeNumber: ep, reason: 'No segments in paragraph sidecar' });
+      results.push({ ok: false, episodeNumber, reason: 'No segments in paragraph sidecar' });
+      continue;
+    }
+    if (!hasParagraphGroup(episodeNumber)) {
+      results.push({ ok: false, episodeNumber, reason: 'No paragraph group sidecar found' });
       continue;
     }
 
-    const paragraphGroupFileName = transcriptFile.replace('.json', '.paragraphGroup.json');
-    if (!files.includes(paragraphGroupFileName)) {
-      results.push({ ok: false, episodeNumber: ep, reason: 'No paragraph group sidecar found' });
-      continue;
-    }
-
-    const { groupStarts } = ParagraphGroupFileSchema.parse(
-      JSON.parse(readFileSync(join(OUTPUTS_DIR, paragraphGroupFileName), 'utf8')),
-    );
+    const { groupStarts } = readParagraphGroup(episodeNumber);
 
     results.push({
       ok: true,
@@ -87,7 +58,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
         metadata,
         paragraph,
         groupStarts,
-        summary: readFileSync(join(OUTPUTS_DIR, summaryFile), 'utf8'),
+        summary: readSummary(episodeNumber),
       },
     });
   }

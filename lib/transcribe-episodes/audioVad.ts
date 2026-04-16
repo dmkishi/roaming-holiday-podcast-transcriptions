@@ -1,12 +1,10 @@
 import { execFile } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
-import { episodePaths } from '@lib/transcribe-episodes/paths.js';
+import { hasVad, paths, writeVad } from '@lib/shared/artifacts.js';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/shared/paths.js';
-import { VadFileSchema, VadOutputSchema } from '@lib/shared/schemas.js';
-import { toPrettyJson } from '@lib/shared/strings.js';
+import { VadOutputSchema } from '@lib/shared/schemas.js';
 import { MIN_GAP_SECONDS } from '@lib/config/audio.js';
 
 export interface Gap {
@@ -37,26 +35,23 @@ export async function runVad(
   force: boolean,
 ): Promise<VadResponse> {
   try {
-    const { vad: vadPath } = episodePaths(episodeNumber);
-
-    if (!force && existsSync(vadPath)) {
+    if (!force && hasVad(episodeNumber)) {
       return {
         ok: true,
         status: 'alreadyExists',
         episodeNumber,
-        path: vadPath,
+        path: paths(episodeNumber).vad,
       };
     }
 
     const pcmPath = await decodePcm(mp3Path);
     const { audioDuration, speechIntervals } = await detectSpeechIntervals(pcmPath);
 
-    mkdirSync(dirname(vadPath), { recursive: true });
-    writeFileSync(vadPath, toPrettyJson(VadFileSchema.parse({
+    const vadPath = writeVad(episodeNumber, {
       duration: audioDuration,
       speech: speechIntervals,
       gaps: gapsFromSpeech(speechIntervals, audioDuration, MIN_GAP_SECONDS),
-    })));
+    });
 
     return {
       ok: true,

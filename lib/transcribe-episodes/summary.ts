@@ -1,9 +1,6 @@
 import OpenAI from 'openai';
-import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { readTranscript, writeSummary } from '@lib/shared/artifacts.js';
 import type { FailResponse, TailItem } from '@lib/transcribe-episodes/types.js';
-import { episodePaths } from '@lib/transcribe-episodes/paths.js';
-import { TranscriptFileSchema } from '@lib/shared/schemas.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
 export interface Summary {
@@ -25,10 +22,7 @@ export async function promptSummary(
   summaryModel: string,
 ): Promise<SummaryResponse> {
   try {
-    const { summary: summaryPath } = episodePaths(transcript.episodeNumber);
-    const { text: transcriptionText } = TranscriptFileSchema.parse(
-      JSON.parse(readFileSync(transcript.path, 'utf8')),
-    );
+    const { text: transcriptionText } = readTranscript(transcript.episodeNumber);
 
     if (!transcriptionText) {
       return {
@@ -54,8 +48,7 @@ export async function promptSummary(
       };
     }
 
-    mkdirSync(dirname(summaryPath), { recursive: true });
-    writeFileSync(summaryPath, response.output_text);
+    const summaryPath = writeSummary(transcript.episodeNumber, response.output_text);
 
     return {
       ok: true,

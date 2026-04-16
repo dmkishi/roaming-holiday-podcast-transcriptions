@@ -1,11 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { episodePaths } from '@lib/transcribe-episodes/paths.js';
-import type { FailResponse, TailItem } from '@lib/transcribe-episodes/types.js';
 import {
-  ParagraphFileSchema, ParagraphGroupFileSchema, VadFileSchema,
-} from '@lib/shared/schemas.js';
-import { toPrettyJson } from '@lib/shared/strings.js';
+  hasParagraph, hasVad, readParagraph, readVad, writeParagraphGroup,
+} from '@lib/shared/artifacts.js';
+import type { FailResponse, TailItem } from '@lib/transcribe-episodes/types.js';
 import { PARAGRAPH_GROUP_GAP_SECONDS } from '@lib/config/audio.js';
 
 export interface ParagraphGroups {
@@ -29,32 +25,24 @@ export function writeParagraphGroups(
   transcript: TailItem,
 ): ParagraphGroupsResponse {
   try {
-    const { paragraph: paragraphPath, paragraphGroup: path, vad: vadPath } =
-      episodePaths(transcript.episodeNumber);
+    const episodeNumber = transcript.episodeNumber;
 
-    if (!existsSync(paragraphPath)) {
-      return { ok: false, error: `Paragraph file not found: ${paragraphPath}` };
+    if (!hasParagraph(episodeNumber)) {
+      return { ok: false, error: `Paragraph file not found for #${episodeNumber}` };
     }
-    if (!existsSync(vadPath)) {
-      return { ok: false, error: `VAD file not found: ${vadPath}` };
+    if (!hasVad(episodeNumber)) {
+      return { ok: false, error: `VAD file not found for #${episodeNumber}` };
     }
 
-    const { segments: paragraphs } = ParagraphFileSchema.parse(
-      JSON.parse(readFileSync(paragraphPath, 'utf8')),
-    );
-    const { gaps } = VadFileSchema.parse(
-      JSON.parse(readFileSync(vadPath, 'utf8')),
-    );
+    const { segments: paragraphs } = readParagraph(episodeNumber);
+    const { gaps } = readVad(episodeNumber);
 
     const groupStarts = findGroupStarts(paragraphs, gaps, PARAGRAPH_GROUP_GAP_SECONDS);
-    const payload = ParagraphGroupFileSchema.parse({ groupStarts });
-
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, toPrettyJson(payload));
+    const path = writeParagraphGroup(episodeNumber, { groupStarts });
 
     return {
       ok: true,
-      episodeNumber: transcript.episodeNumber,
+      episodeNumber,
       path,
       stats: {
         groups: groupStarts.length + 1,

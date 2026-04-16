@@ -1,16 +1,15 @@
 import { execFile } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
+import { hasTranscript, hasVad, readVad, writeTranscript } from '@lib/shared/artifacts.js';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import {
   chooseCutPoints, splitMp3IntoChunks, whisperChunk, mergeChunkTranscripts,
 } from '@lib/transcribe-episodes/audioChunk.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
-import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
-import { VadFileSchema } from '@lib/shared/schemas.js';
 import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import {
   CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
@@ -30,7 +29,6 @@ export interface ToTranscribe {
     tokenCount: number;
     isOverLimit: boolean;
   };
-  path: string;
 }
 
 export interface Transcript {
@@ -108,8 +106,7 @@ export async function makeToTranscribe(
   episode: Episode,
   force: boolean,
 ): Promise<ToTranscribe | undefined> {
-  const { transcript: transcriptPath } = episodePaths(episode.episodeNumber);
-  if (existsSync(transcriptPath) && !force) {
+  if (hasTranscript(episode.episodeNumber) && !force) {
     return undefined;
   }
 
@@ -129,7 +126,6 @@ export async function makeToTranscribe(
       tokenCount: prompt.tokenCount,
       isOverLimit: prompt.isOverLimit,
     },
-    path: transcriptPath,
   };
 }
 
@@ -153,11 +149,10 @@ export async function promptTranscript(
     }
 
     // Read pre-computed VAD file for chunk splitting.
-    const { vad: vadPath } = episodePaths(toTranscribe.episodeNumber);
-    if (!existsSync(vadPath)) {
-      return { ok: false, error: `VAD file not found: ${vadPath}` };
+    if (!hasVad(toTranscribe.episodeNumber)) {
+      return { ok: false, error: `VAD file not found for #${toTranscribe.episodeNumber}` };
     }
-    const vad = VadFileSchema.parse(JSON.parse(readFileSync(vadPath, 'utf8')));
+    const vad = readVad(toTranscribe.episodeNumber);
 
     const cutPoints = chooseCutPoints(vad.gaps, vad.duration, {
       targetChunkMinutes: CHUNK_TARGET_MINUTES,
@@ -209,15 +204,13 @@ export async function promptTranscript(
 
     const wordCount = merged.text.split(/\s+/).filter(Boolean).length;
     const characterCount = merged.text.length;
-    const json = JSON.stringify(merged);
 
-    mkdirSync(dirname(toTranscribe.path), { recursive: true });
-    writeFileSync(toTranscribe.path, json);
+    const path = writeTranscript(toTranscribe.episodeNumber, merged);
 
     return {
       ok: true,
       episodeNumber: toTranscribe.episodeNumber,
-      path: toTranscribe.path,
+      path,
       title: toTranscribe.title,
       description: toTranscribe.description,
       stats: {

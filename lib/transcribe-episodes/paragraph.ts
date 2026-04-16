@@ -1,12 +1,7 @@
 import type { z } from 'zod';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { episodePaths } from '@lib/transcribe-episodes/paths.js';
+import { hasVad, readTranscript, readVad, writeParagraph } from '@lib/shared/artifacts.js';
 import type { FailResponse, TailItem } from '@lib/transcribe-episodes/types.js';
-import {
-  ParagraphFileSchema, TranscriptFileSchema, VadFileSchema,
-} from '@lib/shared/schemas.js';
-import { toPrettyJson } from '@lib/shared/strings.js';
+import type { TranscriptFileSchema } from '@lib/shared/schemas.js';
 import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 
 type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
@@ -30,11 +25,7 @@ export function writeParagraphs(
   transcript: TailItem,
 ): ParagraphsResponse {
   try {
-    const { paragraph: path, vad: vadPath } = episodePaths(transcript.episodeNumber);
-
-    const { segments } = TranscriptFileSchema.parse(
-      JSON.parse(readFileSync(transcript.path, 'utf8')),
-    );
+    const { segments } = readTranscript(transcript.episodeNumber);
 
     if (segments === undefined || segments.length === 0) {
       return {
@@ -43,24 +34,22 @@ export function writeParagraphs(
       };
     }
 
-    if (!existsSync(vadPath)) {
+    if (!hasVad(transcript.episodeNumber)) {
       return {
         ok: false,
-        error: `VAD file not found: ${vadPath}`,
+        error: `VAD file not found for #${transcript.episodeNumber}`,
       };
     }
 
-    const vad = VadFileSchema.parse(JSON.parse(readFileSync(vadPath, 'utf8')));
+    const vad = readVad(transcript.episodeNumber);
     const breaks = buildParagraphBreaks(segments, vad.gaps, PARAGRAPH_GAP_SECONDS);
     const simplifiedSegments = segments.map(({ start, end, text }) => ({ start, end, text }));
     const paragraphs = breaks.map((start, i) => {
       const end = breaks[i + 1] ?? simplifiedSegments.length;
       return simplifiedSegments.slice(start, end);
     });
-    const payload = ParagraphFileSchema.parse({ segments: paragraphs });
 
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, toPrettyJson(payload));
+    const path = writeParagraph(transcript.episodeNumber, { segments: paragraphs });
 
     return {
       ok: true,

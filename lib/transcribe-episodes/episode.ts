@@ -1,9 +1,5 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
 import type { RssItem } from '@lib/shared/rss.js';
-import { episodePaths } from '@lib/transcribe-episodes/paths.js';
 import { type Duration, parseDuration } from '@lib/shared/duration.js';
-import { toPrettyJson } from '@lib/shared/strings.js';
 
 export interface Episode {
   episodeNumber: number;
@@ -14,8 +10,6 @@ export interface Episode {
   imageUrl: string;
   mp3Url: string;
 }
-
-export type EpisodeFile = Omit<Episode, 'pubDate'> & { pubDate: string };
 
 export function findEpisodes(
   rssItems: RssItem[],
@@ -42,13 +36,4 @@ export function findEpisodes(
   }
 
   return episodes;
-}
-
-export function saveMetadata(
-  episode: Episode,
-): string {
-  const { metadata: filepath } = episodePaths(episode.episodeNumber);
-  mkdirSync(dirname(filepath), { recursive: true });
-  writeFileSync(filepath, toPrettyJson(episode));
-  return filepath;
 }

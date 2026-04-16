@@ -1,8 +1,7 @@
 import pc from 'picocolors';
-import { existsSync, readFileSync } from 'node:fs';
 import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/shared/rss.js';
-import { findEpisodes, saveMetadata } from '@lib/transcribe-episodes/episode.js';
+import { findEpisodes } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
 import { runVad } from '@lib/transcribe-episodes/audioVad.js';
 import {
@@ -12,8 +11,9 @@ import {
 import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
-import { episodePaths } from '@lib/transcribe-episodes/paths.js';
-import { MetadataFileSchema } from '@lib/shared/schemas.js';
+import {
+  hasMetadata, readMetadata, writeMetadata, hasTranscript, paths,
+} from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
@@ -48,8 +48,7 @@ function loadTranscriptsFromDisk(): TailItem[] {
   print.info('Loading existing transcripts...');
   const items: TailItem[] = [];
   for (const episodeNumber of opts.episodeNums) {
-    const { transcript: path } = episodePaths(episodeNumber);
-    if (!existsSync(path)) {
+    if (!hasTranscript(episodeNumber)) {
       printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
       continue;
     }
@@ -57,20 +56,15 @@ function loadTranscriptsFromDisk(): TailItem[] {
     let title = '';
     let description = '';
     if (runSummary) {
-      const { metadata: metadataPath } = episodePaths(episodeNumber);
-      try {
-        ({ title, description } = MetadataFileSchema.parse(
-          JSON.parse(readFileSync(metadataPath, 'utf8')),
-        ));
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        printLog.warn(`#${episodeNumber}: Failed to load metadata - ${msg} - skipping`);
+      if (!hasMetadata(episodeNumber)) {
+        printLog.warn(`#${episodeNumber}: No metadata found - skipping`);
         continue;
       }
+      ({ title, description } = readMetadata(episodeNumber));
     }
 
-    items.push({ episodeNumber, path, title, description });
-    printLog.info(`#${episodeNumber}: Loaded "${toRelative(path)}"`);
+    items.push({ episodeNumber, title, description });
+    printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).transcript)}"`);
   }
 
   if (items.length === 0) {
@@ -117,7 +111,10 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   }
 
   for (const episode of episodes) {
-    const filepath = saveMetadata(episode);
+    const filepath = writeMetadata(episode.episodeNumber, {
+      ...episode,
+      pubDate: episode.pubDate.toISOString(),
+    });
     printLog.info([
       `#${episode.episodeNumber}: Saved "${toRelative(filepath)}"`,
       `  Title:        "${episode.title}"`,
@@ -235,7 +232,6 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
 
   return transcripts.map((t) => ({
     episodeNumber: t.episodeNumber,
-    path: t.path,
     title: t.title,
     description: t.description,
   }));
