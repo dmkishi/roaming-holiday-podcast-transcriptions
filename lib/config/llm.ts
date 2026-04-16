@@ -23,46 +23,13 @@ export const WHISPER_PROMPT = {
  *   of negative constraints.
  */
 export const SUMMARY_PROMPT = `
-  You are analyzing a transcript from "Roaming Holiday", a travel podcast by
-  Keith McNally.
+  You are summarizing a podcast episode from "Roaming Holiday", a serialized
+  travel podcast by Keith McNally. Given the episode title, description, and
+  full transcript, compose a concise summary of the episode. Limit to 2
+  sentences, maximum 30 words.
 
-  Given the episode title, description, and full transcript text, extract:
-  1. **summary**: A concise summary of the episode. Limit to 2 sentences,
-     maximum 30 words.
-     - Refer to the speaker as "Keith" or "he/him".
-     - Do not repeat the title of the podcast or the episode — focus on
-       describing the content and themes of the episode.
-     - Mention specific place names but avoid listing them exhaustively.
-
-  2. **sections**: Break the episode into 1–5 sections principally by changes in
-     the locale or the time of recording.
-     - For each section, provide:
-       - **title**: A concise title for the section (1–8 words). Keep the
-         language simple.
-       - **sentences**: The first 2 sentences of the section's content, VERBATIM.
-         Do not change the spelling or punctuation, copy it exactly as it is in
-         the transcript.
-     - The first section should always start from the beginning of the
-       transcript.
-     - If he ends the episode with a closing statement, that should be its own
-       section.
-     - Return sections as an array in transcript order.
-
-  3. **places**: All place names mentioned (cities, countries, trails, landmarks,
-     businesses, etc.)
-
-  4. **keywords**: 3–5 relevant keywords or short phrases capturing the main
-     topics discussed.
-     - Prefer single words with a maximum of 2 words.
-     - Do not include place names.
-     - This is a travel podcast so avoid generic keywords like:
-       - "travel",
-       - "adventure"
-       - "walking"
-       - "hiking"
-       - "weather"
-       - "local culture"
-       - "urban exploration".
-
-  Return only the JSON object with these four fields.
+  - Refer to the speaker as "Keith" or "he/him".
+  - Do not repeat the title of the podcast or the episode — focus on describing
+    his journey, the content, and themes of the episode.
+  - Mention specific place names but avoid listing them exhaustively.
 `.trim();

@@ -7,11 +7,6 @@ export interface TranscriptSegment {
   timelineMarker?: boolean;
 }
 
-export interface ResolvedSection {
-  title: string;
-  segmentIndex: number;
-}
-
 export interface SiteEpisode {
   episodeNumber: number;
   title: string;
@@ -23,11 +18,7 @@ export interface SiteEpisode {
   imagePath: string;
   paragraphs: TranscriptSegment[][];
   groupStarts: number[];
-  // Summary-derived fields are temporarily shelved — see plan.
-  // sections: ResolvedSection[];
   // summary: string;
-  // places: string[];
-  // keywords: string[];
   location?: string;
   youtube?: string;
 }

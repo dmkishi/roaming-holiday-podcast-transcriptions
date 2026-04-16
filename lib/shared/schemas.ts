@@ -38,7 +38,4 @@ export const ParagraphGroupFileSchema = z.object({
 
 export const SummaryFileSchema = z.object({
   summary: z.string(),
-  sections: z.array(z.object({ title: z.string(), sentences: z.string() })),
-  places: z.array(z.string()),
-  keywords: z.array(z.string()),
 });

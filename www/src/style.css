@@ -324,10 +324,6 @@ a {
   margin-block: 1.5rem -1rem;
 }
 
-.episode--toc {
-  padding-left: 0;
-}
-
 .episode--transcript {
   position: relative;
 
@@ -348,18 +344,6 @@ a {
 .episode--transcript span[data-start]:hover {
   background: var(--color-tint);
   border-radius: 2px;
-}
-
-.section-title {
-  position: sticky;
-  top: 0;
-  background: var(--color-bg);
-  margin-top: .5rem;
-  padding-top: 1rem;
-
-  &:first-child {
-    margin-top: -1rem; /* Offset padding-top */
-  }
 }
 
 .timeline-marker {

@@ -59,39 +59,15 @@ eleventyComputed:
       </section>
     {%- endif %}
 
-    {%- if episode.sections and episode.sections.length > 0 %}
-      <nav>
-        <h2>Table of Contents</h2>
-        <ol class="episode--toc">
-          {%- for section in episode.sections %}
-            <li>
-              <a href="#section-{{ section.title | slug }}">
-                {{- section.title -}}
-              </a>
-            </li>
-          {%- endfor %}
-        </ol>
-      </nav>
-    {%- endif %}
-
     <hr>
 
     <section class="episode--transcript" data-transcript>
       {%- for paragraph in episode.paragraphs %}
-        {%- if loop.index0 > 0 and loop.index0 in episode.groupStarts %}
+        {%- if loop.index0 in episode.groupStarts %}
           <hr>
         {%- endif %}
         <p>
           {%- for segment in paragraph %}
-            {%- if episode.sections %}
-              {%- for section in episode.sections %}
-                {%- if section.segmentIndex == segment.id %}
-                  <h2 class="section-title" id="section-{{ section.title | slug }}">
-                    {{- loop.index }}. {{ section.title -}}
-                  </h2>
-                {%- endif %}
-              {%- endfor %}
-            {%- endif %}
             {%- if segment.timelineMarker %}
               <time class="timeline-marker" data-time="{{ segment.start }}">
                 {{- segment.start | formatRoundedTimecode -}}

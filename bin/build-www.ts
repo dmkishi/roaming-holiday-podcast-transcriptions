@@ -1,8 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
-// Summary-derived section matching temporarily shelved — see plan.
-// import { matchSections } from '@lib/build-www/match-sections.js';
 import { downloadImage } from '@lib/build-www/images.js';
 import { loadOverrides } from '@lib/build-www/overrides.js';
 import { collectStats } from '@lib/build-www/stats.js';
@@ -49,15 +47,6 @@ for (const { metadata, paragraph, groupStarts } of artifacts) {
     printAndLog.warn(`#${ep}: Image download failed - ${image.error}`);
   }
 
-  // Summary-derived section matching temporarily shelved — see plan.
-  // const { sections, unmatched } = matchSections(summary.sections, paragraph.segments);
-  // if (unmatched.length > 0) {
-  //   printAndLog.warn([
-  //     `#${ep}: ${unmatched.length} unmatched ${pluralize(unmatched.length, 'section')}:`,
-  //     ...unmatched.map((title) => `  "${title}"`),
-  //   ]);
-  // }
-
   const paragraphs = addTimelineMarkers(paragraph.segments);
   const override = overrides.get(ep);
 
@@ -72,10 +61,7 @@ for (const { metadata, paragraph, groupStarts } of artifacts) {
     imagePath: image.path,
     paragraphs,
     groupStarts,
-    // sections,
     // summary: summary.summary,
-    // places: summary.places,
-    // keywords: summary.keywords,
     location: override?.location,
     youtube: override?.youtube,
   };
