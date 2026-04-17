@@ -4,10 +4,10 @@ import { dirname, join } from 'node:path';
 import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 import {
   MetadataFileSchema,
+  VadFileSchema,
+  TranscriptFileSchema,
   ParagraphFileSchema,
   ParagraphGroupFileSchema,
-  TranscriptFileSchema,
-  VadFileSchema,
 } from '@lib/shared/schemas.js';
 import { formatEpisodeNumber, toPrettyJson } from '@lib/shared/strings.js';
 
