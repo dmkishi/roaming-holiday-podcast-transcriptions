@@ -1,5 +1,5 @@
-import type { RssItem } from '@lib/shared/rss.js';
 import { type Duration, parseDuration } from '@lib/shared/duration.js';
+import type { RssItem } from '@lib/shared/rss.js';
 
 export interface Episode {
   episodeNumber: number;

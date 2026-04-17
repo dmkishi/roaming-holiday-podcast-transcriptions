@@ -1,7 +1,7 @@
 import type { z } from 'zod';
-import { hasVad, readTranscript, readVad, writeParagraph } from '@lib/shared/artifacts.js';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
+import { hasVad, readTranscript, readVad, writeParagraph } from '@lib/shared/artifacts.js';
 import type { TranscriptFileSchema } from '@lib/shared/schemas.js';
 import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 

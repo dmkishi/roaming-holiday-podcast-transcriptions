@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
-import { readTranscript, writeSummary } from '@lib/shared/artifacts.js';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
+import { readTranscript, writeSummary } from '@lib/shared/artifacts.js';
 import { SUMMARY_PROMPT } from '@lib/config/llm.js';
 
 export interface Summary {

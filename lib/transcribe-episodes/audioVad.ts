@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process';
 import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
-import { hasVad, paths, writeVad } from '@lib/shared/artifacts.js';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
+import { hasVad, paths, writeVad } from '@lib/shared/artifacts.js';
 import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/shared/paths.js';
 import { VadOutputSchema } from '@lib/shared/schemas.js';
 import { MIN_GAP_SECONDS } from '@lib/config/audio.js';

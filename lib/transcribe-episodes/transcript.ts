@@ -2,18 +2,18 @@ import { execFile } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
-import { hasTranscript, hasVad, readVad, writeTranscript } from '@lib/shared/artifacts.js';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import {
   chooseCutPoints, splitMp3IntoChunks, whisperChunk, mergeChunkTranscripts,
 } from '@lib/transcribe-episodes/audioChunk.js';
-import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
+import { hasTranscript, hasVad, readVad, writeTranscript } from '@lib/shared/artifacts.js';
+import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import { TMP_DIR, VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
-import { WHISPER_PROMPT } from '@lib/config/llm.js';
 import {
   CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
 } from '@lib/config/audio.js';
+import { WHISPER_PROMPT } from '@lib/config/llm.js';
 
 export interface ToTranscribe {
   episodeNumber: number;

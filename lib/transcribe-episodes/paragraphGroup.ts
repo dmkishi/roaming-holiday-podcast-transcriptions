@@ -1,8 +1,8 @@
+import type { FailResponse } from '@lib/transcribe-episodes/types.js';
+import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
 import {
   hasParagraph, hasVad, readParagraph, readVad, writeParagraphGroup,
 } from '@lib/shared/artifacts.js';
-import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
 import { PARAGRAPH_GROUP_GAP_SECONDS } from '@lib/config/audio.js';
 
 export interface ParagraphGroups {
