@@ -48,6 +48,12 @@ export interface Transcript {
 
 export type TranscriptResponse = FailResponse | Transcript;
 
+// Shared shape consumed by paragraph, paragraphGroup, and summarize stages.
+export type TailItem = Pick<
+  Transcript,
+  'episodeNumber' | 'title' | 'description'
+>;
+
 export const PROMPT_TOKEN_LIMIT = 224;
 const execFileAsync = promisify(execFile);
 

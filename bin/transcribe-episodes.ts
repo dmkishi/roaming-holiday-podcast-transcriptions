@@ -6,7 +6,7 @@ import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
 import { runVad } from '@lib/transcribe-episodes/audioVad.js';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
-  type ToTranscribe, type Transcript,
+  type ToTranscribe, type Transcript, type TailItem,
 } from '@lib/transcribe-episodes/transcript.js';
 import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
@@ -17,7 +17,6 @@ import {
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
-import type { TailItem } from '@lib/transcribe-episodes/types.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
 
 // =============================================================================
