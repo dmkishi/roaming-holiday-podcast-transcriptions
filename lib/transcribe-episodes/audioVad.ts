@@ -1,9 +1,9 @@
 import { execFile } from 'node:child_process';
-import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
+import { decodePcm } from '@lib/transcribe-episodes/audioPcm.js';
 import { hasVad, paths, writeVad } from '@lib/shared/artifacts.js';
-import { TMP_DIR, VENV_PYTHON, VAD_SCRIPT, FFMPEG } from '@lib/shared/paths.js';
+import { VENV_PYTHON, VAD_SCRIPT } from '@lib/shared/paths.js';
 import { VadOutputSchema } from '@lib/shared/schemas.js';
 import { MIN_GAP_SECONDS } from '@lib/config/audio.js';
 
@@ -116,21 +116,6 @@ export function gapsFromSpeech(
 // I/O helpers
 // -----------------------------------------------------------------------------
 /**
- * Decode the source MP3 to 16 kHz mono s16le PCM at `/tmp/<base>.pcm`.
- */
-export async function decodePcm(mp3Path: string): Promise<string> {
-  await checkFfmpegInstalled();
-
-  const pcmPath = join(TMP_DIR, `${tmpBase(mp3Path)}.pcm`);
-  await execFileAsync(FFMPEG, [
-    '-y', '-i', mp3Path,
-    '-ac', '1', '-ar', '16000', '-f', 's16le',
-    pcmPath,
-  ]);
-  return pcmPath;
-}
-
-/**
  * Run Silero VAD on a PCM file and return total duration and speech intervals.
  */
 export async function detectSpeechIntervals(
@@ -142,22 +127,4 @@ export async function detectSpeechIntervals(
   const { stdout } = await execFileAsync(VENV_PYTHON, [VAD_SCRIPT, pcmPath]);
   const { duration, speech } = VadOutputSchema.parse(JSON.parse(stdout));
   return { audioDuration: duration, speechIntervals: speech };
-}
-
-/**
- * Verify that ffmpeg is available on PATH.
- */
-async function checkFfmpegInstalled(): Promise<void> {
-  try {
-    await execFileAsync(FFMPEG, ['-version']);
-  } catch {
-    throw new Error(
-      'ffmpeg not found on PATH.\n' +
-      'Install it: brew install ffmpeg',
-    );
-  }
-}
-
-function tmpBase(mp3Path: string): string {
-  return basename(mp3Path).replace(/\.[^.]+$/, '');
 }

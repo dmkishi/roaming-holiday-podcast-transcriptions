@@ -8,6 +8,7 @@ export const OUTPUTS_DIR = resolve(ROOT, 'episodes');
 export const VENV_PYTHON = resolve(ROOT, '.venv/bin/python');
 export const VENV_WHISPER = resolve(ROOT, '.venv/bin/whisper');
 export const VAD_SCRIPT = resolve(ROOT, 'scripts/vad.py');
+export const FADE_SCRIPT = resolve(ROOT, 'scripts/fade.py');
 export const FFMPEG = 'ffmpeg';
 
 export const SITE_DIR = resolve(ROOT, 'www/src');

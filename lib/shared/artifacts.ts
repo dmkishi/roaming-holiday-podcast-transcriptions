@@ -5,6 +5,7 @@ import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 import {
   MetadataFileSchema,
   VadFileSchema,
+  FadeFileSchema,
   TranscriptFileSchema,
   ParagraphFileSchema,
   ParagraphGroupFileSchema,
@@ -13,6 +14,7 @@ import { formatEpisodeNumber, toPrettyJson } from '@lib/shared/strings.js';
 
 export type MetadataFile = z.infer<typeof MetadataFileSchema>;
 export type VadFile = z.infer<typeof VadFileSchema>;
+export type FadeFile = z.infer<typeof FadeFileSchema>;
 export type TranscriptFile = z.infer<typeof TranscriptFileSchema>;
 export type ParagraphFile = z.infer<typeof ParagraphFileSchema>;
 export type ParagraphGroupFile = z.infer<typeof ParagraphGroupFileSchema>;
@@ -20,6 +22,7 @@ export type ParagraphGroupFile = z.infer<typeof ParagraphGroupFileSchema>;
 const SUFFIX = {
   metadata: '.metadata.json',
   vad: '.vad.json',
+  fade: '.fade.json',
   transcript: '.transcript.json',
   paragraph: '.transcript.paragraph.json',
   paragraphGroup: '.transcript.paragraphGroup.json',
@@ -33,6 +36,7 @@ function pathFor(episodeNumber: number, suffix: string): string {
 export function paths(episodeNumber: number): {
   metadata: string;
   vad: string;
+  fade: string;
   transcript: string;
   paragraph: string;
   paragraphGroup: string;
@@ -41,6 +45,7 @@ export function paths(episodeNumber: number): {
   return {
     metadata: pathFor(episodeNumber, SUFFIX.metadata),
     vad: pathFor(episodeNumber, SUFFIX.vad),
+    fade: pathFor(episodeNumber, SUFFIX.fade),
     transcript: pathFor(episodeNumber, SUFFIX.transcript),
     paragraph: pathFor(episodeNumber, SUFFIX.paragraph),
     paragraphGroup: pathFor(episodeNumber, SUFFIX.paragraphGroup),
@@ -50,6 +55,7 @@ export function paths(episodeNumber: number): {
 
 export const hasMetadata = (n: number): boolean => existsSync(pathFor(n, SUFFIX.metadata));
 export const hasVad = (n: number): boolean => existsSync(pathFor(n, SUFFIX.vad));
+export const hasFade = (n: number): boolean => existsSync(pathFor(n, SUFFIX.fade));
 export const hasTranscript = (n: number): boolean => existsSync(pathFor(n, SUFFIX.transcript));
 export const hasParagraph = (n: number): boolean => existsSync(pathFor(n, SUFFIX.paragraph));
 export const hasParagraphGroup = (n: number): boolean =>
@@ -70,6 +76,8 @@ export const readMetadata = (n: number): MetadataFile =>
   readJson(pathFor(n, SUFFIX.metadata), MetadataFileSchema);
 export const readVad = (n: number): VadFile =>
   readJson(pathFor(n, SUFFIX.vad), VadFileSchema);
+export const readFade = (n: number): FadeFile =>
+  readJson(pathFor(n, SUFFIX.fade), FadeFileSchema);
 export const readTranscript = (n: number): TranscriptFile =>
   readJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema);
 export const readParagraph = (n: number): ParagraphFile =>
@@ -83,6 +91,8 @@ export const writeMetadata = (n: number, data: MetadataFile): string =>
   writeJson(pathFor(n, SUFFIX.metadata), MetadataFileSchema, data);
 export const writeVad = (n: number, data: VadFile): string =>
   writeJson(pathFor(n, SUFFIX.vad), VadFileSchema, data);
+export const writeFade = (n: number, data: FadeFile): string =>
+  writeJson(pathFor(n, SUFFIX.fade), FadeFileSchema, data);
 export const writeTranscript = (n: number, data: TranscriptFile): string =>
   writeJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema, data);
 export const writeParagraph = (n: number, data: ParagraphFile): string =>

@@ -10,9 +10,10 @@ pnpm install
 
 # OpenAI Whisper is a Python package. (i) Create a Python venv (environment
 # manager) at `.venv` then (ii) pip install into it. Silero VAD is used to
-# split long audio files into chunks before transcription.
+# split long audio files into chunks before transcription. Essentia is used
+# to detect audio fades.
 python3 -m venv .venv
-.venv/bin/pip install openai-whisper silero-vad
+.venv/bin/pip install openai-whisper silero-vad essentia
 
 # ffmpeg is required for audio decoding and chunking.
 brew install ffmpeg

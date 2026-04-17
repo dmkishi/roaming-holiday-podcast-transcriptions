@@ -13,6 +13,7 @@ interface CliOptions {
   forceRss: boolean;
   forceDownload: boolean;
   forceVad: boolean;
+  forceFade: boolean;
   forceTranscribe: boolean;
 }
 
@@ -26,6 +27,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     'force-rss': boolean;
     'force-download': boolean;
     'force-vad': boolean;
+    'force-fade': boolean;
     'force-transcribe': boolean;
   }>(args.slice(2), {
     string: ['model', 'summary-model'],
@@ -36,6 +38,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-rss',
       'force-download',
       'force-vad',
+      'force-fade',
       'force-transcribe',
     ],
     default: {
@@ -47,6 +50,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-rss': false,
       'force-download': false,
       'force-vad': false,
+      'force-fade': false,
       'force-transcribe': false,
     },
   });
@@ -54,7 +58,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
   if (episodeNums.size === 0) {
     console.error(
-      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--only-paragraphs] [--only-summaries] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-transcribe]`,
+      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--only-paragraphs] [--only-summaries] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]`,
     );
     process.exit(1);
   }
@@ -67,6 +71,8 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
 
   // Forcing a transcription stage cascades to every downstream transcription
   // stage that consumes its output. Pipeline: rss → download → vad → transcribe.
+  // Fade runs in parallel with VAD (both consume the MP3); forcing download
+  // cascades into both, but forcing VAD does not force fade and vice versa.
   // `force-rss` is intentionally isolated: refetching the RSS only refreshes
   // metadata and does not invalidate downloaded MP3s.
   //
@@ -79,6 +85,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const forceRss = runTranscript && (forceAll || argv['force-rss']);
   const forceDownload = runTranscript && (forceAll || argv['force-download']);
   const forceVad = runTranscript && (forceDownload || argv['force-vad']);
+  const forceFade = runTranscript && (forceDownload || argv['force-fade']);
   const forceTranscribe = runTranscript && (forceVad || argv['force-transcribe']);
 
   return {
@@ -89,6 +96,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     forceRss,
     forceDownload,
     forceVad,
+    forceFade,
     forceTranscribe,
   };
 }

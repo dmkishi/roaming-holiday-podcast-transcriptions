@@ -32,3 +32,27 @@ export const CHUNK_MAX_WINDOW_MINUTES = 6;
  * Minimum non-speech duration (seconds) to count as a gap.
  */
 export const MIN_GAP_SECONDS = .4;
+
+// -----------------------------------------------------------------------------
+// Fade detection (Essentia)
+// -----------------------------------------------------------------------------
+/**
+ * Essentia `FadeDetection` thresholds expressed as fractions of the average
+ * RMS. Values above `cutoffHigh` mark the loud end of a fade; values below
+ * `cutoffLow` mark the quiet end.
+ */
+export const FADE_CUTOFF_HIGH = .85;
+export const FADE_CUTOFF_LOW = .2;
+
+/**
+ * Minimum fade duration (seconds) to keep. Shorter transitions are usually
+ * speech dynamics, not musical fades.
+ */
+export const FADE_MIN_LENGTH_SECONDS = 1.5;
+
+/**
+ * RMS analysis window. 2048 samples at 16 kHz is ~128 ms; hop of 1024 gives
+ * 50% overlap and an effective frame rate of ~15.6 fps.
+ */
+export const FADE_FRAME_SIZE = 2048;
+export const FADE_HOP_SIZE = 1024;

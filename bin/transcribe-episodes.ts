@@ -4,6 +4,7 @@ import { getAllRssItems } from '@lib/shared/rss.js';
 import { findEpisodes } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
 import { runVad } from '@lib/transcribe-episodes/audioVad.js';
+import { runFade } from '@lib/transcribe-episodes/audioFade.js';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript, type TailItem,
@@ -202,6 +203,22 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   print.emptyLine();
 
   // ===========================================================================
+  // Run fade detection (index audio fades)
+  // ===========================================================================
+  print.info('Running fade detection...');
+  for (const toTranscribe of toTranscribes) {
+    const res = await runFade(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceFade);
+    if (!res.ok) {
+      printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
+    } else if (res.status === 'alreadyExists') {
+      printLog.warn(`#${toTranscribe.episodeNumber}: Skipping - fade file already exists`);
+    } else {
+      printLog.info(`#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`);
+    }
+  }
+  print.emptyLine();
+
+  // ===========================================================================
   // Transcribe
   // ===========================================================================
   print.info('Transcribing...');
@@ -268,6 +285,7 @@ if (runParagraph) {
     printLog.info([
       `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
       `  Groups: ${formatNumber(res.stats.groups)}`,
+      `  Fades:  ${formatNumber(res.stats.fades)}`,
     ]);
   }
   print.emptyLine();

@@ -1,7 +1,9 @@
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
 import {
-  hasParagraph, hasVad, readParagraph, readVad, writeParagraphGroup,
+  hasFade, hasVad, hasParagraph,
+  readFade, readVad, readParagraph,
+  writeParagraphGroup,
 } from '@lib/shared/artifacts.js';
 import { PARAGRAPH_GROUP_GAP_SECONDS } from '@lib/config/audio.js';
 
@@ -11,16 +13,15 @@ export interface ParagraphGroups {
   path: string;
   stats: {
     groups: number;
+    fades: number;
   };
 }
 
 export type ParagraphGroupsResponse = FailResponse | ParagraphGroups;
 
 /**
- * Reads the paragraph and VAD sidecars and writes `*.paragraphGroup.json` which
- * lists paragraph indices where a new paragraph group starts according to the
- * intervening VAD silence is at least PARAGRAPH_GROUP_GAP_SECONDS. Always
- * overwrites.
+ * Reads the paragraph, VAD, and fade sidecars and writes `*.paragraphGroup.json`.
+ * Always overwrites.
  */
 export function writeParagraphGroups(
   transcript: TailItem,
@@ -34,12 +35,16 @@ export function writeParagraphGroups(
     if (!hasVad(episodeNumber)) {
       return { ok: false, error: `VAD file not found for #${episodeNumber}` };
     }
+    if (!hasFade(episodeNumber)) {
+      return { ok: false, error: `Fade file not found for #${episodeNumber}` };
+    }
 
     const { segments: paragraphs } = readParagraph(episodeNumber);
     const { gaps } = readVad(episodeNumber);
+    const { fades } = readFade(episodeNumber);
 
     const groupStarts = findGroupStarts(paragraphs, gaps, PARAGRAPH_GROUP_GAP_SECONDS);
-    const path = writeParagraphGroup(episodeNumber, { groupStarts });
+    const path = writeParagraphGroup(episodeNumber, { groupStarts, fades });
 
     return {
       ok: true,
@@ -47,6 +52,7 @@ export function writeParagraphGroups(
       path,
       stats: {
         groups: groupStarts.length + 1,
+        fades: fades.length,
       },
     };
   } catch (error) {

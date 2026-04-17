@@ -23,6 +23,19 @@ export const VadFileSchema = VadOutputSchema.extend({
   gaps: z.array(z.object({ start: z.number(), end: z.number(), duration: z.number() })),
 });
 
+const FadeSpanSchema = z.object({
+  start: z.number(),
+  end: z.number(),
+  type: z.enum(['in', 'out']),
+});
+
+export const FadeOutputSchema = z.object({
+  duration: z.number(),
+  fades: z.array(FadeSpanSchema),
+});
+
+export const FadeFileSchema = FadeOutputSchema;
+
 const SegmentSchema = z.object({
   id: z.number(),
   start: z.number(),
@@ -43,4 +56,5 @@ export const ParagraphFileSchema = z.object({
 
 export const ParagraphGroupFileSchema = z.object({
   groupStarts: z.array(z.number().int().nonnegative()),
+  fades: z.array(FadeSpanSchema),
 });
