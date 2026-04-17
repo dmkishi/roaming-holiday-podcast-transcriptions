@@ -162,7 +162,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
     const mp3 = await downloadMp3(toTranscribe, opts.forceDownload);
     if (mp3.status === 'failed') {
       toTranscribes = toTranscribes.filter((t) => t !== toTranscribe);
-      print.warn(`#${toTranscribe.episodeNumber}: Failed ${mp3.error ? ` - ${mp3.error}` : ''}`);
+      print.warn(`#${toTranscribe.episodeNumber}: Failed ${mp3.error ? `- ${mp3.error}` : ''}`);
     } else {
       const episodeNumber = toTranscribe.episodeNumber;
       const action = mp3.status === 'downloaded' ? 'Downloaded' : 'Already downloaded';
@@ -187,7 +187,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
     const res = await runVad(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceVad);
     if (!res.ok) {
       toTranscribes = toTranscribes.filter((t) => t !== toTranscribe);
-      printLog.warn(`#${toTranscribe.episodeNumber}: Failed${res.error ? ` - ${res.error}` : ''}`);
+      printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
     } else if (res.status === 'alreadyExists') {
       printLog.warn(`#${toTranscribe.episodeNumber}: Skipping - VAD file already exists`);
     } else {
@@ -219,7 +219,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
       ]);
       transcripts.push(res);
     } else {
-      printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? ` - ${res.error}` : ''}`);
+      printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
     }
   }
 
