@@ -8,10 +8,12 @@ Install
 ```sh
 pnpm install
 
-# OpenAI Whisper is a Python package. (i) Create a Python venv (environment
-# manager) at `.venv` then (ii) pip install into it. Silero VAD is used to
-# split long audio files into chunks before transcription. Essentia is used
-# to detect audio fades.
+# 1. Create a Python venv (environment manager) at `.venv`.
+# 2. pip install into it.
+#
+# Packages:
+#   - Silero VAD is used to split audio files into chunks before transcription.
+#   - Essentia is used to detect audio fades.
 python3 -m venv .venv
 .venv/bin/pip install openai-whisper silero-vad essentia
 
@@ -19,7 +21,7 @@ python3 -m venv .venv
 brew install ffmpeg
 
 # Copy the example env file and add your OpenAI API key (for summarizing
-# transcripts).
+# transcripts.)
 cp .env.example .env
 ```
 
@@ -34,31 +36,27 @@ metadata sidecar, transcript, and summary to `episodes/`.
 # Transcribe a single or multiple episodes
 pnpm transcribe 101 [102 103]
 
-# Use a different Whisper transcription model
+# Select models (defaults: Whisper `base`, OpenAI `gpt-4.1`)
 pnpm transcribe 101 --model small
+pnpm transcribe 101 --summary-model gpt-5.4-mini
 
-# Force stages to re-run
+# Skip the transcript pipeline and only re-run tail stages from existing
+# transcripts. Tail stages (paragraphs, paragraph groups, summary) always
+# regenerate when they run, so they have no force flags.
+pnpm transcribe 101 --only-paragraphs  # Rebuild paragraphs + groups only
+pnpm transcribe 101 --only-summaries   # Re-summarize only
+
+# Force transcript-pipeline stages to re-run. Forcing a stage cascades to
+# every downstream stage that consumes its output (rss → download → vad →
+# transcribe). `--force-rss` is isolated: refetching the feed only refreshes
+# metadata. Fade runs in the paragraph phase, so `--force-fade` is valid in
+# `--only-paragraphs` mode; `--force-download` also cascades into fade.
 pnpm transcribe 101 --force-rss         # Bypass the RSS feed ETag cache
 pnpm transcribe 101 --force-download    # Re-download the MP3
+pnpm transcribe 101 --force-vad         # Re-run VAD
+pnpm transcribe 101 --force-fade        # Re-run fade detection
 pnpm transcribe 101 --force-transcribe  # Re-generate the transcript
-pnpm transcribe 101 --force-summarize   # Re-generate the summary
 pnpm transcribe 101 --force-all
-```
-
-### Summarize
-Re-runs only the summarization stage without repeating earlier pipeline steps.
-Reads the transcript and metadata sidecar from episodes/ and writes the summary
-alongside them.
-
-```sh
-# Summarize a single or multiple episodes
-pnpm summarize 101 [102 103]
-
-# Use a different summarization model
-pnpm summarize 101 --model gpt-4.1-mini
-
-# Force overwrite if the summary already exists
-pnpm summarize 101 --force
 ```
 
 ### Build Site
@@ -107,7 +105,7 @@ Compare [pricing](https://developers.openai.com/api/docs/pricing) and [models](h
 
 Output Files
 --------------------------------------------------------------------------------
-All output goes to `transcripts/`. For episode 179 with `--model base`:
+All output goes to `episodes/`.
 
 - **Transcription**: `0179 [2026-03-18] Approaching Yinghanling in insane heat--base.json`
   Whisper's JSON output with full text, segment timestamps, and per-segment
