@@ -46,10 +46,10 @@ export async function runFade(
     }
 
     const pcmPath = await decodePcm(mp3Path);
-    const { duration, fades } = await detectFades(pcmPath);
+    const { fades } = await detectFades(pcmPath);
     const pairs = pairFades(fades, FADE_PAIR_MAX_GAP_SECONDS);
 
-    const fadePath = writeFade(episodeNumber, { duration, fades: pairs });
+    const fadePath = writeFade(episodeNumber, { fades: pairs });
 
     return {
       ok: true,
@@ -69,11 +69,11 @@ export async function runFade(
 // I/O helpers
 // -----------------------------------------------------------------------------
 /**
- * Run Essentia FadeDetection on a PCM file and return duration and fade spans.
+ * Run Essentia FadeDetection on a PCM file and return fade spans.
  */
 export async function detectFades(
   pcmPath: string,
-): Promise<{ duration: number; fades: FadeSpan[] }> {
+): Promise<{ fades: FadeSpan[] }> {
   const { stdout } = await execFileAsync(VENV_PYTHON, [
     FADE_SCRIPT,
     pcmPath,

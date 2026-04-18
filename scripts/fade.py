@@ -6,9 +6,12 @@ Usage:
         --cutoff-high 0.85 --cutoff-low 0.20 --min-length 1.5
 
 Prints JSON to stdout:
-    {"duration": 3600.5,
-     "fades": [{"start": 0.0, "end": 4.2, "type": "in"},
-               {"start": 3595.1, "end": 3600.3, "type": "out"}]}
+  {
+    "fades": [
+      { "start": 0.0, "end": 4.2, "type": "in" },
+      { "start": 3595.1, "end": 3600.3, "type": "out" }
+    ]
+  }
 """
 
 import argparse
@@ -39,7 +42,6 @@ def main() -> None:
     num_samples = len(raw) // BYTES_PER_SAMPLE
     samples = struct.unpack(f'<{num_samples}h', raw[:num_samples * BYTES_PER_SAMPLE])
     audio = np.asarray(samples, dtype=np.float32) / 32768.0
-    duration = num_samples / SAMPLE_RATE
 
     frame_rate = SAMPLE_RATE / args.hop_size
     rms = RMS()
@@ -75,7 +77,7 @@ def main() -> None:
                           'type': 'out'})
         fades.sort(key=lambda f: f['start'])
 
-    json.dump({'duration': round(duration, 3), 'fades': fades}, sys.stdout)
+    json.dump({'fades': fades}, sys.stdout)
 
 
 if __name__ == '__main__':

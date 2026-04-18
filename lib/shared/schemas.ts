@@ -39,12 +39,10 @@ const FadePairSchema = z.object({
 export type FadePair = z.infer<typeof FadePairSchema>;
 
 export const FadeOutputSchema = z.object({
-  duration: z.number(),
   fades: z.array(FadeSpanSchema),
 });
 
 export const FadeFileSchema = z.object({
-  duration: z.number(),
   fades: z.array(FadePairSchema),
 });
 
