@@ -6,7 +6,9 @@ import {
   chooseCutPoints, splitMp3IntoChunks, whisperChunk, mergeChunkTranscripts,
 } from '@lib/transcribe-episodes/audioChunk.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
-import { paths, hasTranscript, hasVad, readVad, writeTranscript } from '@lib/shared/artifacts.js';
+import {
+  paths, hasTranscript, hasVad, readVad, writeTranscript,
+} from '@lib/shared/artifacts.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import { VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
 import {
