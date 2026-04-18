@@ -28,13 +28,25 @@ const FadeSpanSchema = z.object({
   end: z.number(),
   type: z.enum(['in', 'out']),
 });
+export type FadeSpan = z.infer<typeof FadeSpanSchema>;
+
+const FadePairSchema = z.object({
+  outStart: z.number(),
+  outEnd: z.number(),
+  inStart: z.number(),
+  inEnd: z.number(),
+});
+export type FadePair = z.infer<typeof FadePairSchema>;
 
 export const FadeOutputSchema = z.object({
   duration: z.number(),
   fades: z.array(FadeSpanSchema),
 });
 
-export const FadeFileSchema = FadeOutputSchema;
+export const FadeFileSchema = z.object({
+  duration: z.number(),
+  fades: z.array(FadePairSchema),
+});
 
 const SegmentSchema = z.object({
   id: z.number(),
@@ -56,5 +68,5 @@ export const ParagraphFileSchema = z.object({
 
 export const ParagraphGroupFileSchema = z.object({
   groupStarts: z.array(z.number().int().nonnegative()),
-  fades: z.array(FadeSpanSchema),
+  fades: z.array(FadePairSchema),
 });

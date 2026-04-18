@@ -37,6 +37,13 @@ export const MIN_GAP_SECONDS = .4;
 // Fade detection (Essentia)
 // -----------------------------------------------------------------------------
 /**
+ * Maximum gap (seconds) between a fade-out's end and the following fade-in's
+ * start for the two to be treated as a single transition. Negative gaps
+ * (crossfades where the in begins before the out ends) are always accepted.
+ */
+export const FADE_PAIR_MAX_GAP_SECONDS = 2;
+
+/**
  * Essentia `FadeDetection` thresholds expressed as fractions of the average
  * RMS. Values above `cutoffHigh` mark the loud end of a fade; values below
  * `cutoffLow` mark the quiet end.
