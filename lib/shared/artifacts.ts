@@ -60,6 +60,7 @@ export function paths(episodeNumber: number): {
 }
 
 export const hasMetadata = (n: number): boolean => existsSync(pathFor(n, SUFFIX.metadata));
+export const hasMp3 = (n: number): boolean => existsSync(mp3PathFor(n));
 export const hasVad = (n: number): boolean => existsSync(pathFor(n, SUFFIX.vad));
 export const hasFade = (n: number): boolean => existsSync(pathFor(n, SUFFIX.fade));
 export const hasTranscript = (n: number): boolean => existsSync(pathFor(n, SUFFIX.transcript));

@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import pc from 'picocolors';
 import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/shared/rss.js';
@@ -14,7 +13,7 @@ import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
 import {
-  hasMetadata, readMetadata, writeMetadata, hasTranscript, hasFade, paths,
+  hasMetadata, readMetadata, writeMetadata, hasTranscript, hasFade, hasMp3, paths,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
@@ -270,7 +269,7 @@ if (runParagraph) {
     }
 
     const mp3Path = paths(item.episodeNumber).mp3;
-    if (!existsSync(mp3Path)) {
+    if (!hasMp3(item.episodeNumber)) {
       const { mp3Url } = readMetadata(item.episodeNumber);
       const mp3 = await downloadMp3(mp3Url, mp3Path, false);
       if (mp3.status === 'failed') {
