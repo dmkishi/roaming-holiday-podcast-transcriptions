@@ -1,5 +1,4 @@
 import { existsSync, statSync, writeFileSync } from 'node:fs';
-import type { ToTranscribe } from '@lib/transcribe-episodes/transcript.js';
 
 type Mp3Response =
   | {
@@ -14,11 +13,10 @@ type Mp3Response =
 const BYTES_PER_MB = 1024 * 1024;
 
 export async function downloadMp3(
-  toTranscribe: ToTranscribe,
+  url: string,
+  path: string,
   force: boolean,
 ): Promise<Mp3Response> {
-  const { mp3: { url, path } } = toTranscribe;
-
   if (!force && existsSync(path)) {
     return {
       status: 'alreadyDownloaded',

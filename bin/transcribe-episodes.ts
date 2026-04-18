@@ -160,7 +160,11 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   // ===========================================================================
   print.info('Downloading MP3s...');
   for (const toTranscribe of toTranscribes) {
-    const mp3 = await downloadMp3(toTranscribe, opts.forceDownload);
+    const mp3 = await downloadMp3(
+      toTranscribe.mp3.url,
+      toTranscribe.mp3.path,
+      opts.forceDownload,
+    );
     if (mp3.status === 'failed') {
       toTranscribes = toTranscribes.filter((t) => t !== toTranscribe);
       print.warn(`#${toTranscribe.episodeNumber}: Failed ${mp3.error ? `- ${mp3.error}` : ''}`);
