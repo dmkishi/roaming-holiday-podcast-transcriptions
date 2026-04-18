@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { OUTPUTS_DIR } from '@lib/shared/paths.js';
+import { OUTPUTS_DIR, TMP_DIR } from '@lib/shared/paths.js';
 import {
   MetadataFileSchema,
   VadFileSchema,
@@ -33,8 +33,13 @@ function pathFor(episodeNumber: number, suffix: string): string {
   return join(OUTPUTS_DIR, `${formatEpisodeNumber(episodeNumber)}${suffix}`);
 }
 
+function mp3PathFor(episodeNumber: number): string {
+  return join(TMP_DIR, `${formatEpisodeNumber(episodeNumber)}.mp3`);
+}
+
 export function paths(episodeNumber: number): {
   metadata: string;
+  mp3: string;
   vad: string;
   fade: string;
   transcript: string;
@@ -44,6 +49,7 @@ export function paths(episodeNumber: number): {
 } {
   return {
     metadata: pathFor(episodeNumber, SUFFIX.metadata),
+    mp3: mp3PathFor(episodeNumber),
     vad: pathFor(episodeNumber, SUFFIX.vad),
     fade: pathFor(episodeNumber, SUFFIX.fade),
     transcript: pathFor(episodeNumber, SUFFIX.transcript),
