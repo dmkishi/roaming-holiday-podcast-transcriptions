@@ -30,6 +30,8 @@ const FadeSpanSchema = z.object({
 });
 export type FadeSpan = z.infer<typeof FadeSpanSchema>;
 
+export const FadeSpansSchema = z.array(FadeSpanSchema);
+
 const FadePairSchema = z.object({
   outStart: z.number(),
   outEnd: z.number(),
@@ -37,10 +39,6 @@ const FadePairSchema = z.object({
   inEnd: z.number(),
 });
 export type FadePair = z.infer<typeof FadePairSchema>;
-
-export const FadeOutputSchema = z.object({
-  fades: z.array(FadeSpanSchema),
-});
 
 export const FadeFileSchema = z.object({
   fades: z.array(FadePairSchema),

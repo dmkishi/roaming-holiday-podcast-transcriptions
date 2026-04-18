@@ -6,12 +6,10 @@ Usage:
         --cutoff-high 0.85 --cutoff-low 0.20 --min-length 1.5
 
 Prints JSON to stdout:
-  {
-    "fades": [
-      { "start": 0.0, "end": 4.2, "type": "in" },
-      { "start": 3595.1, "end": 3600.3, "type": "out" }
-    ]
-  }
+  [
+    { "start": 0.0, "end": 4.2, "type": "in" },
+    { "start": 3595.1, "end": 3600.3, "type": "out" }
+  ]
 """
 
 import argparse
@@ -77,7 +75,7 @@ def main() -> None:
                           'type': 'out'})
         fades.sort(key=lambda f: f['start'])
 
-    json.dump({'fades': fades}, sys.stdout)
+    json.dump(fades, sys.stdout)
 
 
 if __name__ == '__main__':

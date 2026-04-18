@@ -4,7 +4,7 @@ import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { decodePcm } from '@lib/transcribe-episodes/audioPcm.js';
 import { hasFade, paths, writeFade } from '@lib/shared/artifacts.js';
 import { VENV_PYTHON, FADE_SCRIPT } from '@lib/shared/paths.js';
-import { FadeOutputSchema, type FadePair, type FadeSpan } from '@lib/shared/schemas.js';
+import { FadeSpansSchema, type FadeSpan, type FadePair } from '@lib/shared/schemas.js';
 import {
   FADE_PAIR_MAX_GAP_SECONDS,
   FADE_CUTOFF_HIGH,
@@ -46,10 +46,10 @@ export async function runFade(
     }
 
     const pcmPath = await decodePcm(mp3Path);
-    const { fades } = await detectFades(pcmPath);
     const pairs = pairFades(fades, FADE_PAIR_MAX_GAP_SECONDS);
 
     const fadePath = writeFade(episodeNumber, { fades: pairs });
+    const fades = await detectFades(pcmPath);
 
     return {
       ok: true,
@@ -71,9 +71,7 @@ export async function runFade(
 /**
  * Run Essentia FadeDetection on a PCM file and return fade spans.
  */
-export async function detectFades(
-  pcmPath: string,
-): Promise<{ fades: FadeSpan[] }> {
+export async function detectFades(pcmPath: string): Promise<FadeSpan[]> {
   const { stdout } = await execFileAsync(VENV_PYTHON, [
     FADE_SCRIPT,
     pcmPath,
@@ -83,7 +81,7 @@ export async function detectFades(
     '--cutoff-low', String(FADE_CUTOFF_LOW),
     '--min-length', String(FADE_MIN_LENGTH_SECONDS),
   ]);
-  return FadeOutputSchema.parse(JSON.parse(stdout));
+  return FadeSpansSchema.parse(JSON.parse(stdout));
 }
 
 // -----------------------------------------------------------------------------
