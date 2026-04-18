@@ -71,21 +71,24 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
 
   // Forcing a transcription stage cascades to every downstream transcription
   // stage that consumes its output. Pipeline: rss → download → vad → transcribe.
-  // Fade runs in parallel with VAD (both consume the MP3); forcing download
-  // cascades into both, but forcing VAD does not force fade and vice versa.
   // `force-rss` is intentionally isolated: refetching the RSS only refreshes
   // metadata and does not invalidate downloaded MP3s.
+  //
+  // Fade runs in the paragraph phase (not the transcript pipeline), so
+  // `--force-fade` is valid in `--only-paragraphs` mode. Forcing download
+  // still cascades into fade, since a re-downloaded MP3 invalidates any fade
+  // sidecar derived from the prior file.
   //
   // Tail stages (paragraph, paragraphGroup, summary) always regenerate when
   // they run, so they have no force flags.
   //
-  // `--only-*` short-circuits the transcript pipeline, so transcription force
-  // flags are inert in that mode and silently ignored.
+  // `--only-*` short-circuits the transcript pipeline, so transcript-stage
+  // force flags are inert in that mode and silently ignored.
   const forceAll = runTranscript && argv['force-all'];
   const forceRss = runTranscript && (forceAll || argv['force-rss']);
   const forceDownload = runTranscript && (forceAll || argv['force-download']);
   const forceVad = runTranscript && (forceDownload || argv['force-vad']);
-  const forceFade = runTranscript && (forceDownload || argv['force-fade']);
+  const forceFade = runParagraph && (forceDownload || argv['force-fade']);
   const forceTranscribe = runTranscript && (forceVad || argv['force-transcribe']);
 
   return {

@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import pc from 'picocolors';
 import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/shared/rss.js';
@@ -13,7 +14,7 @@ import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
 import {
-  hasMetadata, readMetadata, writeMetadata, hasTranscript, paths,
+  hasMetadata, readMetadata, writeMetadata, hasTranscript, hasFade, paths,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
@@ -207,22 +208,6 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   print.emptyLine();
 
   // ===========================================================================
-  // Run fade detection (index audio fades)
-  // ===========================================================================
-  print.info('Running fade detection...');
-  for (const toTranscribe of toTranscribes) {
-    const res = await runFade(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceFade);
-    if (!res.ok) {
-      printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
-    } else if (res.status === 'alreadyExists') {
-      printLog.warn(`#${toTranscribe.episodeNumber}: Skipping - fade file already exists`);
-    } else {
-      printLog.info(`#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`);
-    }
-  }
-  print.emptyLine();
-
-  // ===========================================================================
   // Transcribe
   // ===========================================================================
   print.info('Transcribing...');
@@ -274,6 +259,37 @@ if (runParagraph) {
       `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
       `  Paragraphs: ${formatNumber(res.stats.paragraphs)}`,
     ]);
+  }
+  print.emptyLine();
+
+  print.info('Running fade detection...');
+  for (const item of tailItems) {
+    if (!opts.forceFade && hasFade(item.episodeNumber)) {
+      printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
+      continue;
+    }
+
+    const mp3Path = paths(item.episodeNumber).mp3;
+    if (!existsSync(mp3Path)) {
+      const { mp3Url } = readMetadata(item.episodeNumber);
+      const mp3 = await downloadMp3(mp3Url, mp3Path, false);
+      if (mp3.status === 'failed') {
+        printLog.warn(
+          `#${item.episodeNumber}: MP3 download failed ${mp3.error ? `- ${mp3.error}` : ''}`,
+        );
+        continue;
+      }
+      printLog.info(`#${item.episodeNumber}: Downloaded "${mp3Path}" (${mp3.sizeMB} MB)`);
+    }
+
+    const res = await runFade(item.episodeNumber, mp3Path, opts.forceFade);
+    if (!res.ok) {
+      printLog.warn(`#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
+    } else if (res.status === 'alreadyExists') {
+      printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
+    } else {
+      printLog.info(`#${item.episodeNumber}: Saved "${toRelative(res.path)}"`);
+    }
   }
   print.emptyLine();
 
