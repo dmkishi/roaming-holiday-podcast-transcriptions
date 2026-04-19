@@ -66,7 +66,8 @@ eleventyComputed:
         {%- if loop.index0 in episode.gapStarts %}
           <hr>
         {%- endif %}
-        <p>
+        {# Numeric IDs is bad practice but, here, is strictly for dev usage. #}
+        <p id="{{ loop.index0 }}">
           {%- for segment in paragraph %}
             {%- if segment.timelineMarker %}
               <time class="timeline-marker" data-time="{{ segment.start }}">
