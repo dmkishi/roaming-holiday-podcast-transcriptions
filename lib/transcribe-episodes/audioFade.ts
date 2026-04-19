@@ -4,7 +4,7 @@ import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { decodePcm } from '@lib/transcribe-episodes/audioPcm.js';
 import { hasFade, paths, writeFade } from '@lib/shared/artifacts.js';
 import { VENV_PYTHON, FADE_SCRIPT } from '@lib/shared/paths.js';
-import { FadeSpansSchema, type FadeSpan, type FadePair } from '@lib/shared/schemas.js';
+import { FadesSchema, type Fade, type FadePair } from '@lib/shared/schemas.js';
 import {
   FADE_PAIR_MAX_GAP_SECONDS,
   FADE_CUTOFF_HIGH,
@@ -70,7 +70,7 @@ export async function runFade(
 /**
  * Run Essentia FadeDetection on a PCM file and return fade spans.
  */
-export async function detectFades(pcmPath: string): Promise<FadeSpan[]> {
+export async function detectFades(pcmPath: string): Promise<Fade[]> {
   const { stdout } = await execFileAsync(VENV_PYTHON, [
     FADE_SCRIPT,
     pcmPath,
@@ -80,7 +80,7 @@ export async function detectFades(pcmPath: string): Promise<FadeSpan[]> {
     '--cutoff-low', String(FADE_CUTOFF_LOW),
     '--min-length', String(FADE_MIN_LENGTH_SECONDS),
   ]);
-  return FadeSpansSchema.parse(JSON.parse(stdout));
+  return FadesSchema.parse(JSON.parse(stdout));
 }
 
 // -----------------------------------------------------------------------------
@@ -91,7 +91,7 @@ export async function detectFades(pcmPath: string): Promise<FadeSpan[]> {
  * gaps (the fade-in begins before the fade-out ends) are always kept since they
  * represent crossfades. Unpaired fades are discarded.
  */
-export function pairFades(fades: readonly FadeSpan[], maxGap: number): FadePair[] {
+export function pairFades(fades: readonly Fade[], maxGap: number): FadePair[] {
   const sorted = fades.toSorted((a, b) => a.start - b.start);
   const pairs: FadePair[] = [];
   for (let i = 0; i < sorted.length; i++) {

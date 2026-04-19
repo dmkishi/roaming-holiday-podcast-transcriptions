@@ -23,14 +23,14 @@ export const VadFileSchema = VadOutputSchema.extend({
   gaps: z.array(z.object({ start: z.number(), end: z.number(), duration: z.number() })),
 });
 
-const FadeSpanSchema = z.object({
+const FadeSchema = z.object({
   start: z.number(),
   end: z.number(),
   type: z.enum(['in', 'out']),
 });
-export type FadeSpan = z.infer<typeof FadeSpanSchema>;
+export type Fade = z.infer<typeof FadeSchema>;
 
-export const FadeSpansSchema = z.array(FadeSpanSchema);
+export const FadesSchema = z.array(FadeSchema);
 
 const FadePairSchema = z.object({
   outStart: z.number(),
