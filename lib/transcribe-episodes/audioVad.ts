@@ -26,8 +26,8 @@ const execFileAsync = promisify(execFile);
 // -----------------------------------------------------------------------------
 /**
  * Run Silero VAD on an episode MP3 to list speech intervals and gaps. Writes
- * the result to `<code>.vad.json`. Skips if the file already exists (unless
- * the `force` option is true.)
+ * the result to `<code>.audio-vad.json`. Skips if the file already exists
+ * (unless the `force` option is true.)
  */
 export async function runVad(
   episodeNumber: number,

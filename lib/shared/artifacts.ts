@@ -21,8 +21,8 @@ export type ParagraphGroupFile = z.infer<typeof ParagraphGroupFileSchema>;
 
 const SUFFIX = {
   metadata: '.metadata.json',
-  vad: '.vad.json',
-  fade: '.fade.json',
+  vad: '.audio-vad.json',
+  fade: '.audio-fade.json',
   transcript: '.transcript.json',
   paragraph: '.transcript.paragraph.json',
   paragraphGroup: '.transcript.paragraphGroup.json',

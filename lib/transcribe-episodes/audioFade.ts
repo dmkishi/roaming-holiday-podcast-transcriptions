@@ -27,8 +27,8 @@ const execFileAsync = promisify(execFile);
 // -----------------------------------------------------------------------------
 /**
  * Run Essentia fade detection on an episode MP3 to list music fade-in/fade-out
- * spans. Writes the result to `<code>.fade.json`. Skips if the file already
- * exists (unless the `force` option is true.)
+ * spans. Writes the result to `<code>.audio-fade.json`. Skips if the file
+ * already exists (unless the `force` option is true.)
  */
 export async function runFade(
   episodeNumber: number,

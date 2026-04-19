@@ -6,7 +6,7 @@ describe('paths', () => {
   test('produces correct filenames for a basic episode', () => {
     const p = paths(123);
     expect(basename(p.metadata)).toBe('123.metadata.json');
-    expect(basename(p.vad)).toBe('123.vad.json');
+    expect(basename(p.vad)).toBe('123.audio-vad.json');
     expect(basename(p.transcript)).toBe('123.transcript.json');
     expect(basename(p.paragraph)).toBe('123.transcript.paragraph.json');
     expect(basename(p.paragraphGroup)).toBe('123.transcript.paragraphGroup.json');
