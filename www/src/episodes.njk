@@ -63,7 +63,7 @@ eleventyComputed:
 
     <section class="episode--transcript" data-transcript>
       {%- for paragraph in episode.paragraphs %}
-        {%- if loop.index0 in episode.groupStarts %}
+        {%- if loop.index0 in episode.gapStarts %}
           <hr>
         {%- endif %}
         <p>
