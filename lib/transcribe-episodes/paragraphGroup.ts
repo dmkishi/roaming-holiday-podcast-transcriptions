@@ -1,5 +1,6 @@
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
+import type { FadePair } from '@lib/shared/schemas.js';
 import {
   hasFade, hasVad, hasParagraph,
   readFade, readVad, readParagraph,
@@ -43,10 +44,11 @@ export function writeParagraphGroups(
     const { gaps } = readVad(episodeNumber);
     const { fades } = readFade(episodeNumber);
     const groupStarts = findGroupStarts(paragraphs, gaps, PARAGRAPH_GROUP_GAP_SECONDS);
+    const fadePairStarts = findFadePairStarts(paragraphs, fades);
 
     const path = writeParagraphGroup(episodeNumber, {
       gapStarts: groupStarts,
-      fadePairStarts: fades,
+      fadePairStarts,
     });
 
     return {
@@ -90,4 +92,24 @@ export function findGroupStarts(
     if (groupStarts.at(-1) !== i) groupStarts.push(i);
   }
   return groupStarts;
+}
+
+/**
+ * For each fade pair, finds the first paragraph whose start lies within
+ * `[outStart, inEnd]`, i.e. a paragraph that begins while audio plays over it
+ * and records its index. Pairs with no overlapping paragraph start are
+ * skipped.
+ */
+export function findFadePairStarts(
+  paragraphs: Paragraph[],
+  fadePairs: readonly FadePair[],
+): number[] {
+  const starts = paragraphs.map((p) => p[0]!.start);
+  const fadePairStarts: number[] = [];
+  for (const pair of fadePairs) {
+    const i = starts.findIndex((s) => s >= pair.outStart && s <= pair.inEnd);
+    if (i === -1) continue;
+    if (fadePairStarts.at(-1) !== i) fadePairStarts.push(i);
+  }
+  return fadePairStarts;
 }
