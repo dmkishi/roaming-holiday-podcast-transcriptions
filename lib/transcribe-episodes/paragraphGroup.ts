@@ -42,8 +42,8 @@ export function writeParagraphGroups(
     const { segments: paragraphs } = readParagraph(episodeNumber);
     const { gaps } = readVad(episodeNumber);
     const { fades } = readFade(episodeNumber);
-
     const groupStarts = findGroupStarts(paragraphs, gaps, PARAGRAPH_GROUP_GAP_SECONDS);
+
     const path = writeParagraphGroup(episodeNumber, {
       gapStarts: groupStarts,
       fadePairStarts: fades,
