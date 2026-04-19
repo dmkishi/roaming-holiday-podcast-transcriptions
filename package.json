@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "transcribe": "tsx --env-file=.env bin/transcribe-episodes.ts",
-    "www:build": "tsx bin/build-www.ts && eleventy",
-    "www:dev": "open http://localhost:8080 & eleventy --serve",
+    "build-www": "tsx bin/build-www.ts && eleventy",
+    "dev-www": "open http://localhost:8080 & eleventy --serve",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
