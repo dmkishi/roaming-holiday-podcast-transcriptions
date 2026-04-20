@@ -331,19 +331,19 @@ a {
     margin-top: 1.4em;
   }
 
+  span[data-start] {
+    cursor: default;
+
+    &:hover {
+      background: var(--color-tint);
+      border-radius: 2px;
+    }
+  }
+
   hr {
     width: 33%;
     margin: 3rem auto;
   }
-}
-
-.episode--transcript span[data-start] {
-  cursor: default;
-}
-
-.episode--transcript span[data-start]:hover {
-  background: var(--color-tint);
-  border-radius: 2px;
 }
 
 .timeline-marker {
