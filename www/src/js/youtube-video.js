@@ -5,7 +5,7 @@
   if (!video) return;
 
   initMiniPlayer(video);
-  initSeekOnDoubleClick(video);
+  initTranscriptSync(video);
 
   /**
    * Control mini-player. Observe a placeholder "sentinel" instead of the
@@ -50,10 +50,11 @@
   }
 
   /**
-   * Double-clicking a transcript segment seeks the video to that timecode
-   * and starts playback.
+   * - Double-clicking a transcript segment seeks the video to that timecode and
+   *   starts playback.
+   * - Show active playback segment.
    */
-  function initSeekOnDoubleClick(video) {
+  function initTranscriptSync(video) {
     const transcript = document.querySelector('[data-transcript]');
     if (!transcript) return;
 
@@ -61,8 +62,19 @@
     apiScript.src = 'https://www.youtube.com/iframe_api';
     document.head.appendChild(apiScript);
 
-    window.onYouTubeIframeAPIReady = function () {
-      const player = new YT.Player(video, {
+    const spans = Array.from(transcript.querySelectorAll('span[data-start]'))
+      .map(function(el) {
+        return {
+          el,
+          start: parseFloat(el.dataset.start),
+        };
+      });
+    let currentIndex = -1;
+    let intervalId = null;
+    let player;
+
+    window.onYouTubeIframeAPIReady = function() {
+      player = new YT.Player(video, {
         events: {
           onReady: function() {
             transcript.addEventListener('dblclick', function(evt) {
@@ -72,8 +84,36 @@
               player.playVideo();
             });
           },
+          onStateChange: function(evt) {
+            if (evt.data === YT.PlayerState.PLAYING) {
+              if (!intervalId) intervalId = setInterval(updateActiveSpan, 250);
+            } else {
+              if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+              }
+              updateActiveSpan();
+            }
+          },
         },
       });
     };
+
+    function updateActiveSpan() {
+      if (!spans.length || !player) return;
+      const t = player.getCurrentTime();
+
+      let i = currentIndex;
+      while (i + 1 < spans.length && spans[i + 1].start <= t) i++;
+      while (i >= 0 && spans[i].start > t) i--;
+      if (i === currentIndex) return;
+
+      if (currentIndex >= 0) spans[currentIndex].el.classList.remove('is-active');
+      if (i >= 0) {
+        spans[i].el.classList.add('is-active');
+        spans[i].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+      currentIndex = i;
+    }
   }
 })();

@@ -20,7 +20,8 @@
   --color-bg: #f0ead6;
   --color-black: #1c1917;
   --color-black-light: oklch(from var(--color-black) calc(l + .333) c h);
-  --color-tint: rgba(from var(--color-black) r g b / 5%);
+  --color-tint-1: rgba(from var(--color-black) r g b / 5%);
+  --color-tint-2: rgba(from var(--color-black) r g b / 15%);
   --color-warning: rgb(213, 105, 105);
 }
 
@@ -53,7 +54,7 @@ a {
   transition: background-color .2s ease;
 
   &:hover {
-    background-color: var(--color-tint);
+    background-color: var(--color-tint-1);
     transition: background-color 0s ease;
   }
 
@@ -335,8 +336,15 @@ a {
     cursor: default;
 
     &:hover {
-      background: var(--color-tint);
+      background: var(--color-tint-1);
       border-radius: 2px;
+    }
+
+    &.is-active {
+      text-decoration: underline;
+      text-decoration-thickness: 3px;
+      text-decoration-color: var(--color-tint-2);
+      text-decoration-skip-ink: none;
     }
   }
 
@@ -424,7 +432,7 @@ a {
   grid-template-columns: max-content 1fr;
   margin-block: var(--gutter);
   padding: 1.125rem 2rem 1.666rem;
-  background-color: var(--color-tint);
+  background-color: var(--color-tint-1);
   font-style: italic;
 
   section {
