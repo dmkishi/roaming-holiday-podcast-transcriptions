@@ -79,6 +79,11 @@ export default function(eleventyConfig) {
     return content;
   });
 
+  /**
+   * Resize an image to the given width and return the output URL.
+   * @example
+   * {% imageUrl 'img/cover.jpg', 600 %} // => "/img/cover-600w.webp"
+   */
   eleventyConfig.addShortcode('imageUrl', async (src, width) => {
     const input = path.join('www/src', src);
     const subdir = path.relative('img', path.dirname(src));
