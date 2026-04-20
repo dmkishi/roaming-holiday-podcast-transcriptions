@@ -1,4 +1,4 @@
-(function () {
+(function() {
   'use strict';
 
   var transcript = document.querySelector('[data-transcript]');
@@ -19,21 +19,21 @@
     return mins + ':' + String(secs).padStart(2, '0');
   }
 
-  transcript.addEventListener('mouseover', function (e) {
-    var span = e.target.closest('span[data-start]');
+  transcript.addEventListener('mouseover', function(evt) {
+    var span = evt.target.closest('span[data-start]');
     if (!span) return;
     tooltip.textContent = formatTime(parseFloat(span.dataset.start));
     tooltip.hidden = false;
   });
 
-  transcript.addEventListener('mousemove', function (e) {
+  transcript.addEventListener('mousemove', function(evt) {
     if (tooltip.hidden) return;
-    tooltip.style.left = e.clientX + 12 + 'px';
-    tooltip.style.top = e.clientY - 28 + 'px';
+    tooltip.style.left = evt.clientX + 12 + 'px';
+    tooltip.style.top = evt.clientY - 28 + 'px';
   });
 
-  transcript.addEventListener('mouseout', function (e) {
-    var span = e.target.closest('span[data-start]');
+  transcript.addEventListener('mouseout', function(evt) {
+    var span = evt.target.closest('span[data-start]');
     if (!span) return;
     tooltip.hidden = true;
   });

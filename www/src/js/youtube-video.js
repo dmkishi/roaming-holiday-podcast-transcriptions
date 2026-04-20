@@ -1,4 +1,4 @@
-(function () {
+(function() {
   'use strict';
 
   const video = document.querySelector('.js-video');
@@ -22,7 +22,7 @@
 
     let isDismissed = false;
 
-    const observer = new IntersectionObserver(function (entries) {
+    const observer = new IntersectionObserver(function(entries) {
       const isOffscreen = !entries[0].isIntersecting;
 
       if (isDismissed) {
@@ -39,7 +39,7 @@
       }
     }, { threshold: 0 });
 
-    closeBtn.addEventListener('click', function () {
+    closeBtn.addEventListener('click', function() {
       video.classList.remove('js-video__is-mini');
       closeBtn.hidden = true;
       isDismissed = true;
@@ -64,9 +64,9 @@
     window.onYouTubeIframeAPIReady = function () {
       const player = new YT.Player(video, {
         events: {
-          onReady: function () {
-            transcript.addEventListener('dblclick', function (e) {
-              const span = e.target.closest('span[data-start]');
+          onReady: function() {
+            transcript.addEventListener('dblclick', function(evt) {
+              const span = evt.target.closest('span[data-start]');
               if (!span) return;
               player.seekTo(parseFloat(span.dataset.start), true);
               player.playVideo();
