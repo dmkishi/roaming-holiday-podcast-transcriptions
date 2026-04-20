@@ -19,4 +19,4 @@ episodes/*
 www/dist/
 www/src/_data/*.json
 www/src/_episodes/
-www/src/img/
+www/src/img/episodes/
