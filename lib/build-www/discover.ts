@@ -7,7 +7,7 @@ import {
 export interface EpisodeArtifacts {
   metadata: MetadataFile;
   paragraph: ParagraphFile;
-  gapStarts: number[];
+  fadePairStarts: number[];
   summary: string;
 }
 
@@ -50,14 +50,14 @@ export function discoverEpisodes(): DiscoveryResult[] {
       continue;
     }
 
-    const { gapStarts } = readParagraphGroup(episodeNumber);
+    const { fadePairStarts } = readParagraphGroup(episodeNumber);
 
     results.push({
       ok: true,
       artifacts: {
         metadata,
         paragraph,
-        gapStarts,
+        fadePairStarts,
         summary: readSummary(episodeNumber),
       },
     });

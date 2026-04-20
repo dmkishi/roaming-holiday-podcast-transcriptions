@@ -63,6 +63,5 @@ export const ParagraphFileSchema = z.object({
 });
 
 export const ParagraphGroupFileSchema = z.object({
-  gapStarts: z.array(z.number().int().nonnegative()),
   fadePairStarts: z.array(z.number().int().nonnegative()),
 });

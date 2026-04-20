@@ -17,7 +17,7 @@ export interface SiteEpisode {
   mp3Url: string;
   imagePath: string;
   paragraphs: TranscriptSegment[][];
-  gapStarts: number[];
+  fadePairStarts: number[];
   summary: string;
   location?: string;
   youtube?: string;
