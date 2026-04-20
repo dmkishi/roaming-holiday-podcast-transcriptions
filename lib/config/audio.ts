@@ -54,7 +54,7 @@ export const FADE_CUTOFF_LOW = .2;
  * Minimum fade duration (seconds) to keep. Shorter transitions are usually
  * speech dynamics, not musical fades.
  */
-export const FADE_MIN_LENGTH_SECONDS = 1.5;
+export const FADE_MIN_LENGTH_SECONDS = 2;
 
 /**
  * RMS analysis window. 2048 samples at 16 kHz is ~128 ms; hop of 1024 gives
