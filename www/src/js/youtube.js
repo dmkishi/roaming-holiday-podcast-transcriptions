@@ -82,6 +82,7 @@
               if (!span) return;
               player.seekTo(parseFloat(span.dataset.start), true);
               player.playVideo();
+              window.getSelection().removeAllRanges(); // Deselect text.
             });
           },
           onStateChange: function(evt) {
