@@ -321,13 +321,21 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+
+  h2 {
+    font-style: italic;
+  }
 }
 
 .episode--content-warning {
   padding: var(--space-1);
   background-color: var(--color-warning);
   color: var(--color-bg);
-  margin-block: 1.5rem -1rem;
+  margin-block: 1.5rem -.875rem;
+}
+
+.episode--summary {
+  font-style: italic;
 }
 
 .episode--transcript {
@@ -335,6 +343,10 @@ a {
 
   p {
     margin-top: 1.4em;
+
+    &:first-of-type {
+      margin-top: 0;
+    }
   }
 
   span[data-start] {

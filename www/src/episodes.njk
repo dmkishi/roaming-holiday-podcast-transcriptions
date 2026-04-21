@@ -60,6 +60,7 @@ eleventyComputed:
     <hr>
 
     <section class="episode--transcript" data-transcript>
+      <h2>Transcript</h2>
       {%- for paragraph in episode.paragraphs %}
         {%- if loop.index0 in episode.fadePairStarts %}
           <hr>
