@@ -22,7 +22,7 @@
   --color-black-light: oklch(from var(--color-black) calc(l + .333) c h);
   --color-tint-1: rgba(from var(--color-black) r g b / 5%);
   --color-tint-2: rgba(from var(--color-black) r g b / 15%);
-  --color-warning: rgb(213, 105, 105);
+  --color-warning: #ce5656;
 }
 
 html {
