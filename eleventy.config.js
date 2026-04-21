@@ -112,13 +112,14 @@ export default function(eleventyConfig) {
   /**
    * Format seconds to a timecode string, rounded to the nearest minute.
    * @example
-   * {{ 65 | formatRoundedTimecode }}   // => "0:01:00"
+   * {{ 65 | formatRoundedTimecode }}   // => "1:00"
    * {{ 3661 | formatRoundedTimecode }} // => "1:01:00"
    */
   eleventyConfig.addFilter('formatRoundedTimecode', (seconds) => {
     const totalMins = Math.round(seconds / 60);
     const hrs = Math.floor(totalMins / 60);
     const mins = totalMins % 60;
+    if (hrs === 0) return `${mins}:00`;
     return `${hrs}:${String(mins).padStart(2, '0')}:00`;
   });
 

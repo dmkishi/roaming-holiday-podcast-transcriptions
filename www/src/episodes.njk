@@ -67,7 +67,7 @@ eleventyComputed:
         {# Numeric IDs is bad practice but, here, is strictly for dev usage. #}
         <p id="{{ loop.index0 }}">
           {%- for segment in paragraph %}
-            {%- if segment.timelineMarker %}
+            {%- if segment.timelineMarker and loop.index0 != 0 %}
               <time class="timeline-marker" data-time="{{ segment.start }}">
                 {{- segment.start | formatRoundedTimecode -}}
               </time>
