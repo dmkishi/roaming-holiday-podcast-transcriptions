@@ -60,8 +60,5 @@ const ParagraphSegmentSchema = SegmentSchema.omit({ id: true });
 
 export const ParagraphFileSchema = z.object({
   segments: z.array(z.array(ParagraphSegmentSchema)),
-});
-
-export const ParagraphGroupFileSchema = z.object({
   fadePairStarts: z.array(z.number().int().nonnegative()),
 });

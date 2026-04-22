@@ -9,11 +9,12 @@ import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript, type TailItem,
 } from '@lib/transcribe-episodes/transcript.js';
-import { writeParagraphs } from '@lib/transcribe-episodes/paragraph.js';
-import { writeParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
+import { buildParagraphs, type Paragraph } from '@lib/transcribe-episodes/paragraph.js';
+import { buildParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
 import {
-  hasMetadata, readMetadata, writeMetadata, hasTranscript, hasFade, hasMp3, paths,
+  paths, hasMetadata, readMetadata, writeMetadata,
+  hasTranscript, hasFade, hasMp3, writeParagraph,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
@@ -245,19 +246,19 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
 // Build paragraphs and paragraph groups
 // =============================================================================
 if (runParagraph) {
+  const paragraphsByEp = new Map<number, Paragraph[]>();
+
   print.info('Building paragraphs...');
   for (const item of tailItems) {
-    const res = writeParagraphs(item);
+    const res = buildParagraphs(item);
     if (!res.ok) {
       printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
       );
       continue;
     }
-    printLog.info([
-      `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
-      `  Paragraphs: ${formatNumber(res.stats.paragraphs)}`,
-    ]);
+    paragraphsByEp.set(item.episodeNumber, res.paragraphs);
+    printLog.info(`#${item.episodeNumber}: Built ${formatNumber(res.stats.paragraphs)} paragraphs`);
   }
   print.emptyLine();
 
@@ -294,17 +295,26 @@ if (runParagraph) {
 
   print.info('Building paragraph groups...');
   for (const item of tailItems) {
-    const res = writeParagraphGroups(item);
+    const paragraphs = paragraphsByEp.get(item.episodeNumber);
+    if (!paragraphs) continue;
+
+    const res = buildParagraphGroups({ episodeNumber: item.episodeNumber, paragraphs });
     if (!res.ok) {
       printLog.warn(
         `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
       );
       continue;
     }
+
+    const path = writeParagraph(item.episodeNumber, {
+      segments: paragraphs,
+      fadePairStarts: res.fadePairStarts,
+    });
     printLog.info([
-      `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
-      `  Groups: ${formatNumber(res.stats.groups)}`,
-      `  Fades:  ${formatNumber(res.stats.fades)}`,
+      `#${item.episodeNumber}: Saved "${toRelative(path)}"`,
+      `  Paragraphs: ${formatNumber(paragraphs.length)}`,
+      `  Groups:     ${formatNumber(res.stats.groups)}`,
+      `  Fades:      ${formatNumber(res.stats.fades)}`,
     ]);
   }
   print.emptyLine();

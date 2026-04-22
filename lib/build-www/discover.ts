@@ -1,6 +1,6 @@
 import {
-  hasParagraph, hasParagraphGroup, hasSummary, hasTranscript,
-  listEpisodeNumbers, readMetadata, readParagraph, readParagraphGroup, readSummary,
+  listEpisodeNumbers, readMetadata,
+  hasTranscript, hasParagraph, hasSummary, readParagraph, readSummary,
   type MetadataFile, type ParagraphFile,
 } from '@lib/shared/artifacts.js';
 
@@ -17,10 +17,10 @@ export type DiscoveryResult =
 
 /**
  * Scan the outputs directory and return a result per metadata file. Episodes
- * missing a transcript, paragraph sidecar, or paragraph group sidecar are
- * returned as `{ ok: false }` entries so the caller can report the skip with
- * a reason. The paragraph sidecar is the authoritative source of segments
- * downstream.
+ * missing a transcript or paragraph sidecar are returned as `{ ok: false }`
+ * entries so the caller can report the skip with a reason. The paragraph
+ * sidecar carries both segments and fade-pair starts; its presence signals a
+ * complete pipeline run.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
   const results: DiscoveryResult[] = [];
@@ -45,19 +45,13 @@ export function discoverEpisodes(): DiscoveryResult[] {
       results.push({ ok: false, episodeNumber, reason: 'No segments in paragraph sidecar' });
       continue;
     }
-    if (!hasParagraphGroup(episodeNumber)) {
-      results.push({ ok: false, episodeNumber, reason: 'No paragraph group sidecar found' });
-      continue;
-    }
-
-    const { fadePairStarts } = readParagraphGroup(episodeNumber);
 
     results.push({
       ok: true,
       artifacts: {
         metadata,
         paragraph,
-        fadePairStarts,
+        fadePairStarts: paragraph.fadePairStarts,
         summary: readSummary(episodeNumber),
       },
     });

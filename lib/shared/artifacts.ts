@@ -8,7 +8,6 @@ import {
   FadeFileSchema,
   TranscriptFileSchema,
   ParagraphFileSchema,
-  ParagraphGroupFileSchema,
 } from '@lib/shared/schemas.js';
 import { formatEpisodeNumber, toPrettyJson } from '@lib/shared/strings.js';
 
@@ -17,7 +16,6 @@ export type VadFile = z.infer<typeof VadFileSchema>;
 export type FadeFile = z.infer<typeof FadeFileSchema>;
 export type TranscriptFile = z.infer<typeof TranscriptFileSchema>;
 export type ParagraphFile = z.infer<typeof ParagraphFileSchema>;
-export type ParagraphGroupFile = z.infer<typeof ParagraphGroupFileSchema>;
 
 const SUFFIX = {
   metadata: '.metadata.json',
@@ -25,7 +23,6 @@ const SUFFIX = {
   fade: '.audio-fade.json',
   transcript: '.transcript.json',
   paragraph: '.transcript.paragraph.json',
-  paragraphGroup: '.transcript.paragraphGroup.json',
   summary: '.transcript.summary.txt',
 } as const;
 
@@ -44,7 +41,6 @@ export function paths(episodeNumber: number): {
   fade: string;
   transcript: string;
   paragraph: string;
-  paragraphGroup: string;
   summary: string;
 } {
   return {
@@ -54,7 +50,6 @@ export function paths(episodeNumber: number): {
     fade: pathFor(episodeNumber, SUFFIX.fade),
     transcript: pathFor(episodeNumber, SUFFIX.transcript),
     paragraph: pathFor(episodeNumber, SUFFIX.paragraph),
-    paragraphGroup: pathFor(episodeNumber, SUFFIX.paragraphGroup),
     summary: pathFor(episodeNumber, SUFFIX.summary),
   };
 }
@@ -65,8 +60,6 @@ export const hasVad = (n: number): boolean => existsSync(pathFor(n, SUFFIX.vad))
 export const hasFade = (n: number): boolean => existsSync(pathFor(n, SUFFIX.fade));
 export const hasTranscript = (n: number): boolean => existsSync(pathFor(n, SUFFIX.transcript));
 export const hasParagraph = (n: number): boolean => existsSync(pathFor(n, SUFFIX.paragraph));
-export const hasParagraphGroup = (n: number): boolean =>
-  existsSync(pathFor(n, SUFFIX.paragraphGroup));
 export const hasSummary = (n: number): boolean => existsSync(pathFor(n, SUFFIX.summary));
 
 function readJson<S extends z.ZodType>(path: string, schema: S): z.infer<S> {
@@ -89,8 +82,6 @@ export const readTranscript = (n: number): TranscriptFile =>
   readJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema);
 export const readParagraph = (n: number): ParagraphFile =>
   readJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema);
-export const readParagraphGroup = (n: number): ParagraphGroupFile =>
-  readJson(pathFor(n, SUFFIX.paragraphGroup), ParagraphGroupFileSchema);
 export const readSummary = (n: number): string =>
   readFileSync(pathFor(n, SUFFIX.summary), 'utf8');
 
@@ -104,8 +95,6 @@ export const writeTranscript = (n: number, data: TranscriptFile): string =>
   writeJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema, data);
 export const writeParagraph = (n: number, data: ParagraphFile): string =>
   writeJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema, data);
-export const writeParagraphGroup = (n: number, data: ParagraphGroupFile): string =>
-  writeJson(pathFor(n, SUFFIX.paragraphGroup), ParagraphGroupFileSchema, data);
 
 export function writeSummary(n: number, text: string): string {
   const path = pathFor(n, SUFFIX.summary);

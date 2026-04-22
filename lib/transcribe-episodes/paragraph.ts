@@ -1,16 +1,19 @@
 import type { z } from 'zod';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
-import { hasVad, readTranscript, readVad, writeParagraph } from '@lib/shared/artifacts.js';
+import {
+  hasVad, readVad, readTranscript, type ParagraphFile,
+} from '@lib/shared/artifacts.js';
 import type { TranscriptFileSchema } from '@lib/shared/schemas.js';
 import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 
 type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
+export type Paragraph = ParagraphFile['segments'][number];
 
 export interface Paragraphs {
   ok: true;
   episodeNumber: number;
-  path: string;
+  paragraphs: Paragraph[];
   stats: {
     paragraphs: number;
   };
@@ -19,10 +22,9 @@ export interface Paragraphs {
 export type ParagraphsResponse = FailResponse | Paragraphs;
 
 /**
- * Reads a transcript file, computes paragraph breaks, and writes a sidecar
- * `.paragraph.json` file alongside it. Always overwrites.
+ * Reads a transcript file and computes paragraph breaks.
  */
-export function writeParagraphs(
+export function buildParagraphs(
   transcript: TailItem,
 ): ParagraphsResponse {
   try {
@@ -50,12 +52,10 @@ export function writeParagraphs(
       return simplifiedSegments.slice(start, end);
     });
 
-    const path = writeParagraph(transcript.episodeNumber, { segments: paragraphs });
-
     return {
       ok: true,
       episodeNumber: transcript.episodeNumber,
-      path,
+      paragraphs,
       stats: {
         paragraphs: paragraphs.length,
       },

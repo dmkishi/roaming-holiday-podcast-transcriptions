@@ -1,16 +1,12 @@
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
+import type { Paragraph } from '@lib/transcribe-episodes/paragraph.js';
 import type { FadePair } from '@lib/shared/schemas.js';
-import {
-  hasFade, hasParagraph,
-  readFade, readParagraph,
-  writeParagraphGroup,
-} from '@lib/shared/artifacts.js';
+import { hasFade, readFade } from '@lib/shared/artifacts.js';
 
 export interface ParagraphGroups {
   ok: true;
   episodeNumber: number;
-  path: string;
+  fadePairStarts: number[];
   stats: {
     groups: number;
     fades: number;
@@ -20,31 +16,24 @@ export interface ParagraphGroups {
 export type ParagraphGroupsResponse = FailResponse | ParagraphGroups;
 
 /**
- * Reads the paragraph and fade sidecars and writes `*.paragraphGroup.json`.
- * Always overwrites.
+ * Reads the fade sidecar and computes the paragraph indices that begin under
+ * each fade pair.
  */
-export function writeParagraphGroups(
-  transcript: TailItem,
+export function buildParagraphGroups(
+  { episodeNumber, paragraphs }: { episodeNumber: number; paragraphs: Paragraph[] },
 ): ParagraphGroupsResponse {
   try {
-    const episodeNumber = transcript.episodeNumber;
-
-    if (!hasParagraph(episodeNumber)) {
-      return { ok: false, error: `Paragraph file not found for #${episodeNumber}` };
-    }
     if (!hasFade(episodeNumber)) {
       return { ok: false, error: `Fade file not found for #${episodeNumber}` };
     }
 
-    const { segments: paragraphs } = readParagraph(episodeNumber);
     const { fades } = readFade(episodeNumber);
     const fadePairStarts = findFadePairStarts(paragraphs, fades);
-    const path = writeParagraphGroup(episodeNumber, { fadePairStarts });
 
     return {
       ok: true,
       episodeNumber,
-      path,
+      fadePairStarts,
       stats: {
         groups: fadePairStarts.length + 1,
         fades: fades.length,
@@ -57,8 +46,6 @@ export function writeParagraphGroups(
     };
   }
 }
-
-type Paragraph = { start: number; end: number; text: string }[];
 
 /**
  * For each fade pair, finds the first paragraph whose start lies within
