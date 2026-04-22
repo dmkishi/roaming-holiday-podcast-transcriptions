@@ -53,9 +53,8 @@ export function buildParagraphGroups(
 
 /**
  * For each fade pair, finds the first paragraph whose start lies within
- * `[outStart, inEnd]`, i.e. a paragraph that begins while audio plays over it
- * and records its index. Pairs with no overlapping paragraph start are
- * skipped.
+ * `[outStart, inEnd]`, i.e. a paragraph that begins during a fade, and records
+ * its index.
  */
 export function findFadePairStarts(
   paragraphs: Paragraph[],
