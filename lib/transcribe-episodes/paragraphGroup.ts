@@ -1,7 +1,7 @@
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import type { Paragraph } from '@lib/transcribe-episodes/paragraph.js';
-import type { FadePair } from '@lib/shared/schemas.js';
 import { hasFade, readFade } from '@lib/shared/artifacts.js';
+import type { FadePair } from '@lib/shared/schemas.js';
 
 export interface ParagraphGroups {
   ok: true;
