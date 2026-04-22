@@ -9,7 +9,7 @@ import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript, type TailItem,
 } from '@lib/transcribe-episodes/transcript.js';
-import { buildParagraphs, type Paragraph } from '@lib/transcribe-episodes/paragraph.js';
+import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { buildParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
 import {
@@ -246,75 +246,65 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
 // Build paragraphs and paragraph groups
 // =============================================================================
 if (runParagraph) {
-  const paragraphsByEp = new Map<number, Paragraph[]>();
-
-  print.info('Building paragraphs...');
+  print.info('Building paragraph sidecars...');
   for (const item of tailItems) {
-    const res = buildParagraphs(item);
-    if (!res.ok) {
+    const paragraphsRes = buildParagraphs(item);
+    if (!paragraphsRes.ok) {
       printLog.warn(
-        `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
+        `#${item.episodeNumber}: Failed ${paragraphsRes.error ? `- ${paragraphsRes.error}` : ''}`,
       );
       continue;
     }
-    paragraphsByEp.set(item.episodeNumber, res.paragraphs);
-    printLog.info(`#${item.episodeNumber}: Built ${formatNumber(res.stats.paragraphs)} paragraphs`);
-  }
-  print.emptyLine();
+    const { paragraphs } = paragraphsRes;
+    printLog.info(`#${item.episodeNumber}: Built ${formatNumber(paragraphsRes.stats.paragraphs)} paragraphs`);
 
-  print.info('Running fade detection...');
-  for (const item of tailItems) {
-    if (!opts.forceFade && hasFade(item.episodeNumber)) {
-      printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
-      continue;
-    }
+    const needsFade = opts.forceFade || !hasFade(item.episodeNumber);
 
-    const mp3Path = paths(item.episodeNumber).mp3;
-    if (!hasMp3(item.episodeNumber)) {
-      const { mp3Url } = readMetadata(item.episodeNumber);
-      const mp3 = await downloadMp3(mp3Url, mp3Path, false);
-      if (mp3.status === 'failed') {
-        printLog.warn(
-          `#${item.episodeNumber}: MP3 download failed ${mp3.error ? `- ${mp3.error}` : ''}`,
-        );
-        continue;
+    if (needsFade) {
+      const mp3Path = paths(item.episodeNumber).mp3;
+
+      if (!hasMp3(item.episodeNumber)) {
+        const { mp3Url } = readMetadata(item.episodeNumber);
+        const mp3 = await downloadMp3(mp3Url, mp3Path, false);
+        if (mp3.status === 'failed') {
+          printLog.warn(
+            `#${item.episodeNumber}: MP3 download failed ${mp3.error ? `- ${mp3.error}` : ''}`,
+          );
+          continue;
+        }
+        printLog.info(`#${item.episodeNumber}: Downloaded "${mp3Path}" (${mp3.sizeMB} MB)`);
       }
-      printLog.info(`#${item.episodeNumber}: Downloaded "${mp3Path}" (${mp3.sizeMB} MB)`);
-    }
 
-    const res = await runFade(item.episodeNumber, mp3Path, opts.forceFade);
-    if (!res.ok) {
-      printLog.warn(`#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
-    } else if (res.status === 'alreadyExists') {
-      printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
+      const fadeRes = await runFade(item.episodeNumber, mp3Path, opts.forceFade);
+      if (!fadeRes.ok) {
+        printLog.warn(`#${item.episodeNumber}: Failed ${fadeRes.error ? `- ${fadeRes.error}` : ''}`);
+        continue;
+      } else if (fadeRes.status === 'alreadyExists') {
+        printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
+      } else {
+        printLog.info(`#${item.episodeNumber}: Saved "${toRelative(fadeRes.path)}"`);
+      }
     } else {
-      printLog.info(`#${item.episodeNumber}: Saved "${toRelative(res.path)}"`);
+      printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
     }
-  }
-  print.emptyLine();
 
-  print.info('Building paragraph groups...');
-  for (const item of tailItems) {
-    const paragraphs = paragraphsByEp.get(item.episodeNumber);
-    if (!paragraphs) continue;
-
-    const res = buildParagraphGroups({ episodeNumber: item.episodeNumber, paragraphs });
-    if (!res.ok) {
+    const groupsRes = buildParagraphGroups(item.episodeNumber, paragraphs);
+    if (!groupsRes.ok) {
       printLog.warn(
-        `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`,
+        `#${item.episodeNumber}: Failed ${groupsRes.error ? `- ${groupsRes.error}` : ''}`,
       );
       continue;
     }
 
     const path = writeParagraph(item.episodeNumber, {
       segments: paragraphs,
-      fadePairStarts: res.fadePairStarts,
+      fadePairStarts: groupsRes.fadePairStarts,
     });
     printLog.info([
       `#${item.episodeNumber}: Saved "${toRelative(path)}"`,
       `  Paragraphs: ${formatNumber(paragraphs.length)}`,
-      `  Groups:     ${formatNumber(res.stats.groups)}`,
-      `  Fades:      ${formatNumber(res.stats.fades)}`,
+      `  Groups:     ${formatNumber(groupsRes.stats.groups)}`,
+      `  Fades:      ${formatNumber(groupsRes.stats.fades)}`,
     ]);
   }
   print.emptyLine();

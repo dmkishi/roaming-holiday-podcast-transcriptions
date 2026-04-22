@@ -20,11 +20,15 @@ export type ParagraphGroupsResponse = FailResponse | ParagraphGroups;
  * each fade pair.
  */
 export function buildParagraphGroups(
-  { episodeNumber, paragraphs }: { episodeNumber: number; paragraphs: Paragraph[] },
+  episodeNumber: number,
+  paragraphs: Paragraph[],
 ): ParagraphGroupsResponse {
   try {
     if (!hasFade(episodeNumber)) {
-      return { ok: false, error: `Fade file not found for #${episodeNumber}` };
+      return {
+        ok: false,
+        error: `Fade file not found for #${episodeNumber}`,
+      };
     }
 
     const { fades } = readFade(episodeNumber);
