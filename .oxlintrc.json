@@ -32,6 +32,7 @@
    */
   "rules": {
     /* Pedantic */
+    "max-depth": ["error", { "max": 5 }],
     "max-lines": "off",
     "max-lines-per-function": "off",
 
