@@ -7,33 +7,49 @@ import postcssImport from 'postcss-import';
 import postcssPresetEnv from 'postcss-preset-env';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+
+const CSS_DIR = 'www/src/css';
 
 function pluralize(word, count) {
   return count === 1 ? word : `${word}s`;
 }
 
-export default function(eleventyConfig) {
-  /**
-   * - runMode is `build` when `pnpm build-www`
-   * - runMode is `serve` when `pnpm dev-www`
-   */
+/**
+ * Bundle and minify CSS, precompile entrypoints so `hashUrl` reflects the
+ * resolved output, and register the `hashUrl` filter for cache busting.
+ *
+ * - isProd = true on `pnpm build-www` (runMode `build`),
+ * - isProd = false on `pnpm dev-www` (runMode `serve`).
+ */
+function setupCss(eleventyConfig) {
   let isProd = true;
-  eleventyConfig.on('eleventy.before', ({ runMode }) => {
+  const cssOutputCache = new Map(); // url (e.g. "/index.css") -> compiled css
+
+  // Bundle CSS imports and minify. In production, also apply postcss-preset-env.
+  async function compileCss(inputPath) {
+    const css = await readFile(inputPath, 'utf8');
+    const plugins = [postcssImport, ...(isProd ? [postcssPresetEnv] : []), cssnano];
+    const result = await postcss(plugins).process(css, { from: inputPath });
+    return result.css;
+  }
+
+  eleventyConfig.on('eleventy.before', async ({ runMode }) => {
     isProd = runMode === 'build';
+    cssOutputCache.clear();
+    if (!isProd) return;
+
+    // Precompile CSS so hashUrl can hash the resolved output; source-file
+    // hashing misses changes inside imported partials.
+    const cssFiles =
+      (await readdir(CSS_DIR)).filter((f) => f.endsWith('.css') && !f.startsWith('_'));
+    await Promise.all(cssFiles.map(async (file) => {
+      const compiled = await compileCss(path.join(CSS_DIR, file));
+      cssOutputCache.set(`/css/${file}`, compiled);
+    }));
   });
 
-  // Append a content-hash query string for cache busting (prod only)
-  eleventyConfig.addFilter('hashUrl', (url) => {
-    if (!isProd) return url;
-    const filePath = path.join('www/src', url);
-    const content = readFileSync(filePath, 'utf8');
-    const hash = createHash('md5').update(content).digest('hex').slice(0, 8);
-    return `${url}?v=${hash}`;
-  });
-
-  // Bundle and minify CSS
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
     outputFileExtension: 'css',
@@ -41,15 +57,24 @@ export default function(eleventyConfig) {
       if (path.basename(inputPath).startsWith('_')) return;
 
       return async () => {
-        const css = await readFile(inputPath, 'utf8');
-        const plugins = [postcssImport, ...(isProd ? [postcssPresetEnv] : []), cssnano];
-        const result = await postcss(plugins).process(css, {
-          from: inputPath,
-        });
-        return result.css;
+        const url = `/${path.relative('www/src', inputPath)}`;
+        return cssOutputCache.get(url) ?? await compileCss(inputPath);
       };
     },
   });
+
+  // Append a content-hash query string for cache busting (prod only)
+  eleventyConfig.addFilter('hashUrl', (url) => {
+    if (!isProd) return url;
+    const compiled = cssOutputCache.get(url);
+    const source = compiled ?? readFileSync(path.join('www/src', url), 'utf8');
+    const hash = createHash('md5').update(source).digest('hex').slice(0, 8);
+    return `${url}?v=${hash}`;
+  });
+}
+
+export default function(eleventyConfig) {
+  setupCss(eleventyConfig);
 
   // Minify JS
   eleventyConfig.addTemplateFormats('js');

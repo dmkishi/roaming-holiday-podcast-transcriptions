@@ -1,0 +1,49 @@
+@import './_base.css';
+
+.about-page {
+  line-height: var(--font-line-height-tighter);
+
+  p {
+    margin-bottom: 1em;
+
+    &:first-of-type {
+      font-size: var(--font-large);
+    }
+  }
+}
+
+.roaming-by-numbers {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  margin-block: var(--gutter);
+  padding: 1.125rem 2rem 1.666rem;
+  background-color: var(--color-tint-1);
+  font-style: italic;
+
+  section {
+    display: contents;
+  }
+
+  h2,
+  h3,
+  dl {
+    grid-column: 1 / -1;
+  }
+
+  h3 {
+    margin-top: var(--space-1);
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: subgrid;
+    gap: 0 var(--gutter);
+    font-size: var(--font-small);
+  }
+
+  dt {
+    &::after {
+      content: ':';
+    }
+  }
+}
