@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import { DEFAULT_WHISPER_MODEL } from '@lib/config/llm.js';
+import { DEFAULT_MODEL } from '@lib/config/whisper.js';
 
 interface CliOptions {
   episodeNums: Set<number>;
@@ -37,7 +37,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-transcribe',
     ],
     default: {
-      model: DEFAULT_WHISPER_MODEL,
+      model: DEFAULT_MODEL,
       'only-paragraphs': false,
       'force-all': false,
       'force-rss': false,
@@ -51,7 +51,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
   if (episodeNums.size === 0) {
     console.error(
-      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--only-paragraphs] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]`,
+      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_MODEL}] [--only-paragraphs] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]`,
     );
     process.exit(1);
   }

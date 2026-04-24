@@ -1,11 +1,11 @@
-export const DEFAULT_WHISPER_MODEL = 'base';
+export const DEFAULT_MODEL = 'base';
 
 /**
  * The Whisper prompt is not instructional but provides context about the style
  * of speech patterns in the audio. Here, we provide proper nouns to condition
  * Whisper to recognize and spell them correctly.
  */
-export const WHISPER_PROMPT = {
+export const PROMPT = {
   // List names (places, brands, etc.) often mentioned in the podcast that may
   // be or are misheard or misspelled by the model.
   names: [

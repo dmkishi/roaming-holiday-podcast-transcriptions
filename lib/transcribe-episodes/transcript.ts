@@ -14,7 +14,7 @@ import { VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
 import {
   CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
 } from '@lib/config/audio.js';
-import { WHISPER_PROMPT } from '@lib/config/llm.js';
+import { PROMPT } from '@lib/config/whisper.js';
 
 export interface ToTranscribe {
   episodeNumber: number;
@@ -85,8 +85,8 @@ export async function makePrompt(title: string, description?: string): Promise<{
   const prompt = [
     title,
     description,
-    WHISPER_PROMPT.names.join(', '),
-    WHISPER_PROMPT.basicInfo,
+    PROMPT.names.join(', '),
+    PROMPT.basicInfo,
   ].filter(Boolean).join('. ').replace('..', '.');
 
   const tokenCount = await countTokens(prompt);
