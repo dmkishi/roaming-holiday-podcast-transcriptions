@@ -5,7 +5,7 @@
   if (!video) return;
 
   initMiniPlayer(video);
-  initTranscriptSync(video);
+  initPlayer(video);
 
   /**
    * Control mini-player. Observe a placeholder "sentinel" instead of the
@@ -54,21 +54,21 @@
    *   starts playback.
    * - Show active playback segment.
    */
-  function initTranscriptSync(video) {
+  function initPlayer(video) {
     const transcript = document.querySelector('[data-transcript]');
-    if (!transcript) return;
 
     const apiScript = document.createElement('script');
     apiScript.src = 'https://www.youtube.com/iframe_api';
     document.head.appendChild(apiScript);
 
-    const spans = Array.from(transcript.querySelectorAll('span[data-start]'))
-      .map(function(el) {
-        return {
-          el,
-          start: parseFloat(el.dataset.start),
-        };
-      });
+    const spans = transcript
+      ? Array.from(transcript.querySelectorAll('span[data-start]')).map(function(el) {
+          return {
+            el,
+            start: parseFloat(el.dataset.start),
+          };
+        })
+      : [];
     let currentIndex = -1;
     let intervalId = null;
     let player;
@@ -77,13 +77,16 @@
       player = new YT.Player(video, {
         events: {
           onReady: function() {
-            transcript.addEventListener('dblclick', function(evt) {
-              const span = evt.target.closest('span[data-start]');
-              if (!span) return;
-              player.seekTo(parseFloat(span.dataset.start), true);
-              player.playVideo();
-              window.getSelection().removeAllRanges(); // Deselect text.
-            });
+            if (transcript) {
+              transcript.addEventListener('dblclick', function(evt) {
+                const span = evt.target.closest('span[data-start]');
+                if (!span) return;
+                player.seekTo(parseFloat(span.dataset.start), true);
+                player.playVideo();
+                window.getSelection().removeAllRanges(); // Deselect text.
+              });
+            }
+            initKeyboardControls();
           },
           onStateChange: function(evt) {
             if (evt.data === YT.PlayerState.PLAYING) {
@@ -115,6 +118,68 @@
         spans[i].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
       }
       currentIndex = i;
+    }
+
+    function initKeyboardControls() {
+      document.addEventListener('keydown', function(evt) {
+        if (!player) return;
+        if (evt.ctrlKey || evt.metaKey || evt.altKey) return;
+        if (isEditableTarget(evt.target)) return;
+
+        switch (evt.key) {
+          case ' ':
+          case 'k':
+            if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+            else player.playVideo();
+            animateKeyIcon('js-key-icon-space');
+            break;
+          case 'ArrowLeft':
+          case 'j':
+            player.seekTo(Math.max(0, player.getCurrentTime() - 5), true);
+            animateKeyIcon('js-key-icon-left');
+            break;
+          case 'ArrowRight':
+          case 'l':
+            player.seekTo(player.getCurrentTime() + 5, true);
+            animateKeyIcon('js-key-icon-right');
+            break;
+          case 'm':
+            if (player.isMuted()) player.unMute();
+            else player.mute();
+            animateKeyIcon('js-key-icon-m');
+            break;
+          case 'ArrowUp':
+            player.unMute();
+            player.setVolume(Math.min(100, player.getVolume() + 5));
+            animateKeyIcon('js-key-icon-up');
+            break;
+          case 'ArrowDown':
+            player.unMute();
+            player.setVolume(Math.max(0, player.getVolume() - 5));
+            animateKeyIcon('js-key-icon-down');
+            break;
+          default:
+            return;
+        }
+        evt.preventDefault();
+      });
+    }
+
+    /**
+     * Returns true if the event target is a form control or content-editable
+     * element that should receive keyboard input instead of the player.
+     */
+    function isEditableTarget(target) {
+      if (!target || !target.tagName) return false;
+      const tag = target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return true;
+      return target.isContentEditable === true;
+    }
+
+    function animateKeyIcon(className) {
+      const element = document.querySelector('.' + className);
+      element.classList.add('js-key-icon-pressed');
+      setTimeout(() => { element.classList.remove('js-key-icon-pressed'); }, 166);
     }
   }
 })();

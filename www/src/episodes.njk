@@ -18,7 +18,7 @@ eleventyComputed:
 <article class="episode">
   <header>
     {% if episode.youtube %}
-      <div class="js-video-sentinel">
+      <div class="js-video-sentinel episode--video-container">
         <iframe
           class="episode--video js-video"
           src="https://www.youtube-nocookie.com/embed/{{ episode.youtube | youtubeId }}?fs=0&enablejsapi=1"
@@ -26,6 +26,40 @@ eleventyComputed:
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         ></iframe>
+
+        <aside class="episode--video-shortcuts">
+          <dl class="episode--video-shortcuts-list">
+            <dt>
+              <kbd class="key-icon key-icon__space js-key-icon-space" title="Space key">Space</kbd>
+            </dt>
+            <dd>Play/pause</dd>
+
+            <dt>
+              <kbd class="key-icon js-key-icon-left" title="Left-arrow key">←</kbd>
+              <kbd class="key-icon js-key-icon-right" title="Right-arrow key">→</kbd>
+            </dt>
+            <dd>Skip forward/back</dd>
+
+            <dt>
+              <kbd class="key-icon js-key-icon-up" title="Up-arrow key">↑</kbd>
+              <kbd class="key-icon js-key-icon-down" title="Down-arrow key">↓</kbd>
+            </dt>
+            <dd>Volume up/down</dd>
+
+            <dt>
+              <kbd class="key-icon js-key-icon-m" title="m key">M</kbd>
+            </dt>
+            <dd>Mute/unmute</dd>
+
+            <dt>
+              <svg class="pointer-icon" viewBox="0 0 17 21.2">
+                <path style="fill:var(--color-black)" d="M14.6 13.6 6.4 5.4v11.2l2.5-2.4 2.3 5.6 1.9-.7-2.3-5.5z"/>
+                <path style="fill:none;stroke:var(--color-black);stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5px" d="m.9 8.7 2.5-.8m6.8-2.4 2.5-.8M4.8.8l.9 2.6M1.1 4l2.4 1.2m6.2-4.1L8.4 3.5"/>
+              </svg>
+            </dt>
+            <dd>Double-click the transcript to play that segment</dd>
+          </dl>
+        </aside>
       </div>
     {% else %}
       <img
@@ -48,7 +82,7 @@ eleventyComputed:
   </header>
 
   <div class="episode--content wrapper">
-    <p class="episode--content-warning">All content below have been AI generated.</p>
+    <p class="episode--content-warning">All transcripts are machine generated.</p>
 
     {%- if episode.summary %}
       <section class="episode--summary">
