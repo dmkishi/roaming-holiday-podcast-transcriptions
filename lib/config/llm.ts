@@ -1,5 +1,4 @@
 export const DEFAULT_WHISPER_MODEL = 'base';
-export const DEFAULT_SUMMARY_MODEL = 'gpt-4.1';
 
 /**
  * The Whisper prompt is not instructional but provides context about the style
@@ -22,19 +21,3 @@ export const WHISPER_PROMPT = {
   ],
   basicInfo: '"Roaming Holiday" by Keith McNally of Fredericton, New Brunswick.',
 } as const;
-
-/**
- * - Generally, LLMs perform better when steered with positive examples instead
- *   of negative constraints.
- */
-export const SUMMARY_PROMPT = `
-  You are summarizing a podcast episode from "Roaming Holiday", a serialized
-  travel podcast by Keith McNally. Given the episode title, description, and
-  full transcript, compose a concise summary of the episode. Limit to 2
-  sentences, maximum 30 words.
-
-  - Refer to the speaker as "Keith" or "he/him".
-  - Do not repeat the title of the podcast or the episode — focus on describing
-    his journey, the content, and themes of the episode.
-  - Mention specific place names but avoid listing them exhaustively.
-`.trim();

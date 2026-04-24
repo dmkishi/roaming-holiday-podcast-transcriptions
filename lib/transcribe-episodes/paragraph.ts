@@ -1,6 +1,5 @@
 import type { z } from 'zod';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import type { TailItem } from '@lib/transcribe-episodes/transcript.js';
 import {
   hasVad, readVad, readTranscript, type ParagraphFile,
 } from '@lib/shared/artifacts.js';
@@ -25,10 +24,10 @@ export type ParagraphsResponse = FailResponse | Paragraphs;
  * Reads a transcript file and computes paragraph breaks.
  */
 export function buildParagraphs(
-  transcript: TailItem,
+  episodeNumber: number,
 ): ParagraphsResponse {
   try {
-    const { segments } = readTranscript(transcript.episodeNumber);
+    const { segments } = readTranscript(episodeNumber);
 
     if (segments === undefined || segments.length === 0) {
       return {
@@ -37,14 +36,14 @@ export function buildParagraphs(
       };
     }
 
-    if (!hasVad(transcript.episodeNumber)) {
+    if (!hasVad(episodeNumber)) {
       return {
         ok: false,
-        error: `VAD file not found for #${transcript.episodeNumber}`,
+        error: `VAD file not found for #${episodeNumber}`,
       };
     }
 
-    const vad = readVad(transcript.episodeNumber);
+    const vad = readVad(episodeNumber);
     const breaks = buildParagraphBreaks(segments, vad.gaps, PARAGRAPH_GAP_SECONDS);
     const simplifiedSegments = segments.map(({ start, end, text }) => ({ start, end, text }));
     const paragraphs = breaks.map((start, i) => {
@@ -54,7 +53,7 @@ export function buildParagraphs(
 
     return {
       ok: true,
-      episodeNumber: transcript.episodeNumber,
+      episodeNumber,
       paragraphs,
       stats: {
         paragraphs: paragraphs.length,

@@ -1,6 +1,6 @@
 import {
   listEpisodeNumbers, readMetadata,
-  hasTranscript, hasParagraph, hasSummary, readParagraph, readSummary,
+  hasTranscript, hasParagraph, readParagraph,
   type MetadataFile, type ParagraphFile,
 } from '@lib/shared/artifacts.js';
 
@@ -8,7 +8,6 @@ export interface EpisodeArtifacts {
   metadata: MetadataFile;
   paragraph: ParagraphFile;
   fadePairStarts: number[];
-  summary: string;
 }
 
 export type DiscoveryResult =
@@ -32,10 +31,6 @@ export function discoverEpisodes(): DiscoveryResult[] {
       results.push({ ok: false, episodeNumber, reason: 'No transcript found' });
       continue;
     }
-    if (!hasSummary(episodeNumber)) {
-      results.push({ ok: false, episodeNumber, reason: 'No summary found' });
-      continue;
-    }
     if (!hasParagraph(episodeNumber)) {
       results.push({ ok: false, episodeNumber, reason: 'No paragraph sidecar found' });
       continue;
@@ -52,7 +47,6 @@ export function discoverEpisodes(): DiscoveryResult[] {
         metadata,
         paragraph,
         fadePairStarts: paragraph.fadePairStarts,
-        summary: readSummary(episodeNumber),
       },
     });
   }

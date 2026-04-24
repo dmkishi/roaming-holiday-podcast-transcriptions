@@ -18,8 +18,6 @@ import { WHISPER_PROMPT } from '@lib/config/llm.js';
 
 export interface ToTranscribe {
   episodeNumber: number;
-  title: string;
-  description: string;
   mp3: {
     url: string;
     path: string;
@@ -36,8 +34,6 @@ export interface Transcript {
   ok: true;
   episodeNumber: number;
   path: string;
-  title: string;
-  description: string;
   stats: {
     words: number;
     characters: number;
@@ -48,12 +44,6 @@ export interface Transcript {
 }
 
 export type TranscriptResponse = FailResponse | Transcript;
-
-// Shared shape consumed by paragraph, paragraphGroup, and summarize stages.
-export type TailItem = Pick<
-  Transcript,
-  'episodeNumber' | 'title' | 'description'
->;
 
 export const PROMPT_TOKEN_LIMIT = 224;
 const execFileAsync = promisify(execFile);
@@ -121,8 +111,6 @@ export async function makeToTranscribe(
 
   return {
     episodeNumber: episode.episodeNumber,
-    title: episode.title,
-    description: episode.description,
     mp3: {
       url: episode.mp3Url,
       path: paths(episode.episodeNumber).mp3,
@@ -218,8 +206,6 @@ export async function promptTranscript(
       ok: true,
       episodeNumber: toTranscribe.episodeNumber,
       path,
-      title: toTranscribe.title,
-      description: toTranscribe.description,
       stats: {
         words: wordCount,
         characters: characterCount,

@@ -9,7 +9,6 @@ describe('paths', () => {
     expect(basename(p.vad)).toBe('123.audio-vad.json');
     expect(basename(p.transcript)).toBe('123.transcript.json');
     expect(basename(p.paragraph)).toBe('123.transcript.paragraph.json');
-    expect(basename(p.summary)).toBe('123.transcript.summary.txt');
   });
 
   test('zero-pads episode numbers to 3 digits', () => {
@@ -26,7 +25,7 @@ describe('paths', () => {
 
   test('all paths share the same directory', () => {
     const p = paths(1);
-    const dirs = [p.metadata, p.vad, p.transcript, p.paragraph, p.summary]
+    const dirs = [p.metadata, p.vad, p.transcript, p.paragraph]
       .map((x) => x.replace(basename(x), ''));
     expect(new Set(dirs).size).toBe(1);
   });

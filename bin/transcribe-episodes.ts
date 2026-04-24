@@ -7,11 +7,10 @@ import { runVad } from '@lib/transcribe-episodes/audioVad.js';
 import { runFade } from '@lib/transcribe-episodes/audioFade.js';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
-  type ToTranscribe, type Transcript, type TailItem,
+  type ToTranscribe, type Transcript,
 } from '@lib/transcribe-episodes/transcript.js';
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { buildParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
-import { promptSummary, type Summary } from '@lib/transcribe-episodes/summary.js';
 import {
   paths, hasMetadata, readMetadata, writeMetadata,
   hasTranscript, hasFade, hasMp3, writeParagraph,
@@ -25,46 +24,39 @@ import { RSS_FEED_URL } from '@lib/config/rss.js';
 // Parse CLI args
 // =============================================================================
 const opts = getTranscribeCliArgs(process.argv);
-const { runTranscript, runParagraph, runSummary } = opts.runPipeline;
-const modeLabel = runTranscript && runParagraph && runSummary
+const { runTranscript, runParagraph } = opts.runPipeline;
+const modeLabel = runTranscript && runParagraph
   ? 'full pipeline'
-  : `${[runParagraph && 'paragraph', runSummary && 'summary'].filter(Boolean).join(' + ')} only`;
+  : 'paragraph only';
 
 const banner = [
   `Transcribe ${pluralize(opts.episodeNums.size, 'episode')} (${modeLabel}): ${[...opts.episodeNums].join(', ')}`,
 ];
 if (runTranscript) banner.push(`  Whisper model: ${opts.transcribeModel}`);
-if (runSummary) banner.push(`  Summary model: ${opts.summaryModel}`);
 printLog.info(banner);
 print.emptyLine();
 
-const tailItems: TailItem[] = runTranscript
+const episodeNumbers: number[] = runTranscript
   ? await runTranscriptPipeline()
   : loadTranscriptsFromDisk();
 
 // =============================================================================
 // Load transcripts from disk
 // =============================================================================
-function loadTranscriptsFromDisk(): TailItem[] {
+function loadTranscriptsFromDisk(): number[] {
   print.info('Loading existing transcripts...');
-  const items: TailItem[] = [];
+  const items: number[] = [];
   for (const episodeNumber of opts.episodeNums) {
     if (!hasTranscript(episodeNumber)) {
       printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
       continue;
     }
-
-    let title = '';
-    let description = '';
-    if (runSummary) {
-      if (!hasMetadata(episodeNumber)) {
-        printLog.warn(`#${episodeNumber}: No metadata found - skipping`);
-        continue;
-      }
-      ({ title, description } = readMetadata(episodeNumber));
+    if (!hasMetadata(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No metadata found - skipping`);
+      continue;
     }
 
-    items.push({ episodeNumber, title, description });
+    items.push(episodeNumber);
     printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).transcript)}"`);
   }
 
@@ -79,7 +71,7 @@ function loadTranscriptsFromDisk(): TailItem[] {
 // =============================================================================
 // Run transcript pipeline
 // =============================================================================
-async function runTranscriptPipeline(): Promise<TailItem[]> {
+async function runTranscriptPipeline(): Promise<number[]> {
   // ===========================================================================
   // Get RSS feed
   // ===========================================================================
@@ -235,11 +227,7 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
   }
   print.emptyLine();
 
-  return transcripts.map((t) => ({
-    episodeNumber: t.episodeNumber,
-    title: t.title,
-    description: t.description,
-  }));
+  return transcripts.map((t) => t.episodeNumber);
 }
 
 // =============================================================================
@@ -247,93 +235,65 @@ async function runTranscriptPipeline(): Promise<TailItem[]> {
 // =============================================================================
 if (runParagraph) {
   print.info('Building paragraph sidecars...');
-  for (const item of tailItems) {
-    const paragraphsRes = buildParagraphs(item);
+  for (const episodeNumber of episodeNumbers) {
+    const paragraphsRes = buildParagraphs(episodeNumber);
     if (!paragraphsRes.ok) {
       printLog.warn(
-        `#${item.episodeNumber}: Failed ${paragraphsRes.error ? `- ${paragraphsRes.error}` : ''}`,
+        `#${episodeNumber}: Failed ${paragraphsRes.error ? `- ${paragraphsRes.error}` : ''}`,
       );
       continue;
     }
     const { paragraphs } = paragraphsRes;
-    printLog.info(`#${item.episodeNumber}: Built ${formatNumber(paragraphsRes.stats.paragraphs)} paragraphs`);
+    printLog.info(`#${episodeNumber}: Built ${formatNumber(paragraphsRes.stats.paragraphs)} paragraphs`);
 
-    const needsFade = opts.forceFade || !hasFade(item.episodeNumber);
+    const needsFade = opts.forceFade || !hasFade(episodeNumber);
 
     if (needsFade) {
-      const mp3Path = paths(item.episodeNumber).mp3;
+      const mp3Path = paths(episodeNumber).mp3;
 
-      if (!hasMp3(item.episodeNumber)) {
-        const { mp3Url } = readMetadata(item.episodeNumber);
+      if (!hasMp3(episodeNumber)) {
+        const { mp3Url } = readMetadata(episodeNumber);
         const mp3 = await downloadMp3(mp3Url, mp3Path, false);
         if (mp3.status === 'failed') {
           printLog.warn(
-            `#${item.episodeNumber}: MP3 download failed ${mp3.error ? `- ${mp3.error}` : ''}`,
+            `#${episodeNumber}: MP3 download failed ${mp3.error ? `- ${mp3.error}` : ''}`,
           );
           continue;
         }
-        printLog.info(`#${item.episodeNumber}: Downloaded "${mp3Path}" (${mp3.sizeMB} MB)`);
+        printLog.info(`#${episodeNumber}: Downloaded "${mp3Path}" (${mp3.sizeMB} MB)`);
       }
 
-      const fadeRes = await runFade(item.episodeNumber, mp3Path, opts.forceFade);
+      const fadeRes = await runFade(episodeNumber, mp3Path, opts.forceFade);
       if (!fadeRes.ok) {
-        printLog.warn(`#${item.episodeNumber}: Failed ${fadeRes.error ? `- ${fadeRes.error}` : ''}`);
+        printLog.warn(`#${episodeNumber}: Failed ${fadeRes.error ? `- ${fadeRes.error}` : ''}`);
         continue;
       } else if (fadeRes.status === 'alreadyExists') {
-        printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
+        printLog.warn(`#${episodeNumber}: Skipping - fade file already exists`);
       } else {
-        printLog.info(`#${item.episodeNumber}: Saved "${toRelative(fadeRes.path)}"`);
+        printLog.info(`#${episodeNumber}: Saved "${toRelative(fadeRes.path)}"`);
       }
     } else {
-      printLog.warn(`#${item.episodeNumber}: Skipping - fade file already exists`);
+      printLog.warn(`#${episodeNumber}: Skipping - fade file already exists`);
     }
 
-    const groupsRes = buildParagraphGroups(item.episodeNumber, paragraphs);
+    const groupsRes = buildParagraphGroups(episodeNumber, paragraphs);
     if (!groupsRes.ok) {
       printLog.warn(
-        `#${item.episodeNumber}: Failed ${groupsRes.error ? `- ${groupsRes.error}` : ''}`,
+        `#${episodeNumber}: Failed ${groupsRes.error ? `- ${groupsRes.error}` : ''}`,
       );
       continue;
     }
 
-    const path = writeParagraph(item.episodeNumber, {
+    const path = writeParagraph(episodeNumber, {
       segments: paragraphs,
       fadePairStarts: groupsRes.fadePairStarts,
     });
     printLog.info([
-      `#${item.episodeNumber}: Saved "${toRelative(path)}"`,
+      `#${episodeNumber}: Saved "${toRelative(path)}"`,
       `  Paragraphs: ${formatNumber(paragraphs.length)}`,
       `  Groups:     ${formatNumber(groupsRes.stats.groups)}`,
       `  Fades:      ${formatNumber(groupsRes.stats.fades)}`,
     ]);
-  }
-  print.emptyLine();
-}
-
-// =============================================================================
-// Summarize
-// =============================================================================
-if (runSummary) {
-  print.info('Summarizing...');
-  const summaries: Summary[] = [];
-  for (const item of tailItems) {
-    const res = await promptSummary(item, opts.summaryModel);
-    if (!res.ok) {
-      printLog.warn(
-        `#${item.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`
-      );
-      continue;
-    }
-    printLog.info([
-      `#${item.episodeNumber}: Saved "${toRelative(res.path)}"`,
-      `  Tokens: input ${formatNumber(res.stats.tokenInput)} / output ${formatNumber(res.stats.tokenOutput)}`,
-    ]);
-    summaries.push(res);
-  }
-
-  if (summaries.length === 0) {
-    printLog.error('No summaries generated.');
-    process.exit(1);
   }
   print.emptyLine();
 }

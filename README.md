@@ -1,7 +1,7 @@
 Roaming Holiday Podcast Transcriptions
 ================================================================================
-CLI tool that downloads, transcribes, and summarizes episodes of the Roaming
-Holiday podcast by episode number, and builds a static site from the output.
+CLI tool that downloads and transcribes episodes of the Roaming Holiday podcast
+by episode number, and builds a static site from the output.
 
 Install
 --------------------------------------------------------------------------------
@@ -19,32 +19,26 @@ python3 -m venv .venv
 
 # ffmpeg is required for audio decoding and chunking.
 brew install ffmpeg
-
-# Copy the example env file and add your OpenAI API key (for summarizing
-# transcripts.)
-cp .env.example .env
 ```
 
 Usage
 --------------------------------------------------------------------------------
 ### Transcribe
-Runs the full pipeline for an episode from download to summary. Reads the RSS
-feed, downloads the MP3 to `/tmp/`, transcribes it using Whisper, and writes a
-metadata sidecar, transcript, and summary to `episodes/`.
+Runs the full pipeline for an episode from download to paragraph sidecar. Reads
+the RSS feed, downloads the MP3 to `/tmp/`, transcribes it using Whisper, and
+writes a metadata sidecar and transcript to `episodes/`.
 
 ```sh
 # Transcribe a single or multiple episodes
 pnpm transcribe 101 [102 103]
 
-# Select models (defaults: Whisper `base`, OpenAI `gpt-4.1`)
+# Select Whisper model (default: `base`)
 pnpm transcribe 101 --model small
-pnpm transcribe 101 --summary-model gpt-5.4-mini
 
 # Skip the transcript pipeline and only re-run tail stages from existing
-# transcripts. Tail stages (paragraphs, paragraph groups, summary) always
-# regenerate when they run, so they have no force flags.
+# transcripts. Tail stages (paragraphs, paragraph groups) always regenerate
+# when they run, so they have no force flags.
 pnpm transcribe 101 --only-paragraphs  # Rebuild paragraphs + groups only
-pnpm transcribe 101 --only-summaries   # Re-summarize only
 
 # Force transcript-pipeline stages to re-run. Forcing a stage cascades to
 # every downstream stage that consumes its output (rss → download → vad →
@@ -60,9 +54,9 @@ pnpm transcribe 101 --force-all
 ```
 
 ### Build Site
-Builds the static site from the transcription output. Reads episode metadata,
-transcripts, and summaries from `episodes/` and compiles them into a Eleventy
-site in `www/`.
+Builds the static site from the transcription output. Reads episode metadata
+and transcripts from `episodes/` and compiles them into a Eleventy site in
+`www/`.
 
 ```sh
 # Build the site data and the static site using the transcription output
@@ -88,21 +82,6 @@ Speed" figures below are from an Apple M1 machine transcribing a 1 hour episode.
 
 *Default model
 
-### Summarization Models (OpenAI)
-Estimated costs per select models at one million tokens. Evaluated with episode #179 where its transcript consisted of about 47,000 characters. With a careful
-prompt, token consumption was input of ~12,000 and output of ~400.
-
-| Model        | Input | Output |  Cost |  200x | Quality   |
-| ------------ | ----- | ------ | ----- | ----- | --------- |
-| gpt-5.4-mini | $0.75 |  $4.50 |  ¢1.1 | $2.20 | Very good |
-| gpt-4.1*     | $2.00 |  $8.00 |  ¢2.7 | $5.40 | Very good |
-| gpt-4o       | $2.50 | $10.00 |  ¢3.0 | $6.00 | Decent    |
-| gpt-4.1-mini | $0.40 |  $1.60 |  ¢0.6 | $1.20 | Decent    |
-
-*Default model
-
-Compare [pricing](https://developers.openai.com/api/docs/pricing) and [models](https://developers.openai.com/api/docs/models).
-
 Output Files
 --------------------------------------------------------------------------------
 All output goes to `episodes/`.
@@ -116,8 +95,7 @@ All output goes to `episodes/`.
   image URL, MP3 URL). Written before transcription starts.
 
 - **Run log**: `transcribe-20260320T120000.log`
-  Per-run log capturing all CLI output, progress, errors, and the final
-  summary.
+  Per-run log capturing all CLI output, progress, and errors.
 
 MP3 Caching
 --------------------------------------------------------------------------------

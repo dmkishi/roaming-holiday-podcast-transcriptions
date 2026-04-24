@@ -23,7 +23,6 @@ const SUFFIX = {
   fade: '.audio-fade.json',
   transcript: '.transcript.json',
   paragraph: '.transcript.paragraph.json',
-  summary: '.transcript.summary.txt',
 } as const;
 
 function pathFor(episodeNumber: number, suffix: string): string {
@@ -41,7 +40,6 @@ export function paths(episodeNumber: number): {
   fade: string;
   transcript: string;
   paragraph: string;
-  summary: string;
 } {
   return {
     metadata: pathFor(episodeNumber, SUFFIX.metadata),
@@ -50,7 +48,6 @@ export function paths(episodeNumber: number): {
     fade: pathFor(episodeNumber, SUFFIX.fade),
     transcript: pathFor(episodeNumber, SUFFIX.transcript),
     paragraph: pathFor(episodeNumber, SUFFIX.paragraph),
-    summary: pathFor(episodeNumber, SUFFIX.summary),
   };
 }
 
@@ -60,7 +57,6 @@ export const hasVad = (n: number): boolean => existsSync(pathFor(n, SUFFIX.vad))
 export const hasFade = (n: number): boolean => existsSync(pathFor(n, SUFFIX.fade));
 export const hasTranscript = (n: number): boolean => existsSync(pathFor(n, SUFFIX.transcript));
 export const hasParagraph = (n: number): boolean => existsSync(pathFor(n, SUFFIX.paragraph));
-export const hasSummary = (n: number): boolean => existsSync(pathFor(n, SUFFIX.summary));
 
 function readJson<S extends z.ZodType>(path: string, schema: S): z.infer<S> {
   return schema.parse(JSON.parse(readFileSync(path, 'utf8')));
@@ -82,8 +78,6 @@ export const readTranscript = (n: number): TranscriptFile =>
   readJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema);
 export const readParagraph = (n: number): ParagraphFile =>
   readJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema);
-export const readSummary = (n: number): string =>
-  readFileSync(pathFor(n, SUFFIX.summary), 'utf8');
 
 export const writeMetadata = (n: number, data: MetadataFile): string =>
   writeJson(pathFor(n, SUFFIX.metadata), MetadataFileSchema, data);
@@ -95,13 +89,6 @@ export const writeTranscript = (n: number, data: TranscriptFile): string =>
   writeJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema, data);
 export const writeParagraph = (n: number, data: ParagraphFile): string =>
   writeJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema, data);
-
-export function writeSummary(n: number, text: string): string {
-  const path = pathFor(n, SUFFIX.summary);
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, text);
-  return path;
-}
 
 /**
  * Returns sorted episode numbers derived from `*.metadata.json` filenames in

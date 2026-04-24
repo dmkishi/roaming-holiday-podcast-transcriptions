@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "transcribe": "tsx --env-file=.env bin/transcribe-episodes.ts",
+    "transcribe": "tsx bin/transcribe-episodes.ts",
     "build-www": "tsx bin/build-www.ts && eleventy",
     "dev-www": "open http://localhost:8080 & eleventy --serve",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
@@ -27,7 +27,6 @@
     "fast-xml-parser": "^5.5.10",
     "html-minifier-terser": "^7.2.0",
     "minimist": "^1.2.8",
-    "openai": "^6.33.0",
     "oxlint": "^1.58.0",
     "oxlint-tsgolint": "^0.19.0",
     "picocolors": "^1.1.1",

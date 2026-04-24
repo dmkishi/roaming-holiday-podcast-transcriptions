@@ -84,15 +84,6 @@ eleventyComputed:
   <div class="episode--content wrapper">
     <p class="episode--content-warning">All transcripts are machine generated.</p>
 
-    {%- if episode.summary %}
-      <section class="episode--summary">
-        <h2>Summary</h2>
-        <p>{{ episode.summary }}</p>
-      </section>
-    {%- endif %}
-
-    <hr>
-
     <section class="episode--transcript" data-transcript>
       <h2>Transcript</h2>
       {%- for paragraph in episode.paragraphs %}

@@ -39,7 +39,7 @@ const overrides = loadOverrides();
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
 let built = 0;
 
-for (const { metadata, paragraph, fadePairStarts, summary } of artifacts) {
+for (const { metadata, paragraph, fadePairStarts } of artifacts) {
   const ep = metadata.episodeNumber;
 
   const image = await downloadImage(ep, metadata.imageUrl);
@@ -61,7 +61,6 @@ for (const { metadata, paragraph, fadePairStarts, summary } of artifacts) {
     imagePath: image.path,
     paragraphs,
     fadePairStarts,
-    summary,
     location: override?.location,
     youtube: override?.youtube,
   };

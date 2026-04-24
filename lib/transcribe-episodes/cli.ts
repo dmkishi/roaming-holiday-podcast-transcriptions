@@ -1,14 +1,12 @@
 import minimist from 'minimist';
-import { DEFAULT_WHISPER_MODEL, DEFAULT_SUMMARY_MODEL } from '@lib/config/llm.js';
+import { DEFAULT_WHISPER_MODEL } from '@lib/config/llm.js';
 
 interface CliOptions {
   episodeNums: Set<number>;
   transcribeModel: string;
-  summaryModel: string;
   runPipeline: {
     runTranscript: boolean;
     runParagraph: boolean;
-    runSummary: boolean;
   };
   forceRss: boolean;
   forceDownload: boolean;
@@ -20,9 +18,7 @@ interface CliOptions {
 export function getTranscribeCliArgs(args: string[]): CliOptions {
   const argv = minimist<{
     model: string;
-    'summary-model': string;
     'only-paragraphs': boolean;
-    'only-summaries': boolean;
     'force-all': boolean;
     'force-rss': boolean;
     'force-download': boolean;
@@ -30,10 +26,9 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     'force-fade': boolean;
     'force-transcribe': boolean;
   }>(args.slice(2), {
-    string: ['model', 'summary-model'],
+    string: ['model'],
     boolean: [
       'only-paragraphs',
-      'only-summaries',
       'force-all',
       'force-rss',
       'force-download',
@@ -43,9 +38,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     ],
     default: {
       model: DEFAULT_WHISPER_MODEL,
-      'summary-model': DEFAULT_SUMMARY_MODEL,
       'only-paragraphs': false,
-      'only-summaries': false,
       'force-all': false,
       'force-rss': false,
       'force-download': false,
@@ -58,16 +51,14 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
   if (episodeNums.size === 0) {
     console.error(
-      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--summary-model ${DEFAULT_SUMMARY_MODEL}] [--only-paragraphs] [--only-summaries] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]`,
+      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_WHISPER_MODEL}] [--only-paragraphs] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]`,
     );
     process.exit(1);
   }
 
   const onlyParagraphs = argv['only-paragraphs'];
-  const onlySummaries = argv['only-summaries'];
-  const runTranscript = !onlyParagraphs && !onlySummaries;
+  const runTranscript = !onlyParagraphs;
   const runParagraph = runTranscript || onlyParagraphs;
-  const runSummary = runTranscript || onlySummaries;
 
   // Forcing a transcription stage cascades to every downstream transcription
   // stage that consumes its output. Pipeline: rss → download → vad → transcribe.
@@ -79,11 +70,11 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   // still cascades into fade, since a re-downloaded MP3 invalidates any fade
   // sidecar derived from the prior file.
   //
-  // Tail stages (paragraph, paragraphGroup, summary) always regenerate when
-  // they run, so they have no force flags.
+  // Tail stages (paragraph, paragraphGroup) always regenerate when they run,
+  // so they have no force flags.
   //
-  // `--only-*` short-circuits the transcript pipeline, so transcript-stage
-  // force flags are inert in that mode and silently ignored.
+  // `--only-paragraphs` short-circuits the transcript pipeline, so
+  // transcript-stage force flags are inert in that mode and silently ignored.
   const forceAll = runTranscript && argv['force-all'];
   const forceRss = runTranscript && (forceAll || argv['force-rss']);
   const forceDownload = runTranscript && (forceAll || argv['force-download']);
@@ -94,8 +85,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   return {
     episodeNums,
     transcribeModel: argv.model,
-    summaryModel: argv['summary-model'],
-    runPipeline: { runTranscript, runParagraph, runSummary },
+    runPipeline: { runTranscript, runParagraph },
     forceRss,
     forceDownload,
     forceVad,

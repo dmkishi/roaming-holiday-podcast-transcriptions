@@ -18,7 +18,6 @@ export interface SiteEpisode {
   imagePath: string;
   paragraphs: TranscriptSegment[][];
   fadePairStarts: number[];
-  summary: string;
   location?: string;
   youtube?: string;
 }
