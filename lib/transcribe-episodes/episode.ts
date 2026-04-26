@@ -1,5 +1,6 @@
 import { type Duration, parseDuration } from '@lib/shared/duration.js';
 import type { RssItem } from '@lib/shared/rss.js';
+import { sanitizeRssText } from '@lib/shared/sanitizeRssText.js';
 
 export interface Episode {
   episodeNumber: number;
@@ -26,8 +27,8 @@ export function findEpisodes(
 
     episodes.push({
       episodeNumber,
-      title: item.title,
-      description: item.description ?? '',
+      title: sanitizeRssText(item.title),
+      description: sanitizeRssText(item.description ?? ''),
       pubDate: new Date(item.pubDate),
       duration: parseDuration(item['itunes:duration']),
       imageUrl: item['itunes:image']['@_href'],

@@ -11,9 +11,10 @@ import {
 } from '@lib/transcribe-episodes/transcript.js';
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { buildParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
+import { buildMarkdown } from '@lib/transcribe-episodes/markdown.js';
 import {
   paths, hasMetadata, readMetadata, writeMetadata,
-  hasTranscript, hasFade, hasMp3, writeParagraph,
+  hasTranscript, hasFade, hasMp3, writeParagraph, writeMarkdown,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
@@ -294,6 +295,14 @@ if (runParagraph) {
       `  Groups:     ${formatNumber(groupsRes.stats.groups)}`,
       `  Fades:      ${formatNumber(groupsRes.stats.fades)}`,
     ]);
+
+    const markdown = buildMarkdown(
+      readMetadata(episodeNumber),
+      paragraphs,
+      groupsRes.fadePairStarts,
+    );
+    const markdownPath = writeMarkdown(episodeNumber, markdown);
+    printLog.info(`#${episodeNumber}: Saved "${toRelative(markdownPath)}"`);
   }
   print.emptyLine();
 }
