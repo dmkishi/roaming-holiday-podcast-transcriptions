@@ -16,8 +16,8 @@ function pluralize(word, count) {
 
 export default function(eleventyConfig) {
   /**
-   * - runMode is `build` when `pnpm www:build`
-   * - runMode is `serve` when `pnpm www:dev`
+   * - runMode is `build` when `pnpm build-www`
+   * - runMode is `serve` when `pnpm dev-www`
    */
   let isProd = true;
   eleventyConfig.on('eleventy.before', ({ runMode }) => {
