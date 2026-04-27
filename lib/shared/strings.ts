@@ -12,6 +12,9 @@ export function formatNumber(n: number): string {
   return n.toLocaleString('en-US');
 }
 
+/**
+ * `1` → "001"
+ */
 export function formatEpisodeNumber(episodeNumber: number): string {
   return String(episodeNumber).padStart(3, '0');
 }
