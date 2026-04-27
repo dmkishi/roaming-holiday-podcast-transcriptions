@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse } from 'yaml';
 import { z } from 'zod';
-import { SITE_DIR } from '@lib/shared/paths.js';
+import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 
 const EpisodeSupplementSchema = z.object({
   location: z.string().optional(),
@@ -13,12 +13,12 @@ const SupplementsFileSchema = z.record(z.coerce.number(), EpisodeSupplementSchem
 
 export type EpisodeSupplement = z.infer<typeof EpisodeSupplementSchema>;
 
-const SUPPLEMENTS_PATH = resolve(SITE_DIR, 'episodes.yaml');
+const SUPPLEMENTS_PATH = resolve(OUTPUTS_DIR, 'supplements.yaml');
 
 /**
- * Loads per-episode supplemental metadata from `www/src/episodes.yaml`, keyed
- * by episode number. Provides manual data (location, YouTube URL) that isn't
- * automatically discoverable from the RSS feed.
+ * Loads per-episode supplemental metadata from `episodes/supplements.yaml`,
+ * keyed by episode number. Provides manual data (location, YouTube URL) that
+ * isn't automatically discoverable from the RSS feed.
  */
 export function loadSupplements(): Map<number, EpisodeSupplement> {
   if (!existsSync(SUPPLEMENTS_PATH)) return new Map();
