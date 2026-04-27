@@ -14,7 +14,8 @@ import { buildParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js
 import { buildMarkdown } from '@lib/transcribe-episodes/markdown.js';
 import {
   paths, hasMetadata, readMetadata, writeMetadata,
-  hasTranscript, hasFade, hasMp3, writeParagraph, writeMarkdown,
+  hasTranscript, hasFade, hasMp3,
+  hasParagraph, readParagraph, writeParagraph, writeMarkdown,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
@@ -25,10 +26,12 @@ import { RSS_FEED_URL } from '@lib/config/rss.js';
 // Parse CLI args
 // =============================================================================
 const opts = getTranscribeCliArgs(process.argv);
-const { runTranscript, runParagraph } = opts.runPipeline;
-const modeLabel = runTranscript && runParagraph
-  ? 'full pipeline'
-  : 'paragraph only';
+const { runTranscript, runParagraph, runMarkdown } = opts.runPipeline;
+
+let modeLabel: string;
+if (runTranscript) modeLabel = 'full pipeline';
+else if (runParagraph) modeLabel = 'paragraph only';
+else modeLabel = 'markdown only';
 
 const banner = [
   `Transcribe ${pluralize(opts.episodeNums.size, 'episode')} (${modeLabel}): ${[...opts.episodeNums].join(', ')}`,
@@ -37,19 +40,22 @@ if (runTranscript) banner.push(`  Whisper model: ${opts.transcribeModel}`);
 printLog.info(banner);
 print.emptyLine();
 
-const episodeNumbers: number[] = runTranscript
-  ? await runTranscriptPipeline()
-  : loadTranscriptsFromDisk();
+let episodeNumbers: number[];
+if (runTranscript) episodeNumbers = await runTranscriptPipeline();
+else if (runParagraph) episodeNumbers = loadFromDisk('transcript');
+else episodeNumbers = loadFromDisk('paragraph');
 
 // =============================================================================
-// Load transcripts from disk
+// Load existing artifacts from disk
 // =============================================================================
-function loadTranscriptsFromDisk(): number[] {
-  print.info('Loading existing transcripts...');
+function loadFromDisk(requires: 'transcript' | 'paragraph'): number[] {
+  const artifact = requires === 'transcript' ? 'transcripts' : 'paragraph sidecars';
+  print.info(`Loading existing ${artifact}...`);
   const items: number[] = [];
   for (const episodeNumber of opts.episodeNums) {
-    if (!hasTranscript(episodeNumber)) {
-      printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
+    const has = requires === 'transcript' ? hasTranscript(episodeNumber) : hasParagraph(episodeNumber);
+    if (!has) {
+      printLog.warn(`#${episodeNumber}: No ${requires} found - skipping`);
       continue;
     }
     if (!hasMetadata(episodeNumber)) {
@@ -58,11 +64,12 @@ function loadTranscriptsFromDisk(): number[] {
     }
 
     items.push(episodeNumber);
-    printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).transcript)}"`);
+    const path = requires === 'transcript' ? paths(episodeNumber).transcript : paths(episodeNumber).paragraph;
+    printLog.info(`#${episodeNumber}: Loaded "${toRelative(path)}"`);
   }
 
   if (items.length === 0) {
-    printLog.error('No transcripts to process.');
+    printLog.error(`No ${artifact} to process.`);
     process.exit(1);
   }
   print.emptyLine();
@@ -295,12 +302,22 @@ if (runParagraph) {
       `  Groups:     ${formatNumber(groupsRes.stats.groups)}`,
       `  Fades:      ${formatNumber(groupsRes.stats.fades)}`,
     ]);
+  }
+  print.emptyLine();
+}
 
-    const markdown = buildMarkdown(
-      readMetadata(episodeNumber),
-      paragraphs,
-      groupsRes.fadePairStarts,
-    );
+// =============================================================================
+// Build Markdown transcripts
+// =============================================================================
+if (runMarkdown) {
+  print.info('Building Markdown transcripts...');
+  for (const episodeNumber of episodeNumbers) {
+    if (!hasParagraph(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No paragraph sidecar - skipping`);
+      continue;
+    }
+    const { segments, fadePairStarts } = readParagraph(episodeNumber);
+    const markdown = buildMarkdown(readMetadata(episodeNumber), segments, fadePairStarts);
     const markdownPath = writeMarkdown(episodeNumber, markdown);
     printLog.info(`#${episodeNumber}: Saved "${toRelative(markdownPath)}"`);
   }

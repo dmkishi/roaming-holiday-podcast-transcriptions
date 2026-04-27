@@ -7,6 +7,7 @@ interface CliOptions {
   runPipeline: {
     runTranscript: boolean;
     runParagraph: boolean;
+    runMarkdown: boolean;
   };
   forceRss: boolean;
   forceDownload: boolean;
@@ -19,6 +20,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const argv = minimist<{
     model: string;
     'only-paragraphs': boolean;
+    'only-markdown': boolean;
     'force-all': boolean;
     'force-rss': boolean;
     'force-download': boolean;
@@ -29,6 +31,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     string: ['model'],
     boolean: [
       'only-paragraphs',
+      'only-markdown',
       'force-all',
       'force-rss',
       'force-download',
@@ -39,6 +42,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     default: {
       model: DEFAULT_MODEL,
       'only-paragraphs': false,
+      'only-markdown': false,
       'force-all': false,
       'force-rss': false,
       'force-download': false,
@@ -48,7 +52,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     },
   });
 
-  const usage = `Usage: pnpm transcribe <episodes...> [--model ${DEFAULT_MODEL}] [--only-paragraphs] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]
+  const usage = `Usage: pnpm transcribe <episodes...> [--model ${DEFAULT_MODEL}] [--only-paragraphs | --only-markdown] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]
        <episodes...> accepts integers and ranges, e.g. 100 101 120-129`;
 
   const result = parseEpisodeNums(argv._.map(String));
@@ -59,8 +63,38 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const { episodeNums } = result;
 
   const onlyParagraphs = argv['only-paragraphs'];
-  const runTranscript = !onlyParagraphs;
+  const onlyMarkdown = argv['only-markdown'];
+  if (onlyParagraphs && onlyMarkdown) {
+    console.error(`--only-paragraphs and --only-markdown are mutually exclusive\n${usage}`);
+    process.exit(1);
+  }
+
+  // Reject force flags that would be inert under the selected mode rather than
+  // silently ignoring them. Transcript-stage force flags are inert under both
+  // `--only-paragraphs` and `--only-markdown`; `--force-fade` is additionally
+  // inert under `--only-markdown` (fade runs in the paragraph phase). Markdown
+  // has no force flag of its own - `writeMarkdown` overwrites unconditionally.
+  const transcriptForceFlags = [
+    'force-all', 'force-rss', 'force-download', 'force-vad', 'force-transcribe',
+  ] as const;
+  if (onlyParagraphs) {
+    const conflicts = transcriptForceFlags.filter((f) => argv[f]);
+    if (conflicts.length > 0) {
+      console.error(`--only-paragraphs is incompatible with ${conflicts.map((f) => `--${f}`).join(', ')}\n${usage}`);
+      process.exit(1);
+    }
+  }
+  if (onlyMarkdown) {
+    const conflicts = [...transcriptForceFlags, 'force-fade' as const].filter((f) => argv[f]);
+    if (conflicts.length > 0) {
+      console.error(`--only-markdown is incompatible with ${conflicts.map((f) => `--${f}`).join(', ')}\n${usage}`);
+      process.exit(1);
+    }
+  }
+
+  const runTranscript = !onlyParagraphs && !onlyMarkdown;
   const runParagraph = runTranscript || onlyParagraphs;
+  const runMarkdown = true;
 
   // Forcing a transcription stage cascades to every downstream transcription
   // stage that consumes its output. Pipeline: rss → download → vad → transcribe.
@@ -72,11 +106,9 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   // still cascades into fade, since a re-downloaded MP3 invalidates any fade
   // sidecar derived from the prior file.
   //
-  // Tail stages (paragraph, paragraphGroup) always regenerate when they run,
-  // so they have no force flags.
-  //
-  // `--only-paragraphs` short-circuits the transcript pipeline, so
-  // transcript-stage force flags are inert in that mode and silently ignored.
+  // Tail stages (paragraph, paragraphGroup, markdown) always regenerate when
+  // they run, so they have no force flags. Inert force flags under each
+  // `--only-*` mode are rejected up front (see argv validation above).
   const forceAll = runTranscript && argv['force-all'];
   const forceRss = runTranscript && (forceAll || argv['force-rss']);
   const forceDownload = runTranscript && (forceAll || argv['force-download']);
@@ -87,7 +119,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   return {
     episodeNums,
     transcribeModel: argv.model,
-    runPipeline: { runTranscript, runParagraph },
+    runPipeline: { runTranscript, runParagraph, runMarkdown },
     forceRss,
     forceDownload,
     forceVad,
