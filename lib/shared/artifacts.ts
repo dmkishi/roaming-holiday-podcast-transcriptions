@@ -60,6 +60,7 @@ export const hasVad = (n: number): boolean => existsSync(pathFor(n, SUFFIX.vad))
 export const hasFade = (n: number): boolean => existsSync(pathFor(n, SUFFIX.fade));
 export const hasTranscript = (n: number): boolean => existsSync(pathFor(n, SUFFIX.transcript));
 export const hasParagraph = (n: number): boolean => existsSync(pathFor(n, SUFFIX.paragraph));
+export const hasMarkdown = (n: number): boolean => existsSync(pathFor(n, SUFFIX.markdown));
 
 function readJson<S extends z.ZodType>(path: string, schema: S): z.infer<S> {
   return schema.parse(JSON.parse(readFileSync(path, 'utf8')));

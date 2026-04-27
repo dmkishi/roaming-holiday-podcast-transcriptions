@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "transcribe": "tsx bin/transcribe-episodes.ts",
+    "upload-cloudflare": "tsx --env-file=.env bin/upload-cloudflare.ts",
     "build-www": "tsx bin/build-www.ts && eleventy",
     "dev-www": "open http://localhost:8080 & eleventy --serve",
     "check": "pnpm typecheck && pnpm lint && pnpm test",

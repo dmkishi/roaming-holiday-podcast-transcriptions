@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
 import { downloadImage } from '@lib/build-www/images.js';
-import { loadOverrides } from '@lib/build-www/overrides.js';
+import { loadOverrides } from '@lib/shared/overrides.js';
 import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
