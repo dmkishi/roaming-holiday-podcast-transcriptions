@@ -48,13 +48,15 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     },
   });
 
-  const episodeNums = new Set(argv._.map(Number).filter((n) => !isNaN(n)));
-  if (episodeNums.size === 0) {
-    console.error(
-      `Usage: pnpm transcribe <episode-numbers...> [--model ${DEFAULT_MODEL}] [--only-paragraphs] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]`,
-    );
+  const usage = `Usage: pnpm transcribe <episodes...> [--model ${DEFAULT_MODEL}] [--only-paragraphs] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]
+       <episodes...> accepts integers and ranges, e.g. 100 101 120-129`;
+
+  const result = parseEpisodeNums(argv._.map(String));
+  if ('error' in result) {
+    console.error(`${result.error}\n${usage}`);
     process.exit(1);
   }
+  const { episodeNums } = result;
 
   const onlyParagraphs = argv['only-paragraphs'];
   const runTranscript = !onlyParagraphs;
@@ -92,4 +94,34 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     forceFade,
     forceTranscribe,
   };
+}
+
+/**
+ * Parses positional CLI tokens into a set of episode numbers.
+ */
+function parseEpisodeNums(
+  tokens: readonly string[],
+): { episodeNums: Set<number> } | { error: string } {
+  const episodeNums = new Set<number>();
+  for (const token of tokens) {
+    const range = /^(\d+)-(\d+)$/.exec(token);
+    if (range) {
+      const start = Number(range[1]);
+      const end = Number(range[2]);
+      if (start > end) {
+        return { error: `Invalid range '${token}': start must be <= end.` };
+      }
+      for (let n = start; n <= end; n++) episodeNums.add(n);
+      continue;
+    }
+    if (/^\d+$/.test(token)) {
+      episodeNums.add(Number(token));
+      continue;
+    }
+    return { error: `Invalid episode argument '${token}'.` };
+  }
+  if (episodeNums.size === 0) {
+    return { error: 'No episodes specified.' };
+  }
+  return { episodeNums };
 }
