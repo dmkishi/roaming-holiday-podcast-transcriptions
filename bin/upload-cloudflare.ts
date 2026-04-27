@@ -3,7 +3,7 @@ import { basename } from 'node:path';
 import {
   paths, hasMetadata, hasMarkdown, listEpisodeNumbers, readMetadata,
 } from '@lib/shared/artifacts.js';
-import { loadOverrides } from '@lib/shared/overrides.js';
+import { loadSupplements } from '@lib/shared/supplements.js';
 import { toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
 import { pluralize } from '@lib/shared/strings.js';
@@ -67,7 +67,7 @@ if (!opts.force) {
 // =============================================================================
 // Upload
 // =============================================================================
-const overrides = loadOverrides();
+const supplements = loadSupplements();
 
 print.info('Uploading...');
 let uploaded = 0;
@@ -102,7 +102,7 @@ for (const n of episodeNumbers) {
     continue;
   }
 
-  const metadata = buildItemMetadata(readMetadata(n), overrides.get(n));
+  const metadata = buildItemMetadata(readMetadata(n), supplements.get(n));
   const bytes = readFileSync(markdownPath);
 
   const res = await uploadItem(env, key, bytes, metadata);

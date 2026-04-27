@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
 import { downloadImage } from '@lib/build-www/images.js';
-import { loadOverrides } from '@lib/shared/overrides.js';
+import { loadSupplements } from '@lib/shared/supplements.js';
 import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
@@ -35,7 +35,7 @@ print.emptyLine();
 // Build episode data
 // =============================================================================
 print.info('Building episode data...');
-const overrides = loadOverrides();
+const supplements = loadSupplements();
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
 let built = 0;
 
@@ -48,7 +48,7 @@ for (const { metadata, paragraph, fadePairStarts } of artifacts) {
   }
 
   const paragraphs = addTimelineMarkers(paragraph.segments);
-  const override = overrides.get(ep);
+  const supplement = supplements.get(ep);
 
   const episode: SiteEpisode = {
     episodeNumber: ep,
@@ -61,8 +61,8 @@ for (const { metadata, paragraph, fadePairStarts } of artifacts) {
     imagePath: image.path,
     paragraphs,
     fadePairStarts,
-    location: override?.location,
-    youtube: override?.youtube,
+    location: supplement?.location,
+    youtube: supplement?.youtube,
   };
 
   const filepath = join(SITE_EPISODES_DIR, `${formatEpisodeNumber(ep)}.json`);
