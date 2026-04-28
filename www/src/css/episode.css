@@ -118,6 +118,8 @@
     font-family: serif;
     text-align: center;
     line-height: 1.1; /* Adjusts vertical positioning */
+    cursor: default;
+    user-select: none;
   }
 
   .key-icon__space {
