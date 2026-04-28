@@ -7,6 +7,7 @@ import { OUTPUTS_DIR } from '@lib/shared/paths.js';
 const EpisodeSupplementSchema = z.object({
   location: z.string().optional(),
   youtube: z.url().optional(),
+  isInterlude: z.boolean().optional(),
 });
 
 const SupplementsFileSchema = z.record(z.coerce.number(), EpisodeSupplementSchema);

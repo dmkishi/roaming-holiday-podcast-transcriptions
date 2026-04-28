@@ -20,6 +20,7 @@ export interface SiteEpisode {
   fadePairStarts: number[];
   location?: string;
   youtube?: string;
+  isInterlude?: boolean;
 }
 
 // =============================================================================

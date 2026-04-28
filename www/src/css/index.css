@@ -17,6 +17,12 @@
   gap: var(--space-1);
 }
 
+.episode-card__interlude {
+  outline: 1px solid #00000099;
+  outline-offset: 7px;
+  margin-block: -.5px;
+}
+
 .episode-card--header {
   margin-top: -7.25px; /* Align to top of thumbnail */
 }

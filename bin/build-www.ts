@@ -63,6 +63,7 @@ for (const { metadata, paragraph, fadePairStarts } of artifacts) {
     fadePairStarts,
     location: supplement?.location,
     youtube: supplement?.youtube,
+    isInterlude: supplement?.isInterlude,
   };
 
   const filepath = join(SITE_EPISODES_DIR, `${formatEpisodeNumber(ep)}.json`);
