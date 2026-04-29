@@ -19,7 +19,7 @@ export interface SiteEpisode {
   paragraphs: TranscriptSegment[][];
   fadePairStarts: number[];
   location?: string;
-  youtube?: string;
+  youtubeUrl?: string;
   isInterlude?: boolean;
 }
 

@@ -62,7 +62,7 @@ for (const { metadata, paragraph, fadePairStarts } of artifacts) {
     paragraphs,
     fadePairStarts,
     location: supplement?.location,
-    youtube: supplement?.youtube,
+    youtubeUrl: supplement?.youtube,
     isInterlude: supplement?.isInterlude,
   };
 

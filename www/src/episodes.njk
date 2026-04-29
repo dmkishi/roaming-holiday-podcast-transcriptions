@@ -18,11 +18,11 @@ eleventyComputed:
 
 <article class="episode">
   <header>
-    {% if episode.youtube %}
+    {% if episode.youtubeUrl %}
       <div class="js-video-sentinel episode--video-container">
         <iframe
           class="episode--video js-video"
-          src="https://www.youtube-nocookie.com/embed/{{ episode.youtube | youtubeId }}?fs=0&enablejsapi=1"
+          src="https://www.youtube-nocookie.com/embed/{{ episode.youtubeUrl | youtubeId }}?fs=0&enablejsapi=1"
           title="Episode {{ episode.episodeNumber }}"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
