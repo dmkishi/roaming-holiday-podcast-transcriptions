@@ -20,6 +20,9 @@ importers:
       '@dmkishi/markdownlint-cli2.yaml':
         specifier: ^0.0.3
         version: 0.0.3
+      '@dmkishi/oxlintrc':
+        specifier: ^0.0.1
+        version: 0.0.1
       '@js-temporal/polyfill':
         specifier: ^0.5.1
         version: 0.5.1
@@ -445,6 +448,9 @@ packages:
   '@dmkishi/markdownlint-cli2.yaml@0.0.3':
     resolution: {integrity: sha512-bTR3JrspskfhacWKc5i+rC15nyoiFXqs6PFjgCArATketRdJ6xUatFHSdVafi6Ws3lHjVcXEMAKTFoVs+nmlXQ==}
     hasBin: true
+
+  '@dmkishi/oxlintrc@0.0.1':
+    resolution: {integrity: sha512-d4PzaHE6HAHOLs7RmNNY2bWQ5EP2ZybYnqO4EQMxKOoTh4Gs1q8oP59fLaRQ6srasSI5m5zb28sr8aYj8RPPjQ==}
 
   '@emnapi/core@1.9.1':
     resolution: {integrity: sha512-mukuNALVsoix/w1BJwFzwXBN/dHeejQtuVzcDsfOEsdpCumXb/E9j8w11h5S54tT1xhifGfbbSm/ICrObRb3KA==}
@@ -2910,6 +2916,8 @@ snapshots:
   '@dmkishi/css-reset@1.2.2': {}
 
   '@dmkishi/markdownlint-cli2.yaml@0.0.3': {}
+
+  '@dmkishi/oxlintrc@0.0.1': {}
 
   '@emnapi/core@1.9.1':
     dependencies:

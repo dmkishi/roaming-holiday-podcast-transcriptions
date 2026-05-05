@@ -20,6 +20,7 @@
     "@11ty/eleventy-img": "^6.0.4",
     "@dmkishi/css-reset": "^1.2.2",
     "@dmkishi/markdownlint-cli2.yaml": "^0.0.3",
+    "@dmkishi/oxlintrc": "^0.0.1",
     "@js-temporal/polyfill": "^0.5.1",
     "@types/minimist": "^1.2.5",
     "@types/node": "^25.5.2",
