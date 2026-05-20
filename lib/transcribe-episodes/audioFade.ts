@@ -46,9 +46,9 @@ export async function runFade(
     }
 
     const pcmPath = await decodePcm(mp3Path);
-    const pairs = pairFades(fades, FADE_PAIR_MAX_GAP_SECONDS);
-    const fadePath = writeFade(episodeNumber, { fades: pairs });
     const fades = await detectFades(pcmPath);
+    const fadePairs = makeFadePairs(fades, FADE_PAIR_MAX_GAP_SECONDS);
+    const fadePath = writeFade(episodeNumber, { fades: fadePairs });
 
     return {
       ok: true,
@@ -91,7 +91,7 @@ export async function detectFades(pcmPath: string): Promise<Fade[]> {
  * gaps (the fade-in begins before the fade-out ends) are always kept since they
  * represent crossfades. Unpaired fades are discarded.
  */
-export function pairFades(fades: readonly Fade[], maxGap: number): FadePair[] {
+export function makeFadePairs(fades: readonly Fade[], maxGap: number): FadePair[] {
   const sorted = fades.toSorted((a, b) => a.start - b.start);
   const pairs: FadePair[] = [];
   for (let i = 0; i < sorted.length; i++) {

@@ -45,7 +45,9 @@ export function buildParagraphs(
 
     const vad = readVad(episodeNumber);
     const breaks = buildParagraphBreaks(segments, vad.gaps, PARAGRAPH_GAP_SECONDS);
-    const simplifiedSegments = segments.map(({ start, end, text }) => ({ start, end, text }));
+    const simplifiedSegments = segments.map(
+      ({ start, end, text, words }) => ({ start, end, text, words }),
+    );
     const paragraphs = breaks.map((start, i) => {
       const end = breaks[i + 1] ?? simplifiedSegments.length;
       return simplifiedSegments.slice(start, end);

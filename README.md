@@ -15,7 +15,7 @@ pnpm install
 #   - Silero VAD is used to split audio files into chunks before transcription.
 #   - Essentia is used to detect audio fades.
 python3 -m venv .venv
-.venv/bin/pip install openai-whisper silero-vad essentia
+.venv/bin/pip install whisper-timestamped silero-vad essentia
 
 # ffmpeg is required for audio decoding and chunking.
 brew install ffmpeg

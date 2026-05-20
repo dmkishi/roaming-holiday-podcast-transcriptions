@@ -139,7 +139,7 @@ export async function promptTranscript(
         `Whisper not found at ${VENV_WHISPER}\n` +
         'Set up the Python venv:\n' +
         '  python3 -m venv .venv\n' +
-        '  .venv/bin/pip install openai-whisper silero-vad',
+        '  .venv/bin/pip install whisper-timestamped silero-vad',
       );
     }
 

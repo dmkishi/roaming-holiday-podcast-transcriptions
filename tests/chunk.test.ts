@@ -258,4 +258,67 @@ describe('mergeChunkTranscripts', () => {
       { id: 0, start: 0, end: 2, text: ' Single.' },
     ]);
   });
+
+  test('offsets word timestamps by chunk start', () => {
+    const chunks = [
+      {
+        startSeconds: 0,
+        json: {
+          text: 'Hello there.',
+          segments: [{
+            id: 0,
+            start: 0,
+            end: 5,
+            text: ' Hello there.',
+            words: [
+              { text: ' Hello', start: 0.25, end: 0.75, confidence: 0.9 },
+              { text: ' there.', start: 0.75, end: 1.5, confidence: 0.8 },
+            ],
+          }],
+        },
+      },
+      {
+        startSeconds: 900,
+        json: {
+          text: 'World now.',
+          segments: [{
+            id: 0,
+            start: 0,
+            end: 3,
+            text: ' World now.',
+            words: [
+              { text: ' World', start: 0.5, end: 1.25, confidence: 0.95 },
+              { text: ' now.', start: 1.5, end: 2.75, confidence: 0.7 },
+            ],
+          }],
+        },
+      },
+    ];
+
+    const merged = mergeChunkTranscripts(chunks);
+    // First chunk (offset 0): word times unchanged.
+    expect(merged.segments[0]!.words).toEqual([
+      { text: ' Hello', start: 0.25, end: 0.75, confidence: 0.9 },
+      { text: ' there.', start: 0.75, end: 1.5, confidence: 0.8 },
+    ]);
+    // Second chunk (offset 900): word times rebased, confidence untouched.
+    expect(merged.segments[1]!.words).toEqual([
+      { text: ' World', start: 900.5, end: 901.25, confidence: 0.95 },
+      { text: ' now.', start: 901.5, end: 902.75, confidence: 0.7 },
+    ]);
+  });
+
+  test('leaves words undefined for word-less (pre-backfill) segments', () => {
+    const chunks = [
+      {
+        startSeconds: 900,
+        json: {
+          text: 'Legacy.',
+          segments: [{ id: 0, start: 0, end: 2, text: ' Legacy.' }],
+        },
+      },
+    ];
+    const merged = mergeChunkTranscripts(chunks);
+    expect(merged.segments[0]!.words).toBeUndefined();
+  });
 });

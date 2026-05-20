@@ -1,6 +1,7 @@
 import { execFile, spawn } from 'node:child_process';
 import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
+import type { z } from 'zod';
 import type { Gap } from '@lib/transcribe-episodes/audioVad.js';
 import { TMP_DIR, FFMPEG } from '@lib/shared/paths.js';
 import { TranscriptFileSchema } from '@lib/shared/schemas.js';
@@ -18,9 +19,11 @@ export interface CutPointOptions {
   maxWindowMinutes: number;
 }
 
+type TranscriptSegment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
+
 interface MergedTranscript {
   text: string;
-  segments: { id: number; start: number; end: number; text: string }[];
+  segments: TranscriptSegment[];
 }
 
 const execFileAsync = promisify(execFile);
@@ -90,9 +93,9 @@ function findBestGap(
 }
 
 /**
- * Merge per-chunk Whisper JSON outputs into a single transcript. Offsets
- * every segment's start/end by the chunk's position in the original audio
- * and reassigns sequential ids.
+ * Merge per-chunk Whisper JSON outputs into a single transcript. Offsets every
+ * segment's (and word's) start/end by the chunk's position in the original
+ * audio and reassigns sequential ids.
  */
 export function mergeChunkTranscripts(
   chunks: readonly { startSeconds: number; json: unknown }[],
@@ -112,6 +115,11 @@ export function mergeChunkTranscripts(
           start: seg.start + chunk.startSeconds,
           end: seg.end + chunk.startSeconds,
           text: seg.text,
+          words: seg.words?.map((word) => ({
+            ...word,
+            start: word.start + chunk.startSeconds,
+            end: word.end + chunk.startSeconds,
+          })),
         });
       }
     }
@@ -170,6 +178,10 @@ export async function whisperChunk(
     '--language', 'en',
     '--verbose', 'True',
     '--initial_prompt', prompt,
+    // whisper-timestamped defaults to greedy decoding; --accurate restores
+    // openai-whisper's beam search + temperature fallback so transcription
+    // text stays consistent with the existing corpus.
+    '--accurate',
   ];
 
   const exitCode = await new Promise<number | null>((resolve) => {

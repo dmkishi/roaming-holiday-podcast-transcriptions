@@ -49,6 +49,14 @@ const SegmentSchema = z.object({
   start: z.number(),
   end: z.number(),
   text: z.string(),
+  words: z.array(
+    z.object({
+      text: z.string(),
+      start: z.number(),
+      end: z.number(),
+      confidence: z.number().optional(),
+    }),
+  ).optional(), // Phase 1: optional. Phase 3 drops .optional().
 });
 
 export const TranscriptFileSchema = z.object({
