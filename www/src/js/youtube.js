@@ -61,15 +61,27 @@
     apiScript.src = 'https://www.youtube.com/iframe_api';
     document.head.appendChild(apiScript);
 
-    const spans = transcript
-      ? Array.from(transcript.querySelectorAll('span[data-start]')).map(function(el) {
-          return {
-            el,
-            start: parseFloat(el.dataset.start),
-          };
-        })
-      : [];
-    let currentIndex = -1;
+    /**
+     * Collect transcript <span>s matching `selector`, pairing each element with
+     * its parsed `data-start` timestamp for monotonic-walk lookup.
+     * @param {string} selector
+     * @returns {{ el: Element, start: number }[]}
+     */
+    function collectSpans(selector) {
+      if (!transcript) return [];
+      return [...transcript.querySelectorAll(selector)].map((el) => ({
+        el,
+        start: parseFloat(el.dataset.start ?? ''),
+      }));
+    }
+
+    // Segment-level spans (both `.segment` wrappers and fallback segment spans)
+    // and word-level spans live interleaved with duplicate start times — track
+    // them separately so each gets its own monotonic-walk pointer and class.
+    const segmentSpans = collectSpans('p > span[data-start]');
+    const wordSpans = collectSpans('.segment > span[data-start]');
+    let currentSegmentIndex = -1;
+    let currentWordIndex = -1;
     let intervalId = null;
     let player;
 
@@ -103,21 +115,43 @@
       });
     };
 
+    /**
+     * Highlight the segment and word matching the current playback time.
+     * Segment changes also scroll the transcript (word changes only toggle the
+     * class to avoid jitter from the ~3×/s update cadence.)
+     */
     function updateActiveSpan() {
-      if (!spans.length || !player) return;
+      if (!player) return;
       const t = player.getCurrentTime();
 
-      let i = currentIndex;
-      while (i + 1 < spans.length && spans[i + 1].start <= t) i++;
-      while (i >= 0 && spans[i].start > t) i--;
-      if (i === currentIndex) return;
-
-      if (currentIndex >= 0) spans[currentIndex].el.classList.remove('is-active');
-      if (i >= 0) {
-        spans[i].el.classList.add('is-active');
-        spans[i].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (segmentSpans.length > 0) {
+        let i = currentSegmentIndex;
+        while (i + 1 < segmentSpans.length && segmentSpans[i + 1].start <= t) i++;
+        while (i >= 0 && segmentSpans[i].start > t) i--;
+        if (i !== currentSegmentIndex) {
+          if (currentSegmentIndex >= 0) {
+            segmentSpans[currentSegmentIndex].el.classList.remove('is-active-segment');
+          }
+          if (i >= 0) {
+            segmentSpans[i].el.classList.add('is-active-segment');
+            // Scroll only on segment change — word transitions fire ~3×/s and
+            // would jitter the page.
+            segmentSpans[i].el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }
+          currentSegmentIndex = i;
+        }
       }
-      currentIndex = i;
+
+      if (wordSpans.length > 0) {
+        let j = currentWordIndex;
+        while (j + 1 < wordSpans.length && wordSpans[j + 1].start <= t) j++;
+        while (j >= 0 && wordSpans[j].start > t) j--;
+        if (j !== currentWordIndex) {
+          if (currentWordIndex >= 0) wordSpans[currentWordIndex].el.classList.remove('is-active');
+          if (j >= 0) wordSpans[j].el.classList.add('is-active');
+          currentWordIndex = j;
+        }
+      }
     }
 
     function initKeyboardControls() {

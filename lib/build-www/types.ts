@@ -4,6 +4,12 @@ export interface TranscriptSegment {
   start: number;
   end: number;
   text: string;
+  words?: {
+    text: string;
+    start: number;
+    end: number;
+    confidence?: number;
+  }[];
   timelineMarker?: boolean;
 }
 

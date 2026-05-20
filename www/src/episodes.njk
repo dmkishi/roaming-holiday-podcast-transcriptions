@@ -99,9 +99,20 @@ eleventyComputed:
                 {{- segment.start | formatRoundedTimecode -}}
               </time>
             {%- endif %}
-            <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">
-              {{- segment.text -}}
-            </span>
+            {%- if segment.words %}
+              <span class="segment" data-start="{{ segment.start }}" data-end="{{ segment.end }}">
+                {%- for word in segment.words -%}
+                  {%- if not loop.first %} {% endif -%}
+                  <span data-start="{{ word.start }}" data-end="{{ word.end }}">
+                    {{- word.text -}}
+                  </span>
+                {%- endfor -%}
+              </span>
+            {%- else %}
+              <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">
+                {{- segment.text -}}
+              </span>
+            {%- endif %}
           {%- endfor %}
         </p>
       {%- endfor %}
