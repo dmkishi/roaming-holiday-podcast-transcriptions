@@ -191,6 +191,6 @@ export async function whisperChunk(
     proc.on('close', (code) => { resolve(code); });
   });
 
-  const jsonName = basename(chunkPath).replace(/\.[^.]+$/, '') + '.json';
+  const jsonName = basename(chunkPath) + '.words.json';
   return { jsonPath: join(TMP_DIR, jsonName), exitCode };
 }
