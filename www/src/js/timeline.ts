@@ -26,24 +26,21 @@
     return mins + ':' + String(secs).padStart(2, '0');
   }
 
-  transcript.addEventListener('mouseover', (evt: MouseEvent) => {
-    if (!(evt.target instanceof Element)) return;
-    const span = evt.target.closest('span[data-start]');
-    if (!(span instanceof HTMLElement)) return;
-    tooltip.textContent = formatTime(parseFloat(span.dataset['start'] ?? ''));
-    tooltip.hidden = false;
-  });
-
   transcript.addEventListener('mousemove', (evt: MouseEvent) => {
-    if (tooltip.hidden !== false) return;
+    const segment = evt.target instanceof Element
+      ? evt.target.closest<HTMLElement>('.segment')
+      : undefined;
+    if (!segment) {
+      tooltip.hidden = true;
+      return;
+    }
+    tooltip.textContent = formatTime(parseFloat(segment.dataset['start'] ?? ''));
+    tooltip.hidden = false;
     tooltip.style.left = evt.clientX + 12 + 'px';
     tooltip.style.top = evt.clientY - 28 + 'px';
   });
 
-  transcript.addEventListener('mouseout', (evt: MouseEvent) => {
-    if (!(evt.target instanceof Element)) return;
-    const span = evt.target.closest('span[data-start]');
-    if (!span) return;
+  transcript.addEventListener('mouseleave', () => {
     tooltip.hidden = true;
   });
 })();

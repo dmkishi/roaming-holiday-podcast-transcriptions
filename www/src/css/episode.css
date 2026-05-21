@@ -183,10 +183,10 @@
     cursor: default;
   }
 
-  /* Hover: in the hybrid DOM, highlight the innermost word; in the fallback
-     DOM (no words), the whole segment is the innermost span. Exclude `.segment`
-     wrappers so the hybrid hover doesn't compound with the inner word. */
-  span[data-start]:not(.segment):hover {
+  /* Hover: highlight the innermost interactive unit — a word in hybrid mode,
+     or the whole segment when it has no word breakdown. */
+  .word:hover,
+  .segment:not(:has(.word)):hover {
     background: var(--color-tint-1);
     border-radius: 2px;
   }
@@ -202,7 +202,7 @@
      segment's `is-active-segment` to the same underline so users still get a
      dominant cue when no words are present. */
   .is-active,
-  p > span[data-start]:not(.segment).is-active-segment {
+  .segment:not(:has(.word)).is-active-segment {
     text-decoration: underline;
     text-decoration-thickness: 3px;
     text-decoration-color: var(--color-tint-2);

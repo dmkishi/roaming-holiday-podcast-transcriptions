@@ -70,11 +70,11 @@
       }));
     }
 
-    // Segment-level spans (both `.segment` wrappers and fallback segment spans)
-    // and word-level spans live interleaved with duplicate start times — track
-    // them separately so each gets its own monotonic-walk pointer and class.
-    const segmentSpans = collectSpans('p > span[data-start]');
-    const wordSpans = collectSpans('.segment > span[data-start]');
+    // Segment and word spans live interleaved with duplicate start times —
+    // track them separately so each gets its own monotonic-walk pointer and
+    // class.
+    const segmentSpans = collectSpans('.segment');
+    const wordSpans = collectSpans('.word');
     let currentSegmentIndex = -1;
     let currentWordIndex = -1;
 
@@ -89,7 +89,7 @@
               transcript.addEventListener('dblclick', (evt) => {
                 if (!player) return;
                 if (!(evt.target instanceof Element)) return;
-                const span = evt.target.closest('span[data-start]');
+                const span = evt.target.closest('.word, .segment');
                 if (!(span instanceof HTMLElement)) return;
                 player.seekTo(parseFloat(span.dataset['start'] ?? ''), true);
                 player.playVideo();

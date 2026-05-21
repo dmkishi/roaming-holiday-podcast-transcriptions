@@ -103,13 +103,13 @@ eleventyComputed:
               <span class="segment" data-start="{{ segment.start }}" data-end="{{ segment.end }}">
                 {%- for word in segment.words -%}
                   {%- if not loop.first %} {% endif -%}
-                  <span data-start="{{ word.start }}" data-end="{{ word.end }}">
+                  <span class="word" data-start="{{ word.start }}" data-end="{{ word.end }}">
                     {{- word.text -}}
                   </span>
                 {%- endfor -%}
               </span>
             {%- else %}
-              <span data-start="{{ segment.start }}" data-end="{{ segment.end }}">
+              <span class="segment" data-start="{{ segment.start }}" data-end="{{ segment.end }}">
                 {{- segment.text -}}
               </span>
             {%- endif %}
