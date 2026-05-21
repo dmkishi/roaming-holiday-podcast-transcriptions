@@ -6,10 +6,11 @@ interface TestSegment {
   start: number;
   end: number;
   text: string;
+  words: { text: string; start: number; end: number }[];
 }
 
 function seg(id: number, start: number, end: number, text: string): TestSegment {
-  return { id, start, end, text };
+  return { id, start, end, text, words: [] };
 }
 
 function gap(start: number, end: number) {

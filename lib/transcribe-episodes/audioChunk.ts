@@ -115,7 +115,7 @@ export function mergeChunkTranscripts(
           start: seg.start + chunk.startSeconds,
           end: seg.end + chunk.startSeconds,
           text: seg.text,
-          words: seg.words?.map((word) => ({
+          words: seg.words.map((word) => ({
             ...word,
             start: word.start + chunk.startSeconds,
             end: word.end + chunk.startSeconds,

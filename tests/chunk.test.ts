@@ -156,22 +156,22 @@ describe('mergeChunkTranscripts', () => {
         startSeconds: 0,
         json: {
           text: 'Hello.',
-          segments: [{ id: 0, start: 0, end: 5, text: ' Hello.' }],
+          segments: [{ id: 0, start: 0, end: 5, text: ' Hello.', words: [] }],
         },
       },
       {
         startSeconds: 900,
         json: {
           text: 'World.',
-          segments: [{ id: 0, start: 0, end: 3, text: ' World.' }],
+          segments: [{ id: 0, start: 0, end: 3, text: ' World.', words: [] }],
         },
       },
     ];
 
     const merged = mergeChunkTranscripts(chunks);
     expect(merged.segments).toEqual([
-      { id: 0, start: 0, end: 5, text: ' Hello.' },
-      { id: 1, start: 900, end: 903, text: ' World.' },
+      { id: 0, start: 0, end: 5, text: ' Hello.', words: [] },
+      { id: 1, start: 900, end: 903, text: ' World.', words: [] },
     ]);
   });
 
@@ -182,8 +182,8 @@ describe('mergeChunkTranscripts', () => {
         json: {
           text: 'A',
           segments: [
-            { id: 0, start: 0, end: 1, text: ' A' },
-            { id: 1, start: 1, end: 2, text: ' B' },
+            { id: 0, start: 0, end: 1, text: ' A', words: [] },
+            { id: 1, start: 1, end: 2, text: ' B', words: [] },
           ],
         },
       },
@@ -192,7 +192,7 @@ describe('mergeChunkTranscripts', () => {
         json: {
           text: 'C',
           segments: [
-            { id: 0, start: 0, end: 1, text: ' C' },
+            { id: 0, start: 0, end: 1, text: ' C', words: [] },
           ],
         },
       },
@@ -221,7 +221,7 @@ describe('mergeChunkTranscripts', () => {
         startSeconds: 900,
         json: {
           text: 'World.',
-          segments: [{ id: 0, start: 0, end: 3, text: ' World.' }],
+          segments: [{ id: 0, start: 0, end: 3, text: ' World.', words: [] }],
         },
       },
     ];
@@ -247,7 +247,7 @@ describe('mergeChunkTranscripts', () => {
         json: {
           text: 'Single.',
           segments: [
-            { id: 0, start: 0, end: 2, text: ' Single.' },
+            { id: 0, start: 0, end: 2, text: ' Single.', words: [] },
           ],
         },
       },
@@ -255,7 +255,7 @@ describe('mergeChunkTranscripts', () => {
     const merged = mergeChunkTranscripts(chunks);
     expect(merged.text).toBe('Single.');
     expect(merged.segments).toEqual([
-      { id: 0, start: 0, end: 2, text: ' Single.' },
+      { id: 0, start: 0, end: 2, text: ' Single.', words: [] },
     ]);
   });
 
@@ -308,17 +308,4 @@ describe('mergeChunkTranscripts', () => {
     ]);
   });
 
-  test('leaves words undefined for word-less (pre-backfill) segments', () => {
-    const chunks = [
-      {
-        startSeconds: 900,
-        json: {
-          text: 'Legacy.',
-          segments: [{ id: 0, start: 0, end: 2, text: ' Legacy.' }],
-        },
-      },
-    ];
-    const merged = mergeChunkTranscripts(chunks);
-    expect(merged.segments[0]!.words).toBeUndefined();
-  });
 });

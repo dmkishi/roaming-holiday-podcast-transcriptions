@@ -56,7 +56,7 @@ const SegmentSchema = z.object({
       end: z.number(),
       confidence: z.number().optional(),
     }),
-  ).optional(), // Phase 1: optional. Phase 3 drops .optional().
+  ),
 });
 
 export const TranscriptFileSchema = z.object({
