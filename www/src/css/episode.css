@@ -185,28 +185,14 @@
 
   /* Hover: highlight the innermost interactive unit — a word in hybrid mode,
      or the whole segment when it has no word breakdown. */
-  .word:hover,
-  .segment:not(:has(.word)):hover {
+  .word:hover {
     background: var(--color-tint-1);
     border-radius: 2px;
   }
 
-  /* Active segment: containing region of the active word (hybrid) or the
-     active segment itself (fallback). */
-  .is-active-segment {
+  .is-active {
     background: var(--color-tint-1);
     border-radius: 2px;
-  }
-
-  /* Active word: precise playback indicator. In fallback mode, promote the
-     segment's `is-active-segment` to the same underline so users still get a
-     dominant cue when no words are present. */
-  .is-active,
-  .segment:not(:has(.word)).is-active-segment {
-    text-decoration: underline;
-    text-decoration-thickness: 3px;
-    text-decoration-color: var(--color-tint-2);
-    text-decoration-skip-ink: none;
   }
 
   hr {

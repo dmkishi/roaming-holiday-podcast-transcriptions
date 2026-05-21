@@ -70,12 +70,7 @@
       }));
     }
 
-    // Segment and word spans live interleaved with duplicate start times —
-    // track them separately so each gets its own monotonic-walk pointer and
-    // class.
-    const segmentSpans = collectSpans('.segment');
     const wordSpans = collectSpans('.word');
-    let currentSegmentIndex = -1;
     let currentWordIndex = -1;
 
     let intervalId: ReturnType<typeof setInterval> | undefined;
@@ -100,13 +95,13 @@
           },
           onStateChange: (evt) => {
             if (evt.data === YT.PlayerState.PLAYING) {
-              intervalId ??= setInterval(updateActiveSpan, 250);
+              intervalId ??= setInterval(updateActiveWord, 250);
             } else {
               if (intervalId !== undefined) {
                 clearInterval(intervalId);
                 intervalId = undefined;
               }
-              updateActiveSpan();
+              updateActiveWord();
             }
           },
         },
@@ -114,33 +109,12 @@
     };
 
     /**
-     * Highlight the segment and word matching the current playback time.
-     * Segment changes also scroll the transcript (word changes only toggle the
-     * class to avoid jitter from the ~3×/s update cadence.)
+     * Highlight the word matching the current playback time.
      */
-    function updateActiveSpan(): void {
+    function updateActiveWord(): void {
       if (!player) return;
+
       const time = player.getCurrentTime();
-
-      if (segmentSpans.length > 0) {
-        let i = currentSegmentIndex;
-        while (i + 1 < segmentSpans.length && segmentSpans[i + 1]!.start <= time) i++;
-        while (i >= 0 && segmentSpans[i]!.start > time) i--;
-        if (i !== currentSegmentIndex) {
-          if (currentSegmentIndex >= 0) {
-            segmentSpans[currentSegmentIndex]!.el.classList.remove('is-active-segment');
-          }
-          if (i >= 0) {
-            const span = segmentSpans[i]!;
-            span.el.classList.add('is-active-segment');
-            // Scroll only on segment change — word transitions fire ~3×/s and
-            // would jitter the page.
-            span.el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-          }
-          currentSegmentIndex = i;
-        }
-      }
-
       if (wordSpans.length > 0) {
         let j = currentWordIndex;
         while (j + 1 < wordSpans.length && wordSpans[j + 1]!.start <= time) j++;
