@@ -64,10 +64,10 @@ function setupCss(eleventyConfig) {
   });
 
   // Append a content-hash query string for cache busting (prod only)
-  eleventyConfig.addFilter('hashUrl', (url) => {
+  eleventyConfig.addFilter('hashUrl', (/** @type {string} */ url) => {
     if (!isProd) return url;
-    const compiled = cssOutputCache.get(url);
-    const source = compiled ?? readFileSync(path.join('www/src', url), 'utf8');
+    const srcFile = url.endsWith('.js') ? url.replace(/\.js$/u, '.ts') : url;
+    const source = cssOutputCache.get(url) ?? readFileSync(path.join('www/src', srcFile), 'utf8');
     const hash = createHash('md5').update(source).digest('hex').slice(0, 8);
     return `${url}?v=${hash}`;
   });
@@ -76,16 +76,19 @@ function setupCss(eleventyConfig) {
 export default function(eleventyConfig) {
   setupCss(eleventyConfig);
 
-  // Minify JS
-  eleventyConfig.addTemplateFormats('js');
-  eleventyConfig.addExtension('js', {
+  // eleventyConfig.addPassthroughCopy({ 'www/src/img/*.svg': 'img' });
+
+  // Strip TypeScript and minify
+  eleventyConfig.addTemplateFormats('ts');
+  eleventyConfig.addExtension('ts', {
     outputFileExtension: 'js',
     compile: async function(_content, inputPath) {
       if (path.basename(inputPath).startsWith('_')) return;
+      if (inputPath.endsWith('.d.ts')) return;
 
       return async () => {
-        const js = await readFile(inputPath, 'utf8');
-        const result = await esbuildTransform(js, { minify: true });
+        const ts = await readFile(inputPath, 'utf8');
+        const result = await esbuildTransform(ts, { minify: true, loader: 'ts' });
         return result.code;
       };
     },
