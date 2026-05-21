@@ -89,6 +89,7 @@
           },
           onStateChange: (evt) => {
             if (evt.data === YT.PlayerState.PLAYING) {
+              updateActiveWord();
               intervalId ??= setInterval(updateActiveWord, 250);
             } else {
               if (intervalId !== undefined) {
