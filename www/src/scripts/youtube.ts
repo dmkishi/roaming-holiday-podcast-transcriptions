@@ -52,29 +52,23 @@
    * - Show active playback segment.
    */
   function initPlayer(videoEl: HTMLElement): void {
-    const transcript = document.querySelector('[data-transcript]');
-
     const apiScript = document.createElement('script');
     apiScript.src = 'https://www.youtube.com/iframe_api';
     document.head.append(apiScript);
 
-    /**
-     * Collect transcript <span>s matching `selector`, pairing each element with
-     * its parsed `data-start` timestamp for monotonic-walk lookup.
-     */
-    function collectSpans(selector: string): { el: HTMLElement, start: number }[] {
-      if (!transcript) return [];
-      return [...transcript.querySelectorAll<HTMLElement>(selector)].map((el) => ({
-        el,
-        start: parseFloat(el.dataset['start'] ?? ''),
-      }));
-    }
+    const transcript = document.querySelector('[data-transcript]');
+    const wordSpans = transcript
+      ? [...transcript.querySelectorAll<HTMLElement>('.word')].map((el) => (
+          {
+            el,
+            start: parseFloat(el.dataset['start'] ?? ''),
+          }
+        ))
+      : [];
 
-    const wordSpans = collectSpans('.word');
-    let currentWordIndex = -1;
-
-    let intervalId: ReturnType<typeof setInterval> | undefined;
     let player: YT.Player | undefined;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    let currentWordIndex = -1;
 
     globalThis.onYouTubeIframeAPIReady = () => {
       player = new YT.Player(videoEl, {
