@@ -18,9 +18,9 @@
 }
 
 .episode-card__interlude {
-  outline: 1px solid #00000099;
-  outline-offset: 7px;
-  margin-block: -.5px;
+  --color: rgba(190, 113, 27, 0.09);
+  outline: calc(var(--space-1) - .5px) solid var(--color);
+  background-color: var(--color);
 }
 
 .episode-card--header {
