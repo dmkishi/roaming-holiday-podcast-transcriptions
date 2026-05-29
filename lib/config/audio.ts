@@ -36,6 +36,13 @@ export const MIN_GAP_SECONDS = .4;
 // Fade Detection (Essentia)
 // -----------------------------------------------------------------------------
 /**
+ * RMS analysis window. 2048 samples at 16 kHz is ~128 ms; hop of 1024 gives
+ * 50% overlap and an effective frame rate of ~15.6 fps.
+ */
+export const FADE_FRAME_SIZE = 2_048;
+export const FADE_HOP_SIZE = 1_024;
+
+/**
  * Essentia `FadeDetection` thresholds expressed as fractions of the average
  * RMS. Values above `cutoffHigh` mark the loud end of a fade; values below
  * `cutoffLow` mark the quiet end.
@@ -48,13 +55,6 @@ export const FADE_CUTOFF_LOW = .2;
  * dynamics, not audio fades, and are discarded.
  */
 export const FADE_MIN_LENGTH_SECONDS = 2;
-
-/**
- * RMS analysis window. 2048 samples at 16 kHz is ~128 ms; hop of 1024 gives
- * 50% overlap and an effective frame rate of ~15.6 fps.
- */
-export const FADE_FRAME_SIZE = 2_048;
-export const FADE_HOP_SIZE = 1_024;
 
 /**
  * The longest silence (in seconds) allowed between a fade-out and the following
