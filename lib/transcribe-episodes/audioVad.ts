@@ -21,9 +21,6 @@ export type VadResponse = FailResponse | VadResult;
 
 const execFileAsync = promisify(execFile);
 
-// -----------------------------------------------------------------------------
-// Orchestrator
-// -----------------------------------------------------------------------------
 /**
  * Run Silero VAD on an episode MP3 to list speech intervals and gaps. Writes
  * the result to `<code>.audio-vad.json`. Skips if the file already exists
@@ -67,9 +64,6 @@ export async function runVad(
   }
 }
 
-// -----------------------------------------------------------------------------
-// Pure functions
-// -----------------------------------------------------------------------------
 /**
  * Given speech intervals and total duration, return non-speech gaps of at
  * least `minGapSeconds`.
@@ -112,9 +106,6 @@ export function gapsFromSpeech(
   return gaps;
 }
 
-// -----------------------------------------------------------------------------
-// I/O helpers
-// -----------------------------------------------------------------------------
 /**
  * Run Silero VAD on a PCM file and return total duration and speech intervals.
  */

@@ -22,9 +22,6 @@ export type FadeResponse = FailResponse | FadeResult;
 
 const execFileAsync = promisify(execFile);
 
-// -----------------------------------------------------------------------------
-// Orchestrator
-// -----------------------------------------------------------------------------
 /**
  * Run Essentia fade detection on an episode MP3 to list music fade-in/fade-out
  * spans. Writes the result to `<code>.audio-fade.json`. Skips if the file
@@ -64,9 +61,6 @@ export async function runFade(
   }
 }
 
-// -----------------------------------------------------------------------------
-// I/O helpers
-// -----------------------------------------------------------------------------
 /**
  * Run Essentia FadeDetection on a PCM file and return fade spans.
  */
@@ -83,9 +77,6 @@ export async function detectFades(pcmPath: string): Promise<Fade[]> {
   return FadesSchema.parse(JSON.parse(stdout));
 }
 
-// -----------------------------------------------------------------------------
-// Pairing
-// -----------------------------------------------------------------------------
 /**
  * Keep only paired fade-outs and fade-ins within `maxGap` seconds. Negative
  * gaps (the fade-in begins before the fade-out ends) are always kept since they
