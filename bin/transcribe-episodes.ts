@@ -265,14 +265,12 @@ if (runParagraph) {
         printLog.info(`#${episodeNumber}: Downloaded "${mp3Path}" (${mp3.sizeMB} MB)`);
       }
 
-      const fadeRes = await runFade(episodeNumber, mp3Path, opts.forceFade);
-      if (!fadeRes.ok) {
+      const fadeRes = await runFade(episodeNumber, mp3Path);
+      if (fadeRes.ok) {
+        printLog.info(`#${episodeNumber}: Saved "${toRelative(fadeRes.path)}"`);
+      } else {
         printLog.warn(`#${episodeNumber}: Failed ${fadeRes.error ? `- ${fadeRes.error}` : ''}`);
         continue;
-      } else if (fadeRes.status === 'alreadyExists') {
-        printLog.warn(`#${episodeNumber}: Skipping - fade file already exists`);
-      } else {
-        printLog.info(`#${episodeNumber}: Saved "${toRelative(fadeRes.path)}"`);
       }
     } else {
       printLog.warn(`#${episodeNumber}: Skipping - fade file already exists`);

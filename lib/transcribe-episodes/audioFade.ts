@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { decodePcm } from '@lib/transcribe-episodes/audioPcm.js';
-import { hasFade, paths, writeFade } from '@lib/shared/artifacts.js';
+import { writeFade } from '@lib/shared/artifacts.js';
 import { VENV_PYTHON, FADE_SCRIPT } from '@lib/shared/paths.js';
 import { FadesSchema, type Fade, type FadePair } from '@lib/shared/schemas.js';
 import {
@@ -11,35 +11,22 @@ import {
   FADE_MIN_LENGTH_SECONDS, FADE_PAIR_MAX_GAP_SECONDS,
 } from '@lib/config/audio.js';
 
-type FadeResult =
-  | { ok: true; status: 'generated'; episodeNumber: number; path: string }
-  | { ok: true; status: 'alreadyExists'; episodeNumber: number; path: string };
-
-type FadeResponse = FailResponse | FadeResult;
+type FadeResponse =
+  | FailResponse
+  | { ok: true; status: 'generated'; episodeNumber: number; path: string };
 
 // eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 /**
  * Run Essentia fade detection on an episode MP3 to list music fade-in/fade-out
- * spans. Writes the result to `<code>.audio-fade.json`. Skips if the file
- * already exists (unless the `force` option is true.)
+ * spans. Writes the result to `<code>.audio-fade.json`.
  */
 export async function runFade(
   episodeNumber: number,
   mp3Path: string,
-  force: boolean,
 ): Promise<FadeResponse> {
   try {
-    if (!force && hasFade(episodeNumber)) {
-      return {
-        ok: true,
-        status: 'alreadyExists',
-        episodeNumber,
-        path: paths(episodeNumber).fade,
-      };
-    }
-
     const pcmPath = await decodePcm(mp3Path);
     const fades = await detectFades(pcmPath);
     const fadePairs = makeFadePairs(fades, FADE_PAIR_MAX_GAP_SECONDS);
