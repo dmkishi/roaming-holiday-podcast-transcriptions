@@ -10,11 +10,10 @@ import {
   type ToTranscribe, type Transcript,
 } from '@lib/transcribe-episodes/transcript.js';
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
-import { buildParagraphGroups } from '@lib/transcribe-episodes/paragraphGroup.js';
 import { buildMarkdown } from '@lib/transcribe-episodes/markdown.js';
 import {
   paths, hasMetadata, readMetadata, writeMetadata,
-  hasTranscript, hasFade, hasMp3,
+  hasTranscript, hasVad, hasFade, hasMp3,
   hasParagraph, readParagraph, writeParagraph, writeMarkdown,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
@@ -244,15 +243,10 @@ async function runTranscriptPipeline(): Promise<number[]> {
 if (runParagraph) {
   print.info('Building paragraph sidecars...');
   for (const episodeNumber of episodeNumbers) {
-    const paragraphsRes = buildParagraphs(episodeNumber);
-    if (!paragraphsRes.ok) {
-      printLog.warn(
-        `#${episodeNumber}: Failed ${paragraphsRes.error ? `- ${paragraphsRes.error}` : ''}`,
-      );
+    if (!hasVad(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No VAD file - skipping`);
       continue;
     }
-    const { paragraphs } = paragraphsRes;
-    printLog.info(`#${episodeNumber}: Built ${formatNumber(paragraphsRes.stats.paragraphs)} paragraphs`);
 
     const needsFade = opts.forceFade || !hasFade(episodeNumber);
 
@@ -284,23 +278,24 @@ if (runParagraph) {
       printLog.warn(`#${episodeNumber}: Skipping - fade file already exists`);
     }
 
-    const groupsRes = buildParagraphGroups(episodeNumber, paragraphs);
-    if (!groupsRes.ok) {
+    const paragraphsRes = buildParagraphs(episodeNumber);
+    if (!paragraphsRes.ok) {
       printLog.warn(
-        `#${episodeNumber}: Failed ${groupsRes.error ? `- ${groupsRes.error}` : ''}`,
+        `#${episodeNumber}: Failed ${paragraphsRes.error ? `- ${paragraphsRes.error}` : ''}`,
       );
       continue;
     }
+    const { paragraphs, fadePairStarts, stats } = paragraphsRes;
 
     const path = writeParagraph(episodeNumber, {
       segments: paragraphs,
-      fadePairStarts: groupsRes.fadePairStarts,
+      fadePairStarts,
     });
     printLog.info([
       `#${episodeNumber}: Saved "${toRelative(path)}"`,
-      `  Paragraphs: ${formatNumber(paragraphs.length)}`,
-      `  Groups:     ${formatNumber(groupsRes.stats.groups)}`,
-      `  Fades:      ${formatNumber(groupsRes.stats.fades)}`,
+      `  Paragraphs: ${formatNumber(stats.paragraphs)}`,
+      `  Groups:     ${formatNumber(stats.paragraphGroups)}`,
+      `  Fades:      ${formatNumber(stats.fades)}`,
     ]);
   }
   print.emptyLine();

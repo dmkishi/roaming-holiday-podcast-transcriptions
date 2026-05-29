@@ -1,9 +1,9 @@
 import type { z } from 'zod';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import {
-  hasVad, readVad, readTranscript, type ParagraphFile,
+  hasVad, readVad, hasFade, readFade, readTranscript, type ParagraphFile,
 } from '@lib/shared/artifacts.js';
-import type { TranscriptFileSchema } from '@lib/shared/schemas.js';
+import type { FadePair, TranscriptFileSchema } from '@lib/shared/schemas.js';
 import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 
 type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
@@ -13,8 +13,11 @@ export interface Paragraphs {
   ok: true;
   episodeNumber: number;
   paragraphs: Paragraph[];
+  fadePairStarts: number[];
   stats: {
     paragraphs: number;
+    paragraphGroups: number;
+    fades: number;
   };
 }
 
@@ -43,22 +46,44 @@ export function buildParagraphs(
       };
     }
 
+    if (!hasFade(episodeNumber)) {
+      return {
+        ok: false,
+        error: `Fade file not found for #${episodeNumber}`,
+      };
+    }
+
     const vad = readVad(episodeNumber);
-    const breaks = buildParagraphBreaks(segments, vad.gaps, PARAGRAPH_GAP_SECONDS);
-    const simplifiedSegments = segments.map(
-      ({ start, end, text, words }) => ({ start, end, text, words }),
-    );
-    const paragraphs = breaks.map((start, i) => {
-      const end = breaks[i + 1] ?? simplifiedSegments.length;
-      return simplifiedSegments.slice(start, end);
-    });
+    const { fades } = readFade(episodeNumber);
+
+    // Split segments into groups at each fade (interlude), then break each
+    // group into paragraphs on its VAD gaps. The first paragraph of every
+    // group after the first begins a new fade pair.
+    const groupStartSegments = [0, ...findSegmentFadeBoundaries(segments, fades)];
+
+    const paragraphs: Paragraph[] = [];
+    const groupStartParagraphs: number[] = [];
+    for (const [i, groupStart] of groupStartSegments.entries()) {
+      if (i > 0) groupStartParagraphs.push(paragraphs.length);
+      const group = segments.slice(groupStart, groupStartSegments[i + 1] ?? segments.length);
+      const breaks = buildParagraphBreaks(group, vad.gaps, PARAGRAPH_GAP_SECONDS);
+      for (const [k, start] of breaks.entries()) {
+        const end = breaks[k + 1] ?? group.length;
+        paragraphs.push(group.slice(start, end).map(
+          (s) => ({ start: s.start, end: s.end, text: s.text, words: s.words }),
+        ));
+      }
+    }
 
     return {
       ok: true,
       episodeNumber,
       paragraphs,
+      fadePairStarts: groupStartParagraphs,
       stats: {
         paragraphs: paragraphs.length,
+        paragraphGroups: groupStartParagraphs.length + 1,
+        fades: fades.length,
       },
     };
   } catch (error) {
@@ -67,6 +92,24 @@ export function buildParagraphs(
       error: error instanceof Error ? error.message : String(error),
     };
   }
+}
+
+/**
+ * Find segment indices that coincide with audio fades, i.e. segments whose
+ * `start` is at or after the audio fade-in end time, i.e. where speech resumes
+ * once the audio has fully faded.
+ */
+export function findSegmentFadeBoundaries(
+  segments: readonly { start: number }[],
+  fadePairs: readonly FadePair[],
+): number[] {
+  const boundaries: number[] = [];
+  for (const fadePair of fadePairs) {
+    const index = segments.findIndex((segment) => segment.start >= fadePair.outStart);
+    if (index <= 0) continue;
+    if (boundaries.at(-1) !== index) boundaries.push(index);
+  }
+  return boundaries;
 }
 
 /**

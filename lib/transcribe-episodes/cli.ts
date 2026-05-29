@@ -106,9 +106,9 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   // still cascades into fade, since a re-downloaded MP3 invalidates any fade
   // sidecar derived from the prior file.
   //
-  // Tail stages (paragraph, paragraphGroup, markdown) always regenerate when
-  // they run, so they have no force flags. Inert force flags under each
-  // `--only-*` mode are rejected up front (see argv validation above).
+  // Tail stages (paragraph, markdown) always regenerate when they run, so they
+  // have no force flags. Inert force flags under each `--only-*` mode are
+  // rejected up front (see argv validation above).
   const forceAll = runTranscript && argv['force-all'];
   const forceRss = runTranscript && (forceAll || argv['force-rss']);
   const forceDownload = runTranscript && (forceAll || argv['force-download']);
