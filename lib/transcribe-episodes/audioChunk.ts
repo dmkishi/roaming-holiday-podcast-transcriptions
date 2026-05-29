@@ -26,6 +26,7 @@ interface MergedTranscript {
   segments: TranscriptSegment[];
 }
 
+// eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 /**

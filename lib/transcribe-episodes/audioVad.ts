@@ -19,6 +19,7 @@ export type VadResult =
 
 export type VadResponse = FailResponse | VadResult;
 
+// eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 /**

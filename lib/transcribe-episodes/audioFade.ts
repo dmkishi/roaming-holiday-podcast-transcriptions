@@ -20,6 +20,7 @@ export type FadeResult =
 
 export type FadeResponse = FailResponse | FadeResult;
 
+// eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 /**

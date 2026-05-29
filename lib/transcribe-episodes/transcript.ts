@@ -46,6 +46,8 @@ export interface Transcript {
 export type TranscriptResponse = FailResponse | Transcript;
 
 export const PROMPT_TOKEN_LIMIT = 224;
+
+// eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 /**

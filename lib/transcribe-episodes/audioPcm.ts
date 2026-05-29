@@ -4,6 +4,7 @@ import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
 import { TMP_DIR, FFMPEG } from '@lib/shared/paths.js';
 
+// eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 /**
