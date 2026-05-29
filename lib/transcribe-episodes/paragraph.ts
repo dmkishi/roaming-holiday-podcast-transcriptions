@@ -56,9 +56,9 @@ export function buildParagraphs(
     const vad = readVad(episodeNumber);
     const { fades } = readFade(episodeNumber);
 
-    // Split segments into groups at each fade (interlude), then break each
-    // group into paragraphs on its VAD gaps. The first paragraph of every
-    // group after the first begins a new fade pair.
+    // Split segments into groups at each fade, then break each group into
+    // paragraphs on its VAD gaps. The first paragraph of every group after the
+    // first begins a new fade pair.
     const groupStartSegments = [0, ...findSegmentFadeBoundaries(segments, fades)];
 
     const paragraphs: Paragraph[] = [];

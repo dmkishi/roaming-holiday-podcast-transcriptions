@@ -19,8 +19,7 @@ type FadeResponse =
 const execFileAsync = promisify(execFile);
 
 /**
- * Run Essentia fade detection on an episode MP3 to list music fade-in/fade-out
- * spans. Writes the result to `<code>.audio-fade.json`.
+ * Detect fade pairs and write to `<code>.audio-fade.json`.
  */
 export async function runFade(
   episodeNumber: number,
@@ -29,7 +28,7 @@ export async function runFade(
   try {
     const pcmPath = await decodePcm(mp3Path);
     const fades = await detectFades(pcmPath);
-    const fadePairs = makeFadePairs(fades, FADE_PAIR_MAX_GAP_SECONDS);
+    const fadePairs = pairFades(fades, FADE_PAIR_MAX_GAP_SECONDS);
     const fadePath = writeFade(episodeNumber, { fades: fadePairs });
 
     return {
@@ -46,9 +45,6 @@ export async function runFade(
   }
 }
 
-/**
- * Run Essentia FadeDetection on a PCM file and return fade spans.
- */
 async function detectFades(pcmPath: string): Promise<Fade[]> {
   const { stdout } = await execFileAsync(VENV_PYTHON, [
     FADE_SCRIPT,
@@ -63,20 +59,19 @@ async function detectFades(pcmPath: string): Promise<Fade[]> {
 }
 
 /**
- * Keep only paired fade-outs and fade-ins within `maxGap` seconds. Negative
- * gaps (the fade-in begins before the fade-out ends) are always kept since they
- * represent crossfades. Unpaired fades are discarded.
+ * Pair two fades (fade-out and fade-in) within `maxGap` seconds. Unpaired fades
+ * are discarded.
  */
-function makeFadePairs(fades: readonly Fade[], maxGap: number): FadePair[] {
+function pairFades(fades: readonly Fade[], maxGap: number): FadePair[] {
   const sorted = fades.toSorted((a, b) => a.start - b.start);
-  const pairs: FadePair[] = [];
+  const fadePairs: FadePair[] = [];
   for (let i = 0; i < sorted.length; i++) {
     const out = sorted[i]!;
     if (out.type !== 'out') continue;
     const next = sorted[i + 1];
     if (!next || next.type !== 'in') continue;
     if (next.start - out.end > maxGap) continue;
-    pairs.push({
+    fadePairs.push({
       outStart: out.start,
       outEnd: out.end,
       inStart: next.start,
@@ -84,5 +79,5 @@ function makeFadePairs(fades: readonly Fade[], maxGap: number): FadePair[] {
     });
     i++;
   }
-  return pairs;
+  return fadePairs;
 }
