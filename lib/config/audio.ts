@@ -53,8 +53,8 @@ export const FADE_MIN_LENGTH_SECONDS = 2;
  * RMS analysis window. 2048 samples at 16 kHz is ~128 ms; hop of 1024 gives
  * 50% overlap and an effective frame rate of ~15.6 fps.
  */
-export const FADE_FRAME_SIZE = 2048;
-export const FADE_HOP_SIZE = 1024;
+export const FADE_FRAME_SIZE = 2_048;
+export const FADE_HOP_SIZE = 1_024;
 
 /**
  * Maximum gap (seconds) between a fade-out's end and the following fade-in's
