@@ -33,7 +33,7 @@ export const CHUNK_MAX_WINDOW_MINUTES = 6;
 export const MIN_GAP_SECONDS = .4;
 
 // -----------------------------------------------------------------------------
-// Fade detection (Essentia)
+// Fade Detection (Essentia)
 // -----------------------------------------------------------------------------
 /**
  * Essentia `FadeDetection` thresholds expressed as fractions of the average
@@ -44,8 +44,8 @@ export const FADE_CUTOFF_HIGH = .85;
 export const FADE_CUTOFF_LOW = .2;
 
 /**
- * Minimum fade duration (seconds) to keep. Shorter transitions are usually
- * speech dynamics, not musical fades.
+ * Minimum fade duration (seconds) to keep. Shorter fades are usually speech
+ * dynamics, not audio fades, and are discarded.
  */
 export const FADE_MIN_LENGTH_SECONDS = 2;
 
@@ -57,8 +57,8 @@ export const FADE_FRAME_SIZE = 2_048;
 export const FADE_HOP_SIZE = 1_024;
 
 /**
- * Maximum gap (seconds) between a fade-out's end and the following fade-in's
- * start for the two to be treated as a single transition. Negative gaps
- * (crossfades where the in begins before the out ends) are always accepted.
+ * The longest silence (in seconds) allowed between a fade-out and the following
+ * fade-in for them to be considered a pair. Crossfades (negative gaps) are
+ * always paired regardless of length.
  */
 export const FADE_PAIR_MAX_GAP_SECONDS = 2;
