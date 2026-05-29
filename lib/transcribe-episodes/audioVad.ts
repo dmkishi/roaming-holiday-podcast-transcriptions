@@ -13,11 +13,11 @@ export interface Gap {
   duration: number;
 }
 
-export type VadResult =
+type VadResult =
   | { ok: true; status: 'generated'; episodeNumber: number; path: string }
   | { ok: true; status: 'alreadyExists'; episodeNumber: number; path: string };
 
-export type VadResponse = FailResponse | VadResult;
+type VadResponse = FailResponse | VadResult;
 
 // eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);

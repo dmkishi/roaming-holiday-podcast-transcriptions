@@ -14,11 +14,11 @@ import {
   FADE_HOP_SIZE,
 } from '@lib/config/audio.js';
 
-export type FadeResult =
+type FadeResult =
   | { ok: true; status: 'generated'; episodeNumber: number; path: string }
   | { ok: true; status: 'alreadyExists'; episodeNumber: number; path: string };
 
-export type FadeResponse = FailResponse | FadeResult;
+type FadeResponse = FailResponse | FadeResult;
 
 // eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
@@ -65,7 +65,7 @@ export async function runFade(
 /**
  * Run Essentia FadeDetection on a PCM file and return fade spans.
  */
-export async function detectFades(pcmPath: string): Promise<Fade[]> {
+async function detectFades(pcmPath: string): Promise<Fade[]> {
   const { stdout } = await execFileAsync(VENV_PYTHON, [
     FADE_SCRIPT,
     pcmPath,
@@ -83,7 +83,7 @@ export async function detectFades(pcmPath: string): Promise<Fade[]> {
  * gaps (the fade-in begins before the fade-out ends) are always kept since they
  * represent crossfades. Unpaired fades are discarded.
  */
-export function makeFadePairs(fades: readonly Fade[], maxGap: number): FadePair[] {
+function makeFadePairs(fades: readonly Fade[], maxGap: number): FadePair[] {
   const sorted = fades.toSorted((a, b) => a.start - b.start);
   const pairs: FadePair[] = [];
   for (let i = 0; i < sorted.length; i++) {
