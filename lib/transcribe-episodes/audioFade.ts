@@ -13,7 +13,7 @@ import {
 
 type FadeResponse =
   | FailResponse
-  | { ok: true; status: 'generated'; episodeNumber: number; path: string };
+  | { ok: true; path: string };
 
 // eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
@@ -33,8 +33,6 @@ export async function runFade(
 
     return {
       ok: true,
-      status: 'generated',
-      episodeNumber,
       path: fadePath,
     };
   } catch (error) {
