@@ -6,12 +6,9 @@ import { hasFade, paths, writeFade } from '@lib/shared/artifacts.js';
 import { VENV_PYTHON, FADE_SCRIPT } from '@lib/shared/paths.js';
 import { FadesSchema, type Fade, type FadePair } from '@lib/shared/schemas.js';
 import {
-  FADE_PAIR_MAX_GAP_SECONDS,
-  FADE_CUTOFF_HIGH,
-  FADE_CUTOFF_LOW,
-  FADE_MIN_LENGTH_SECONDS,
-  FADE_FRAME_SIZE,
-  FADE_HOP_SIZE,
+  FADE_FRAME_SIZE, FADE_HOP_SIZE,
+  FADE_CUTOFF_HIGH, FADE_CUTOFF_LOW,
+  FADE_MIN_LENGTH_SECONDS, FADE_PAIR_MAX_GAP_SECONDS,
 } from '@lib/config/audio.js';
 
 type FadeResult =
