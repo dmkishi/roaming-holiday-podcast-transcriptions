@@ -1,19 +1,16 @@
-import type { z } from 'zod';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import {
-  hasVad, readVad, hasFade, readFade, readTranscript, type ParagraphFile,
+  hasVad, readVad, hasFade, readFade, readTranscript,
 } from '@lib/shared/artifacts.js';
-import type { FadePair, TranscriptFileSchema } from '@lib/shared/schemas.js';
+import type {
+  FadePair, Paragraph, ParagraphGroup, Segment,
+} from '@lib/shared/schemas.js';
 import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 
-type Segment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
-export type Paragraph = ParagraphFile['segments'][number];
-
-export interface Paragraphs {
+interface Paragraphs {
   ok: true;
   episodeNumber: number;
-  paragraphs: Paragraph[];
-  fadePairStarts: number[];
+  paragraphGroups: ParagraphGroup[];
   stats: {
     paragraphs: number;
     paragraphGroups: number;
@@ -53,36 +50,29 @@ export function buildParagraphs(
       };
     }
 
+    const paragraphGroups: ParagraphGroup[] = [];
     const vad = readVad(episodeNumber);
     const { fades } = readFade(episodeNumber);
-
-    // Split segments into groups at each fade, then break each group into
-    // paragraphs on its VAD gaps. The first paragraph of every group after the
-    // first begins a new fade pair.
     const groupStartSegments = [0, ...findSegmentFadeBoundaries(segments, fades)];
-
-    const paragraphs: Paragraph[] = [];
-    const groupStartParagraphs: number[] = [];
     for (const [i, groupStart] of groupStartSegments.entries()) {
-      if (i > 0) groupStartParagraphs.push(paragraphs.length);
       const group = segments.slice(groupStart, groupStartSegments[i + 1] ?? segments.length);
       const breaks = buildParagraphBreaks(group, vad.gaps, PARAGRAPH_GAP_SECONDS);
-      for (const [k, start] of breaks.entries()) {
+      const paragraphs: Paragraph[] = breaks.map((start, k) => {
         const end = breaks[k + 1] ?? group.length;
-        paragraphs.push(group.slice(start, end).map(
+        return group.slice(start, end).map(
           (s) => ({ start: s.start, end: s.end, text: s.text, words: s.words }),
-        ));
-      }
+        );
+      });
+      paragraphGroups.push(paragraphs);
     }
 
     return {
       ok: true,
       episodeNumber,
-      paragraphs,
-      fadePairStarts: groupStartParagraphs,
+      paragraphGroups,
       stats: {
-        paragraphs: paragraphs.length,
-        paragraphGroups: groupStartParagraphs.length + 1,
+        paragraphs: paragraphGroups.reduce((sum, group) => sum + group.length, 0),
+        paragraphGroups: paragraphGroups.length,
         fades: fades.length,
       },
     };

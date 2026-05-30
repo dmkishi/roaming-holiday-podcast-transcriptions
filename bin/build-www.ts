@@ -39,7 +39,7 @@ const supplements = loadSupplements();
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
 let built = 0;
 
-for (const { metadata, paragraph, fadePairStarts } of artifacts) {
+for (const { metadata, paragraph } of artifacts) {
   const ep = metadata.episodeNumber;
 
   const image = await downloadImage(ep, metadata.imageUrl);
@@ -47,7 +47,7 @@ for (const { metadata, paragraph, fadePairStarts } of artifacts) {
     printLog.warn(`#${ep}: Image download failed - ${image.error}`);
   }
 
-  const paragraphs = addTimelineMarkers(paragraph.segments);
+  const paragraphGroups = addTimelineMarkers(paragraph.paragraphGroups);
   const supplement = supplements.get(ep);
 
   const episode: SiteEpisode = {
@@ -59,8 +59,7 @@ for (const { metadata, paragraph, fadePairStarts } of artifacts) {
     imageUrl: metadata.imageUrl,
     mp3Url: metadata.mp3Url,
     imagePath: image.path,
-    paragraphs,
-    fadePairStarts,
+    paragraphGroups,
     location: supplement?.location,
     youtubeUrl: supplement?.youtube,
     isInterlude: supplement?.isInterlude,

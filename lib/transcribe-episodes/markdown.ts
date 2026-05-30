@@ -1,16 +1,15 @@
 import { stringify as stringifyYaml } from 'yaml';
-import type { Paragraph } from '@lib/transcribe-episodes/paragraph.js';
 import type { MetadataFile } from '@lib/shared/artifacts.js';
+import type { ParagraphGroup } from '@lib/shared/schemas.js';
 import { formatDate } from '@lib/shared/strings.js';
 
 /**
- * Builds a Markdown transcript document with YAML frontmatter, splitting
- * paragraphs into paragraph groups separated by `---`.
+ * Builds a Markdown transcript document with YAML frontmatter, separating
+ * paragraph groups with `---`.
  */
 export function buildMarkdown(
   metadata: MetadataFile,
-  paragraphs: Paragraph[],
-  fadePairStarts: number[],
+  paragraphGroups: ParagraphGroup[],
 ): string {
   const frontmatter = stringifyYaml({
     episode_number: metadata.episodeNumber,
@@ -19,12 +18,12 @@ export function buildMarkdown(
     pub_date: formatDate(new Date(metadata.pubDate)),
   });
 
-  const fadeStartSet = new Set(fadePairStarts);
   const blocks: string[] = [`# ${metadata.title}`];
-  for (let i = 0; i < paragraphs.length; i++) {
-    if (fadeStartSet.has(i) && i > 0) blocks.push('---');
-    const text = paragraphs[i]!.map((s) => s.text).join('').trim();
-    blocks.push(text);
+  for (const [i, group] of paragraphGroups.entries()) {
+    if (i > 0) blocks.push('---');
+    for (const paragraph of group) {
+      blocks.push(paragraph.map((s) => s.text).join('').trim());
+    }
   }
 
   return `---\n${frontmatter}---\n\n${blocks.join('\n\n')}\n`;

@@ -283,12 +283,9 @@ if (runParagraph) {
       );
       continue;
     }
-    const { paragraphs, fadePairStarts, stats } = paragraphsRes;
+    const { paragraphGroups, stats } = paragraphsRes;
 
-    const path = writeParagraph(episodeNumber, {
-      segments: paragraphs,
-      fadePairStarts,
-    });
+    const path = writeParagraph(episodeNumber, { paragraphGroups });
     printLog.info([
       `#${episodeNumber}: Saved "${toRelative(path)}"`,
       `  Paragraphs: ${formatNumber(stats.paragraphs)}`,
@@ -309,8 +306,8 @@ if (runMarkdown) {
       printLog.warn(`#${episodeNumber}: No paragraph sidecar - skipping`);
       continue;
     }
-    const { segments, fadePairStarts } = readParagraph(episodeNumber);
-    const markdown = buildMarkdown(readMetadata(episodeNumber), segments, fadePairStarts);
+    const { paragraphGroups } = readParagraph(episodeNumber);
+    const markdown = buildMarkdown(readMetadata(episodeNumber), paragraphGroups);
     const markdownPath = writeMarkdown(episodeNumber, markdown);
     printLog.info(`#${episodeNumber}: Saved "${toRelative(markdownPath)}"`);
   }

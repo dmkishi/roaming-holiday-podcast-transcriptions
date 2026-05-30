@@ -22,8 +22,7 @@ export interface SiteEpisode {
   imageUrl: string;
   mp3Url: string;
   imagePath: string;
-  paragraphs: TranscriptSegment[][];
-  fadePairStarts: number[];
+  paragraphGroups: TranscriptSegment[][][];
   location?: string;
   youtubeUrl?: string;
   isInterlude?: boolean;

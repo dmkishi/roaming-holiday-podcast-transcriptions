@@ -59,14 +59,20 @@ const SegmentSchema = z.object({
   ),
 });
 
+export type Segment = z.infer<typeof SegmentSchema>;
+
 export const TranscriptFileSchema = z.object({
   text: z.string().default(''),
   segments: z.array(SegmentSchema).optional(),
 });
 
 const ParagraphSegmentSchema = SegmentSchema.omit({ id: true });
+const ParagraphSchema = z.array(ParagraphSegmentSchema);
+const ParagraphGroupSchema = z.array(ParagraphSchema);
+
+export type Paragraph = z.infer<typeof ParagraphSchema>;
+export type ParagraphGroup = z.infer<typeof ParagraphGroupSchema>;
 
 export const ParagraphFileSchema = z.object({
-  segments: z.array(z.array(ParagraphSegmentSchema)),
-  fadePairStarts: z.array(z.number().int().nonnegative()),
+  paragraphGroups: z.array(ParagraphGroupSchema),
 });

@@ -7,7 +7,6 @@ import {
 export interface EpisodeArtifacts {
   metadata: MetadataFile;
   paragraph: ParagraphFile;
-  fadePairStarts: number[];
 }
 
 export type DiscoveryResult =
@@ -18,8 +17,8 @@ export type DiscoveryResult =
  * Scan the outputs directory and return a result per metadata file. Episodes
  * missing a transcript or paragraph sidecar are returned as `{ ok: false }`
  * entries so the caller can report the skip with a reason. The paragraph
- * sidecar carries both segments and fade-pair starts; its presence signals a
- * complete pipeline run.
+ * sidecar carries the grouped paragraphs; its presence signals a complete
+ * pipeline run.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
   const results: DiscoveryResult[] = [];
@@ -36,8 +35,8 @@ export function discoverEpisodes(): DiscoveryResult[] {
       continue;
     }
     const paragraph = readParagraph(episodeNumber);
-    if (paragraph.segments.length === 0) {
-      results.push({ ok: false, episodeNumber, reason: 'No segments in paragraph sidecar' });
+    if (paragraph.paragraphGroups.length === 0) {
+      results.push({ ok: false, episodeNumber, reason: 'No paragraph groups in sidecar' });
       continue;
     }
 
@@ -46,7 +45,6 @@ export function discoverEpisodes(): DiscoveryResult[] {
       artifacts: {
         metadata,
         paragraph,
-        fadePairStarts: paragraph.fadePairStarts,
       },
     });
   }
