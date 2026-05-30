@@ -19,7 +19,8 @@ export const VadOutputSchema = z.object({
   speech: z.array(z.object({ start: z.number(), end: z.number() })),
 });
 
-export const VadFileSchema = VadOutputSchema.extend({
+export const VadFileSchema = z.object({
+  duration: z.number(),
   gaps: z.array(z.object({ start: z.number(), end: z.number(), duration: z.number() })),
 });
 

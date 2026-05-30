@@ -23,9 +23,9 @@ type VadResponse = FailResponse | VadResult;
 const execFileAsync = promisify(execFile);
 
 /**
- * Run Silero VAD on an episode MP3 to list speech intervals and gaps. Writes
- * the result to `<code>.audio-vad.json`. Skips if the file already exists
- * (unless the `force` option is true.)
+ * Run Silero VAD on an episode MP3 to list gaps. Writes the result to
+ * `<code>.audio-vad.json`. Skips if the file already exists (unless the `force`
+ * option is true.)
  */
 export async function runVad(
   episodeNumber: number,
@@ -47,7 +47,6 @@ export async function runVad(
 
     const vadPath = writeVad(episodeNumber, {
       duration: audioDuration,
-      speech: speechIntervals,
       gaps: gapsFromSpeech(speechIntervals, audioDuration, MIN_GAP_SECONDS),
     });
 
