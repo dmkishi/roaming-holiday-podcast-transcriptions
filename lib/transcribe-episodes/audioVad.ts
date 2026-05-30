@@ -66,6 +66,20 @@ export async function runVad(
 }
 
 /**
+ * Run Silero VAD on a PCM file and return total duration and speech intervals.
+ */
+export async function detectSpeechIntervals(
+  pcmPath: string,
+): Promise<{
+  audioDuration: number;
+  speechIntervals: { start: number; end: number }[];
+}> {
+  const { stdout } = await execFileAsync(VENV_PYTHON, [VAD_SCRIPT, pcmPath]);
+  const { duration, speech } = VadOutputSchema.parse(JSON.parse(stdout));
+  return { audioDuration: duration, speechIntervals: speech };
+}
+
+/**
  * Given speech intervals and total duration, return non-speech gaps of at
  * least `minGapSeconds`.
  */
@@ -105,18 +119,4 @@ export function gapsFromSpeech(
   }
 
   return gaps;
-}
-
-/**
- * Run Silero VAD on a PCM file and return total duration and speech intervals.
- */
-export async function detectSpeechIntervals(
-  pcmPath: string,
-): Promise<{
-  audioDuration: number;
-  speechIntervals: { start: number; end: number }[];
-}> {
-  const { stdout } = await execFileAsync(VENV_PYTHON, [VAD_SCRIPT, pcmPath]);
-  const { duration, speech } = VadOutputSchema.parse(JSON.parse(stdout));
-  return { audioDuration: duration, speechIntervals: speech };
 }
