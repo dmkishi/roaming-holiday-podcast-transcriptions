@@ -91,7 +91,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   printLog.info(`RSS feed: ${feed.items.length} items (${pc.blue(feed.status)})`);
 
   // ===========================================================================
-  // Make episode metadata
+  // Write episode metadata file(s) via RSS feed
   // ===========================================================================
   const episodes = findEpisodes(feed.items, opts.episodeNums);
   const foundEpisodeNums = episodes.map((e) => e.episodeNumber);
@@ -185,7 +185,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   print.emptyLine();
 
   // ===========================================================================
-  // Detect audio gaps and save
+  // Detect audio gaps and save (for transcribing and building paragraphs)
   // ===========================================================================
   print.info('Detecting audio gaps...');
   for (const toTranscribe of toTranscribes) {
@@ -297,7 +297,7 @@ if (runParagraph) {
 }
 
 // =============================================================================
-// Build Markdown transcripts
+// Build Markdown transcripts (for LLMs)
 // =============================================================================
 if (runMarkdown) {
   print.info('Building Markdown transcripts...');
