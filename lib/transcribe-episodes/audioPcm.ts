@@ -39,5 +39,5 @@ async function checkFfmpegInstalled(): Promise<void> {
 }
 
 function tmpBase(mp3Path: string): string {
-  return basename(mp3Path).replace(/\.[^.]+$/, '');
+  return basename(mp3Path).replace(/\.[^.]+$/u, '');
 }

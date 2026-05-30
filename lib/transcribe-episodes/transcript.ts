@@ -190,7 +190,7 @@ export async function promptTranscript(
       });
     }
 
-    const workDuration = fromSeconds((performance.now() - startTime) / 1000);
+    const workDuration = fromSeconds((performance.now() - startTime) / 1_000);
 
     // Merge all chunk transcripts with rebased timestamps.
     const merged = mergeChunkTranscripts(chunkResults);
@@ -199,7 +199,7 @@ export async function promptTranscript(
       return { ok: false, error: 'Whisper transcript is empty' };
     }
 
-    const wordCount = merged.text.split(/\s+/).filter(Boolean).length;
+    const wordCount = merged.text.split(/\s+/u).filter(Boolean).length;
     const characterCount = merged.text.length;
 
     const path = writeTranscript(toTranscribe.episodeNumber, merged);

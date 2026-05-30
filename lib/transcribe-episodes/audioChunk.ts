@@ -139,7 +139,7 @@ export async function splitMp3IntoChunks(
   mp3Path: string,
   cutPoints: readonly number[],
 ): Promise<ChunkSpec[]> {
-  const base = basename(mp3Path).replace(/\.[^.]+$/, '');
+  const base = basename(mp3Path).replace(/\.[^.]+$/u, '');
   const chunks: ChunkSpec[] = [];
 
   for (let i = 0; i < cutPoints.length - 1; i++) {
