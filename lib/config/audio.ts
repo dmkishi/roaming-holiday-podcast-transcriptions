@@ -25,7 +25,7 @@ export const CHUNK_INITIAL_WINDOW_MINUTES = 2;
 export const CHUNK_MAX_WINDOW_MINUTES = 6;
 
 // -----------------------------------------------------------------------------
-// VAD
+// Gaps
 // -----------------------------------------------------------------------------
 /**
  * Minimum non-speech duration (seconds) to count as a gap.

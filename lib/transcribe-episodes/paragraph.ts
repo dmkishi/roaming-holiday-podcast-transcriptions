@@ -1,6 +1,6 @@
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import {
-  hasVad, readVad, hasFade, readFade, readTranscript,
+  hasGaps, readGaps, hasFade, readFade, readTranscript,
 } from '@lib/shared/artifacts.js';
 import type {
   FadePair, Paragraph, ParagraphGroup, Segment,
@@ -36,10 +36,10 @@ export function buildParagraphs(
       };
     }
 
-    if (!hasVad(episodeNumber)) {
+    if (!hasGaps(episodeNumber)) {
       return {
         ok: false,
-        error: `VAD file not found for #${episodeNumber}`,
+        error: `Gaps file not found for #${episodeNumber}`,
       };
     }
 
@@ -51,12 +51,12 @@ export function buildParagraphs(
     }
 
     const paragraphGroups: ParagraphGroup[] = [];
-    const vad = readVad(episodeNumber);
+    const gapsFile = readGaps(episodeNumber);
     const { fades } = readFade(episodeNumber);
     const groupStartSegments = [0, ...findSegmentFadeBoundaries(segments, fades)];
     for (const [i, groupStart] of groupStartSegments.entries()) {
       const group = segments.slice(groupStart, groupStartSegments[i + 1] ?? segments.length);
-      const breaks = buildParagraphBreaks(group, vad.gaps, PARAGRAPH_GAP_SECONDS);
+      const breaks = buildParagraphBreaks(group, gapsFile.gaps, PARAGRAPH_GAP_SECONDS);
       const paragraphs: Paragraph[] = breaks.map((start, k) => {
         const end = breaks[k + 1] ?? group.length;
         return group.slice(start, end).map(
@@ -103,9 +103,9 @@ export function findSegmentFadeBoundaries(
 }
 
 /**
- * Computes paragraph break indices using VAD-detected speech gaps.
+ * Computes paragraph break indices using detected audio gaps.
  *
- * For each VAD gap above `paragraphGapSeconds`, a binary search locates the
+ * For each gap greater than `paragraphGapSeconds`, a binary search locates the
  * Whisper segment that precedes the gap midpoint. A break is inserted after
  * that segment when it ends with sentence-ending punctuation (`.`, `?`, `!`).
  *
@@ -114,11 +114,11 @@ export function findSegmentFadeBoundaries(
  */
 export function buildParagraphBreaks(
   segments: Segment[],
-  vadGaps: readonly { start: number; end: number; duration: number }[],
+  gaps: readonly { start: number; end: number; duration: number }[],
   paragraphGapSeconds: number,
 ): number[] {
   const breaks: number[] = [0];
-  for (const gap of vadGaps) {
+  for (const gap of gaps) {
     if (gap.duration < paragraphGapSeconds) continue;
     const midpoint = (gap.start + gap.end) / 2;
     const segIndex = findSegmentBeforeTime(segments, midpoint);

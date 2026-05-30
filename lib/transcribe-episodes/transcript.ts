@@ -7,7 +7,7 @@ import {
 } from '@lib/transcribe-episodes/audioChunk.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import {
-  paths, hasTranscript, hasVad, readVad, writeTranscript,
+  paths, hasTranscript, hasGaps, readGaps, writeTranscript,
 } from '@lib/shared/artifacts.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import { VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
@@ -145,13 +145,13 @@ export async function promptTranscript(
       );
     }
 
-    // Read pre-computed VAD file for chunk splitting.
-    if (!hasVad(toTranscribe.episodeNumber)) {
-      return { ok: false, error: `VAD file not found for #${toTranscribe.episodeNumber}` };
+    // Read pre-computed gaps file for chunk splitting.
+    if (!hasGaps(toTranscribe.episodeNumber)) {
+      return { ok: false, error: `Gaps file not found for #${toTranscribe.episodeNumber}` };
     }
-    const vad = readVad(toTranscribe.episodeNumber);
+    const gapsFile = readGaps(toTranscribe.episodeNumber);
 
-    const cutPoints = chooseCutPoints(vad.gaps, vad.pcmSeconds, {
+    const cutPoints = chooseCutPoints(gapsFile.gaps, gapsFile.pcmSeconds, {
       targetChunkMinutes: CHUNK_TARGET_MINUTES,
       initialWindowMinutes: CHUNK_INITIAL_WINDOW_MINUTES,
       maxWindowMinutes: CHUNK_MAX_WINDOW_MINUTES,

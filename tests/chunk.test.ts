@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { gapsFromSpeech } from '@lib/transcribe-episodes/audioVad.js';
+import { findGapsOverThreshold } from '@lib/transcribe-episodes/audioGaps.js';
 import {
   chooseCutPoints,
   mergeChunkTranscripts,
@@ -19,13 +19,13 @@ const defaultOpts: CutPointOptions = {
 describe('gapsFromSpeech', () => {
   test('leading silence before first speech', () => {
     const speech = [{ start: 5, end: 10 }];
-    const gaps = gapsFromSpeech(speech, 10, 0.4);
+    const gaps = findGapsOverThreshold(speech, 10, 0.4);
     expect(gaps).toEqual([{ start: 0, end: 5, duration: 5 }]);
   });
 
   test('trailing silence after last speech', () => {
     const speech = [{ start: 0, end: 5 }];
-    const gaps = gapsFromSpeech(speech, 10, 0.4);
+    const gaps = findGapsOverThreshold(speech, 10, 0.4);
     expect(gaps).toEqual([{ start: 5, end: 10, duration: 5 }]);
   });
 
@@ -34,7 +34,7 @@ describe('gapsFromSpeech', () => {
       { start: 0, end: 10 },
       { start: 13, end: 20 },
     ];
-    const gaps = gapsFromSpeech(speech, 20, 0.4);
+    const gaps = findGapsOverThreshold(speech, 20, 0.4);
     expect(gaps).toEqual([{ start: 10, end: 13, duration: 3 }]);
   });
 
@@ -43,7 +43,7 @@ describe('gapsFromSpeech', () => {
       { start: 2, end: 5 },
       { start: 8, end: 12 },
     ];
-    const gaps = gapsFromSpeech(speech, 15, 0.4);
+    const gaps = findGapsOverThreshold(speech, 15, 0.4);
     expect(gaps).toEqual([
       { start: 0, end: 2, duration: 2 },
       { start: 5, end: 8, duration: 3 },
@@ -57,12 +57,12 @@ describe('gapsFromSpeech', () => {
       { start: 10.2, end: 20 },
       { start: 22, end: 30 },
     ];
-    const gaps = gapsFromSpeech(speech, 30, 0.4);
+    const gaps = findGapsOverThreshold(speech, 30, 0.4);
     expect(gaps).toEqual([{ start: 20, end: 22, duration: 2 }]);
   });
 
   test('no speech at all returns full duration as gap', () => {
-    const gaps = gapsFromSpeech([], 60, 0.4);
+    const gaps = findGapsOverThreshold([], 60, 0.4);
     expect(gaps).toEqual([{ start: 0, end: 60, duration: 60 }]);
   });
 
@@ -71,13 +71,13 @@ describe('gapsFromSpeech', () => {
       { start: 0, end: 5 },
       { start: 5, end: 10 },
     ];
-    const gaps = gapsFromSpeech(speech, 10, 0.4);
+    const gaps = findGapsOverThreshold(speech, 10, 0.4);
     expect(gaps).toEqual([]);
   });
 
   test('speech covers entire duration', () => {
     const speech = [{ start: 0, end: 60 }];
-    const gaps = gapsFromSpeech(speech, 60, 0.4);
+    const gaps = findGapsOverThreshold(speech, 60, 0.4);
     expect(gaps).toEqual([]);
   });
 });

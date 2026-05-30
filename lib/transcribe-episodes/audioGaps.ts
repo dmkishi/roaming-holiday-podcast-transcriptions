@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
 import { decodePcm } from '@lib/transcribe-episodes/audioPcm.js';
-import { hasVad, paths, writeVad } from '@lib/shared/artifacts.js';
+import { hasGaps, paths, writeGaps } from '@lib/shared/artifacts.js';
 import { VENV_PYTHON, VAD_SCRIPT } from '@lib/shared/paths.js';
 import { VadOutputSchema } from '@lib/shared/schemas.js';
 import { MIN_GAP_SECONDS } from '@lib/config/audio.js';
@@ -13,39 +13,37 @@ export interface Gap {
   duration: number;
 }
 
-type VadResult =
+type GapsResponse =
+  | FailResponse
   | { ok: true; status: 'generated'; episodeNumber: number; path: string }
   | { ok: true; status: 'alreadyExists'; episodeNumber: number; path: string };
-
-type VadResponse = FailResponse | VadResult;
 
 // eslint-disable-next-line typescript/strict-void-return
 const execFileAsync = promisify(execFile);
 
 /**
- * Run Silero VAD on an episode MP3 to list gaps. Writes the result to
- * `<code>.audio-vad.json`. Skips if the file already exists (unless the `force`
- * option is true.)
+ * Detect audio gaps in an episode MP3 and write them to `<code>.audio-gaps.json`.
+ * Skips if the file already exists (unless the `force` option is true.)
  */
-export async function runVad(
+export async function detectGaps(
   episodeNumber: number,
   mp3Path: string,
   force: boolean,
-): Promise<VadResponse> {
+): Promise<GapsResponse> {
   try {
-    if (!force && hasVad(episodeNumber)) {
+    if (!force && hasGaps(episodeNumber)) {
       return {
         ok: true,
         status: 'alreadyExists',
         episodeNumber,
-        path: paths(episodeNumber).vad,
+        path: paths(episodeNumber).gaps,
       };
     }
 
     const pcmPath = await decodePcm(mp3Path);
     const { pcmSeconds, speechIntervals } = await detectSpeechIntervals(pcmPath);
 
-    const vadPath = writeVad(episodeNumber, {
+    const gapsPath = writeGaps(episodeNumber, {
       // Measured PCM length, the source of truth for chunk math. The RSS
       // `itunes:duration` (whole-second, sometimes inaccurate) can disagree
       // with the actual audio and isn't consistent with the gaps below.
@@ -57,7 +55,7 @@ export async function runVad(
       ok: true,
       status: 'generated',
       episodeNumber,
-      path: vadPath,
+      path: gapsPath,
     };
   } catch (error) {
     return {
@@ -68,7 +66,8 @@ export async function runVad(
 }
 
 /**
- * Run Silero VAD on a PCM file and return total duration and speech intervals.
+ * Run Silero VAD on a PCM file and return the file's total duration and the
+ * start/end timestamps of detected speech intervals.
  */
 export async function detectSpeechIntervals(
   pcmPath: string,
@@ -82,8 +81,7 @@ export async function detectSpeechIntervals(
 }
 
 /**
- * Given speech intervals and total duration, return non-speech gaps of at
- * least `minGapSeconds`.
+ * Compute the gaps between speech intervals over a given threshold duration.
  */
 export function gapsFromSpeech(
   speech: readonly { start: number; end: number }[],

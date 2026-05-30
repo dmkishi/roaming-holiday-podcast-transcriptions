@@ -6,7 +6,7 @@ describe('paths', () => {
   test('produces correct filenames for a basic episode', () => {
     const p = paths(123);
     expect(basename(p.metadata)).toBe('123.metadata.json');
-    expect(basename(p.vad)).toBe('123.audio-vad.json');
+    expect(basename(p.gaps)).toBe('123.audio-gaps.json');
     expect(basename(p.transcript)).toBe('123.transcript.json');
     expect(basename(p.paragraph)).toBe('123.transcript.paragraph.json');
   });
@@ -25,7 +25,7 @@ describe('paths', () => {
 
   test('all paths share the same directory', () => {
     const p = paths(1);
-    const dirs = [p.metadata, p.vad, p.transcript, p.paragraph]
+    const dirs = [p.metadata, p.gaps, p.transcript, p.paragraph]
       .map((x) => x.replace(basename(x), ''));
     expect(new Set(dirs).size).toBe(1);
   });

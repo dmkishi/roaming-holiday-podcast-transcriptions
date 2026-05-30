@@ -11,7 +11,7 @@ interface CliOptions {
   };
   forceRss: boolean;
   forceDownload: boolean;
-  forceVad: boolean;
+  forceGaps: boolean;
   forceFade: boolean;
   forceTranscribe: boolean;
 }
@@ -24,7 +24,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     'force-all': boolean;
     'force-rss': boolean;
     'force-download': boolean;
-    'force-vad': boolean;
+    'force-gaps': boolean;
     'force-fade': boolean;
     'force-transcribe': boolean;
   }>(args.slice(2), {
@@ -35,7 +35,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-all',
       'force-rss',
       'force-download',
-      'force-vad',
+      'force-gaps',
       'force-fade',
       'force-transcribe',
     ],
@@ -46,13 +46,13 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
       'force-all': false,
       'force-rss': false,
       'force-download': false,
-      'force-vad': false,
+      'force-gaps': false,
       'force-fade': false,
       'force-transcribe': false,
     },
   });
 
-  const usage = `Usage: pnpm transcribe <episodes...> [--model ${DEFAULT_MODEL}] [--only-paragraphs | --only-markdown] [--force-all] [--force-rss] [--force-download] [--force-vad] [--force-fade] [--force-transcribe]
+  const usage = `Usage: pnpm transcribe <episodes...> [--model ${DEFAULT_MODEL}] [--only-paragraphs | --only-markdown] [--force-all] [--force-rss] [--force-download] [--force-gaps] [--force-fade] [--force-transcribe]
        <episodes...> accepts integers and ranges, e.g. 100 101 120-129`;
 
   const result = parseEpisodeNums(argv._.map(String));
@@ -75,7 +75,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   // inert under `--only-markdown` (fade runs in the paragraph phase). Markdown
   // has no force flag of its own - `writeMarkdown` overwrites unconditionally.
   const transcriptForceFlags = [
-    'force-all', 'force-rss', 'force-download', 'force-vad', 'force-transcribe',
+    'force-all', 'force-rss', 'force-download', 'force-gaps', 'force-transcribe',
   ] as const;
   if (onlyParagraphs) {
     const conflicts = transcriptForceFlags.filter((f) => argv[f]);
@@ -112,9 +112,9 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   const forceAll = runTranscript && argv['force-all'];
   const forceRss = runTranscript && (forceAll || argv['force-rss']);
   const forceDownload = runTranscript && (forceAll || argv['force-download']);
-  const forceVad = runTranscript && (forceDownload || argv['force-vad']);
+  const forceGaps = runTranscript && (forceDownload || argv['force-gaps']);
   const forceFade = runParagraph && (forceDownload || argv['force-fade']);
-  const forceTranscribe = runTranscript && (forceVad || argv['force-transcribe']);
+  const forceTranscribe = runTranscript && (forceGaps || argv['force-transcribe']);
 
   return {
     episodeNums,
@@ -122,7 +122,7 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     runPipeline: { runTranscript, runParagraph, runMarkdown },
     forceRss,
     forceDownload,
-    forceVad,
+    forceGaps,
     forceFade,
     forceTranscribe,
   };

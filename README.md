@@ -47,7 +47,7 @@ pnpm transcribe 101 --only-paragraphs  # Rebuild paragraphs + groups only
 # `--only-paragraphs` mode; `--force-download` also cascades into fade.
 pnpm transcribe 101 --force-rss         # Bypass the RSS feed ETag cache
 pnpm transcribe 101 --force-download    # Re-download the MP3
-pnpm transcribe 101 --force-vad         # Re-run VAD
+pnpm transcribe 101 --force-gaps        # Re-run VAD
 pnpm transcribe 101 --force-fade        # Re-run fade detection
 pnpm transcribe 101 --force-transcribe  # Re-generate the transcript
 pnpm transcribe 101 --force-all

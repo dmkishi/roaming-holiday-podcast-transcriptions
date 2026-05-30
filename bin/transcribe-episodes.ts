@@ -3,7 +3,7 @@ import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
 import { getAllRssItems } from '@lib/shared/rss.js';
 import { findEpisodes } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
-import { runVad } from '@lib/transcribe-episodes/audioVad.js';
+import { detectGaps } from '@lib/transcribe-episodes/audioGaps.js';
 import { runFade } from '@lib/transcribe-episodes/audioFade.js';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
@@ -13,7 +13,7 @@ import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import { buildMarkdown } from '@lib/transcribe-episodes/markdown.js';
 import {
   paths, hasMetadata, readMetadata, writeMetadata,
-  hasTranscript, hasVad, hasFade, hasMp3,
+  hasTranscript, hasGaps, hasFade, hasMp3,
   hasParagraph, readParagraph, writeParagraph, writeMarkdown,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
@@ -185,23 +185,23 @@ async function runTranscriptPipeline(): Promise<number[]> {
   print.emptyLine();
 
   // ===========================================================================
-  // Run VAD (index audio gaps)
+  // Detect audio gaps and save
   // ===========================================================================
-  print.info('Running VAD...');
+  print.info('Detecting audio gaps...');
   for (const toTranscribe of toTranscribes) {
-    const res = await runVad(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceVad);
+    const res = await detectGaps(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceGaps);
     if (!res.ok) {
       toTranscribes = toTranscribes.filter((t) => t !== toTranscribe);
       printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
     } else if (res.status === 'alreadyExists') {
-      printLog.warn(`#${toTranscribe.episodeNumber}: Skipping - VAD file already exists`);
+      printLog.warn(`#${toTranscribe.episodeNumber}: Skipping - gaps file already exists`);
     } else {
       printLog.info(`#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`);
     }
   }
 
   if (toTranscribes.length === 0) {
-    printLog.error('VAD failed for all episodes.');
+    printLog.error('Gap detection failed for all episodes.');
     process.exit(1);
   }
   print.emptyLine();
@@ -243,8 +243,8 @@ async function runTranscriptPipeline(): Promise<number[]> {
 if (runParagraph) {
   print.info('Building paragraph sidecars...');
   for (const episodeNumber of episodeNumbers) {
-    if (!hasVad(episodeNumber)) {
-      printLog.warn(`#${episodeNumber}: No VAD file - skipping`);
+    if (!hasGaps(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No gaps file - skipping`);
       continue;
     }
 

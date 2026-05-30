@@ -2,7 +2,7 @@ import { execFile, spawn } from 'node:child_process';
 import { basename, join } from 'node:path';
 import { promisify } from 'node:util';
 import type { z } from 'zod';
-import type { Gap } from '@lib/transcribe-episodes/audioVad.js';
+import type { Gap } from '@lib/transcribe-episodes/audioGaps.js';
 import { TMP_DIR, FFMPEG } from '@lib/shared/paths.js';
 import { TranscriptFileSchema } from '@lib/shared/schemas.js';
 
