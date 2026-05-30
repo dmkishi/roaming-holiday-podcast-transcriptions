@@ -151,7 +151,7 @@ export async function promptTranscript(
     }
     const vad = readVad(toTranscribe.episodeNumber);
 
-    const cutPoints = chooseCutPoints(vad.gaps, vad.duration, {
+    const cutPoints = chooseCutPoints(vad.gaps, vad.pcmSeconds, {
       targetChunkMinutes: CHUNK_TARGET_MINUTES,
       initialWindowMinutes: CHUNK_INITIAL_WINDOW_MINUTES,
       maxWindowMinutes: CHUNK_MAX_WINDOW_MINUTES,

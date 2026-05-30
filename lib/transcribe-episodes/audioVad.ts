@@ -43,11 +43,14 @@ export async function runVad(
     }
 
     const pcmPath = await decodePcm(mp3Path);
-    const { audioDuration, speechIntervals } = await detectSpeechIntervals(pcmPath);
+    const { pcmSeconds, speechIntervals } = await detectSpeechIntervals(pcmPath);
 
     const vadPath = writeVad(episodeNumber, {
-      duration: audioDuration,
-      gaps: gapsFromSpeech(speechIntervals, audioDuration, MIN_GAP_SECONDS),
+      // Measured PCM length, the source of truth for chunk math. The RSS
+      // `itunes:duration` (whole-second, sometimes inaccurate) can disagree
+      // with the actual audio and isn't consistent with the gaps below.
+      pcmSeconds,
+      gaps: gapsFromSpeech(speechIntervals, pcmSeconds, MIN_GAP_SECONDS),
     });
 
     return {
@@ -70,12 +73,12 @@ export async function runVad(
 export async function detectSpeechIntervals(
   pcmPath: string,
 ): Promise<{
-  audioDuration: number;
+  pcmSeconds: number;
   speechIntervals: { start: number; end: number }[];
 }> {
   const { stdout } = await execFileAsync(VENV_PYTHON, [VAD_SCRIPT, pcmPath]);
   const { duration, speech } = VadOutputSchema.parse(JSON.parse(stdout));
-  return { audioDuration: duration, speechIntervals: speech };
+  return { pcmSeconds: duration, speechIntervals: speech };
 }
 
 /**

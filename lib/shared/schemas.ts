@@ -20,7 +20,7 @@ export const VadOutputSchema = z.object({
 });
 
 export const VadFileSchema = z.object({
-  duration: z.number(),
+  pcmSeconds: z.number(),
   gaps: z.array(z.object({ start: z.number(), end: z.number(), duration: z.number() })),
 });
 
