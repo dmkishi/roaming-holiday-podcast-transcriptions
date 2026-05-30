@@ -48,7 +48,7 @@ export async function detectGaps(
       // `itunes:duration` (whole-second, sometimes inaccurate) can disagree
       // with the actual audio and isn't consistent with the gaps below.
       pcmSeconds,
-      gaps: gapsFromSpeech(speechIntervals, pcmSeconds, MIN_GAP_SECONDS),
+      gaps: findGapsOverThreshold(speechIntervals, pcmSeconds, MIN_GAP_SECONDS),
     });
 
     return {
@@ -83,7 +83,7 @@ export async function detectSpeechIntervals(
 /**
  * Compute the gaps between speech intervals over a given threshold duration.
  */
-export function gapsFromSpeech(
+export function findGapsOverThreshold(
   speech: readonly { start: number; end: number }[],
   totalDuration: number,
   minGapSeconds: number,
