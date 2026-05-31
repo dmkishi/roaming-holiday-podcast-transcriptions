@@ -1,9 +1,5 @@
 @import './_base.css';
 
-.episodes--timeline {
-  margin-block: 1rem 2rem;
-}
-
 .episode-list {
   display: flex;
   flex-direction: column;

@@ -6,10 +6,6 @@ eagerImageCount: 5
 ---
 {% from "macros/episodeMeta.njk" import episodeMeta %}
 
-<nav class="episodes--timeline wrapper">
-  Taiwan ← China ← S. Korea ← Japan ← Canada
-</nav>
-
 <ul class="episode-list wrapper">
   {%- for item in collections.episode | reverse %}
     {%- set episode = item.data.episode %}
