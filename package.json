@@ -7,7 +7,7 @@
     "transcribe": "tsx bin/transcribe-episodes.ts",
     "upload-cloudflare": "tsx --env-file=.env bin/upload-cloudflare.ts",
     "build-www": "tsx bin/build-www.ts && eleventy",
-    "dev-www": "open http://localhost:8080 & eleventy --serve",
+    "dev-www": "eleventy --serve --incremental",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "typecheck": "tsc --noEmit && tsc --noEmit -p www/tsconfig.json",
     "lint": "oxlint",
