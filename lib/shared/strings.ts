@@ -22,8 +22,8 @@ export function formatEpisodeNumber(episodeNumber: number): string {
 export function handleize(str: string): string {
   return str
     .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
+    .replaceAll(/[^a-z0-9]+/gu, '-')
+    .replaceAll(/^-+|-+$/gu, '');
 }
 
 export function pluralize(

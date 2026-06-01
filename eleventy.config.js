@@ -1,5 +1,5 @@
 import cssnano from 'cssnano';
-import Image from '@11ty/eleventy-img';
+import eleventyImage from '@11ty/eleventy-img';
 import { transform as esbuildTransform } from 'esbuild';
 import { minify } from 'html-minifier-terser';
 import postcss from 'postcss';
@@ -53,7 +53,7 @@ function setupCss(eleventyConfig) {
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
     outputFileExtension: 'css',
-    compile: async function(_content, inputPath) {
+    compile(_content, inputPath) {
       if (path.basename(inputPath).startsWith('_')) return;
 
       return async () => {
@@ -82,7 +82,7 @@ export default function(eleventyConfig) {
   eleventyConfig.addTemplateFormats('ts');
   eleventyConfig.addExtension('ts', {
     outputFileExtension: 'js',
-    compile: async function(_content, inputPath) {
+    compile(_content, inputPath) {
       if (path.basename(inputPath).startsWith('_')) return;
       if (inputPath.endsWith('.d.ts')) return;
 
@@ -97,7 +97,7 @@ export default function(eleventyConfig) {
   // Minify HTML
   eleventyConfig.addTransform('htmlmin', async (content, outputPath) => {
     if (outputPath?.endsWith('.html')) {
-      return minify(content, {
+      return await minify(content, {
         collapseWhitespace: true,
         removeComments: true,
         minifyCSS: true,
@@ -115,7 +115,7 @@ export default function(eleventyConfig) {
   eleventyConfig.addShortcode('imageUrl', async (src, width) => {
     const input = path.join('www/src', src);
     const subdir = path.relative('img', path.dirname(src));
-    const metadata = await Image(input, {
+    const metadata = await eleventyImage(input, {
       widths: [width],
       formats: ['webp'],
       outputDir: path.join('www/dist/img', subdir),
@@ -131,11 +131,11 @@ export default function(eleventyConfig) {
   /**
    * Format a number with locale-appropriate separators.
    * @example
-   * {{ 217988 | formatNumber }} // => "217,988"
+   * {{ 217_988 | formatNumber }} // => "217,988"
    */
-  eleventyConfig.addFilter('formatNumber', (n) => {
-    return Number(n).toLocaleString('en-US');
-  });
+  eleventyConfig.addFilter('formatNumber', (n) =>
+    Number(n).toLocaleString('en-US')
+  );
 
   /**
    * Format a number with exactly one decimal place.
@@ -143,18 +143,18 @@ export default function(eleventyConfig) {
    * {{ 12 | formatDecimal }}   // => "12.0"
    * {{ 12.34 | formatDecimal }} // => "12.3"
    */
-  eleventyConfig.addFilter('formatDecimal', (n) => {
-    return Number(n).toLocaleString('en-US', {
+  eleventyConfig.addFilter('formatDecimal', (n) =>
+    Number(n).toLocaleString('en-US', {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
-    });
-  });
+    })
+  );
 
   /**
    * Format seconds to a timecode string, rounded to the nearest minute.
    * @example
    * {{ 65 | formatRoundedTimecode }}   // => "1:00"
-   * {{ 3661 | formatRoundedTimecode }} // => "1:01:00"
+   * {{ 3_661 | formatRoundedTimecode }} // => "1:01:00"
    */
   eleventyConfig.addFilter('formatRoundedTimecode', (seconds) => {
     const totalMins = Math.round(seconds / 60);
@@ -168,9 +168,9 @@ export default function(eleventyConfig) {
    * Format seconds to human-readable duration rounded to nearest minute.
    * @example
    * {{ 65 | formatRoundedHuman }}    // => "1m"
-   * {{ 3661 | formatRoundedHuman }}  // => "1h 1m"
-   * {{ 3660 | formatRoundedHuman }}  // => "1h"
-   * {{ 90000 | formatRoundedHuman }} // => "1d 1h"
+   * {{ 3_661 | formatRoundedHuman }}  // => "1h 1m"
+   * {{ 3_660 | formatRoundedHuman }}  // => "1h"
+   * {{ 90_000 | formatRoundedHuman }} // => "1d 1h"
    */
   eleventyConfig.addFilter('formatRoundedHuman', (seconds) => {
     const totalMins = Math.round(seconds / 60);
@@ -190,22 +190,22 @@ export default function(eleventyConfig) {
    * @example
    * {{ '2026-04-04' | formatDate }} // => "April 4, 2026"
    */
-  eleventyConfig.addFilter('formatDate', (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+  eleventyConfig.addFilter('formatDate', (dateStr) =>
+    new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-    });
-  });
+    })
+  );
 
   /**
    * Extract the video ID from a YouTube URL.
    * @example
    * {{ 'https://www.youtube.com/watch?v=abc123' | youtubeId }} // => "abc123"
    */
-  eleventyConfig.addFilter('youtubeId', (url) => {
-    return new URL(url).searchParams.get('v') || '';
-  });
+  eleventyConfig.addFilter('youtubeId', (url) =>
+    new URL(url).searchParams.get('v') ?? ''
+  );
 
   return {
     dir: {

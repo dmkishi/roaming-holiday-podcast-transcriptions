@@ -34,7 +34,7 @@ function parseEpisodeNums(
 ): { episodeNums: Set<number> } | { error: string } {
   const episodeNums = new Set<number>();
   for (const token of tokens) {
-    const range = /^(\d+)-(\d+)$/.exec(token);
+    const range = /^(\d+)-(\d+)$/u.exec(token);
     if (range) {
       const start = Number(range[1]);
       const end = Number(range[2]);
@@ -44,7 +44,7 @@ function parseEpisodeNums(
       for (let n = start; n <= end; n++) episodeNums.add(n);
       continue;
     }
-    if (/^\d+$/.test(token)) {
+    if (/^\d+$/u.test(token)) {
       episodeNums.add(Number(token));
       continue;
     }

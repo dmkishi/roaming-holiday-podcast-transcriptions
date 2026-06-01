@@ -55,12 +55,12 @@ describe('findEpisodes', () => {
   test('parses pubDate into a Date', () => {
     const episode = getSingleEpisode(findEpisodes(items, new Set([1])));
     expect(episode.pubDate).toBeInstanceOf(Date);
-    expect(episode.pubDate.getUTCFullYear()).toBe(2025);
+    expect(episode.pubDate.getUTCFullYear()).toBe(2_025);
   });
 
   test('parses duration', () => {
     const episode = getSingleEpisode(findEpisodes(items, new Set([1])));
-    expect(episode.duration.seconds).toBe(5025);
+    expect(episode.duration.seconds).toBe(5_025);
     expect(episode.duration.timestamp).toBe('1:23:45');
   });
 

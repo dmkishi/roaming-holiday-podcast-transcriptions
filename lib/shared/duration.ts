@@ -10,7 +10,7 @@ export interface Duration {
  */
 export function parseDuration(input: string): Duration {
   const [secs = 0, mins = 0, hrs = 0] = input.split(':').map(Number).toReversed();
-  const totalSeconds = hrs * 3600 + mins * 60 + secs;
+  const totalSeconds = hrs * 3_600 + mins * 60 + secs;
   return fromSeconds(totalSeconds);
 }
 
@@ -18,8 +18,8 @@ export function parseDuration(input: string): Duration {
  * Creates a Duration from a total number of seconds.
  */
 export function fromSeconds(totalSeconds: number): Duration {
-  const hrs = Math.floor(totalSeconds / 3600);
-  const mins = Math.floor((totalSeconds % 3600) / 60);
+  const hrs = Math.floor(totalSeconds / 3_600);
+  const mins = Math.floor((totalSeconds % 3_600) / 60);
   const secs = Math.round(totalSeconds % 60);
 
   const timestamp = `${hrs}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;

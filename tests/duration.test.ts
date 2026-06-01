@@ -4,14 +4,14 @@ import { parseDuration, fromSeconds } from '@lib/shared/duration.js';
 describe('parseDuration', () => {
   test('H:MM:SS', () => {
     const d = parseDuration('1:23:45');
-    expect(d.seconds).toBe(5025);
+    expect(d.seconds).toBe(5_025);
     expect(d.timestamp).toBe('1:23:45');
     expect(d.human).toBe('1h 23m 45s');
   });
 
   test('MM:SS', () => {
     const d = parseDuration('23:45');
-    expect(d.seconds).toBe(1425);
+    expect(d.seconds).toBe(1_425);
     expect(d.timestamp).toBe('0:23:45');
     expect(d.human).toBe('23m 45s');
   });
@@ -25,7 +25,7 @@ describe('parseDuration', () => {
 
   test('zero-pads minutes and seconds in timestamp', () => {
     const d = parseDuration('1:3:5');
-    expect(d.seconds).toBe(3785);
+    expect(d.seconds).toBe(3_785);
     expect(d.timestamp).toBe('1:03:05');
   });
 
@@ -38,14 +38,14 @@ describe('parseDuration', () => {
 
   test('exact hour', () => {
     const d = parseDuration('1:00:00');
-    expect(d.seconds).toBe(3600);
+    expect(d.seconds).toBe(3_600);
     expect(d.human).toBe('1h 0m 0s');
   });
 });
 
 describe('fromSeconds', () => {
   test('formats large values', () => {
-    const d = fromSeconds(7384);
+    const d = fromSeconds(7_384);
     expect(d.timestamp).toBe('2:03:04');
     expect(d.human).toBe('2h 3m 4s');
   });

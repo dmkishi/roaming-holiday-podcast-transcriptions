@@ -10,7 +10,7 @@ type Mp3Response =
       sizeMB: number;
     };
 
-const BYTES_PER_MB = 1024 * 1024;
+const BYTES_PER_MB = 1_024 * 1_024;
 
 export async function downloadMp3(
   url: string,

@@ -99,8 +99,8 @@ describe('chooseCutPoints', () => {
 
   test('picks midpoint of gap near target', () => {
     const gaps = [{ start: 870, end: 930, duration: 60 }];
-    const cuts = chooseCutPoints(gaps, 1800, defaultOpts);
-    expect(cuts).toEqual([0, 900, 1800]);
+    const cuts = chooseCutPoints(gaps, 1_800, defaultOpts);
+    expect(cuts).toEqual([0, 900, 1_800]);
   });
 
   test('prefers longest gap within window', () => {
@@ -110,30 +110,30 @@ describe('chooseCutPoints', () => {
       { start: 880, end: 885, duration: 5 },
       { start: 850, end: 870, duration: 20 },
     ];
-    const cuts = chooseCutPoints(gaps, 1800, defaultOpts);
+    const cuts = chooseCutPoints(gaps, 1_800, defaultOpts);
     expect(cuts[1]).toBe(860);
   });
 
   test('widens search window when no gap in initial window', () => {
     const gaps = [{ start: 598, end: 602, duration: 4 }];
-    const cuts = chooseCutPoints(gaps, 1800, defaultOpts);
+    const cuts = chooseCutPoints(gaps, 1_800, defaultOpts);
     expect(cuts[1]).toBe(600);
   });
 
   test('hard-cuts at target when no gap found in max window', () => {
-    const cuts = chooseCutPoints([], 1800, defaultOpts);
-    expect(cuts).toEqual([0, 900, 1800]);
+    const cuts = chooseCutPoints([], 1_800, defaultOpts);
+    expect(cuts).toEqual([0, 900, 1_800]);
   });
 
   test('multiple cut points for a long file', () => {
     const gaps = [
       { start: 895, end: 905, duration: 10 },
-      { start: 1795, end: 1805, duration: 10 },
-      { start: 2695, end: 2705, duration: 10 },
+      { start: 1_795, end: 1_805, duration: 10 },
+      { start: 2_695, end: 2_705, duration: 10 },
     ];
-    const cuts = chooseCutPoints(gaps, 3600, defaultOpts);
+    const cuts = chooseCutPoints(gaps, 3_600, defaultOpts);
     expect(cuts[0]).toBe(0);
-    expect(cuts.at(-1)).toBe(3600);
+    expect(cuts.at(-1)).toBe(3_600);
     // 0, ~900, ~1800, ~2700, 3600
     expect(cuts.length).toBe(5);
   });

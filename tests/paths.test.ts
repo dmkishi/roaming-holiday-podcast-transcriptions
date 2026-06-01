@@ -19,7 +19,7 @@ describe('paths', () => {
   });
 
   test('does not over-pad 3+ digit episode numbers', () => {
-    const p = paths(1234);
+    const p = paths(1_234);
     expect(basename(p.metadata)).toBe('1234.metadata.json');
   });
 

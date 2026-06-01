@@ -14,8 +14,8 @@ const NAMED_ENTITIES: Record<string, string> = {
  */
 export function sanitizeRssText(input: string): string {
   return input
-    .replaceAll(/<[^>]*>/g, '')
-    .replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, entity: string) => {
+    .replaceAll(/<[^>]*>/gu, '')
+    .replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/gu, (match, entity: string) => {
       if (entity.startsWith('#x') || entity.startsWith('#X')) {
         const code = parseInt(entity.slice(2), 16);
         return Number.isFinite(code) ? String.fromCodePoint(code) : match;
@@ -26,6 +26,6 @@ export function sanitizeRssText(input: string): string {
       }
       return NAMED_ENTITIES[entity] ?? match;
     })
-    .replaceAll(/\s+/g, ' ')
+    .replaceAll(/\s+/gu, ' ')
     .trim();
 }

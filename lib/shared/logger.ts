@@ -5,7 +5,7 @@ import { LOG_PATH } from '@lib/shared/paths.js';
 type LogLevel = 'info' | 'warn' | 'error';
 
 // oxlint-disable-next-line no-control-regex
-const STRIP_ANSI = /\u001B\[[0-9;]*m/g;
+const STRIP_ANSI = /\u001B\[[0-9;]*m/gu;
 let isFirstWrite = true;
 
 function toPlain(msg: string) {

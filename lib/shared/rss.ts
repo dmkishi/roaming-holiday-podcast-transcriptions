@@ -58,7 +58,7 @@ export async function getAllRssItems(
       xml = await res.text();
       status = 'downloaded';
       writeFileSync(cachePaths.xml, xml);
-      const newEtag = res.headers.get('etag')?.replace(/-gzip"$/, '"') ?? '';
+      const newEtag = res.headers.get('etag')?.replace(/-gzip"$/u, '"') ?? '';
       if (newEtag !== '') writeFileSync(cachePaths.etag, newEtag);
     } else {
       return { status: 'failed' };
