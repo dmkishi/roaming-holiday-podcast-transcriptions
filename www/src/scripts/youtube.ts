@@ -4,6 +4,7 @@
   const videoElement = document.querySelector('.js-video');
   if (!(videoElement instanceof HTMLElement)) return;
 
+  let enableMiniPlayerToggling = (): void => {};
   initMiniPlayer(videoElement);
   initPlayer(videoElement);
 
@@ -11,8 +12,15 @@
    * Control mini-player. Observe a placeholder "sentinel" instead of the
    * <iframe> directly to avoid a feedback loop when `position:fixed` removes it
    * from flow.
+   *
+   * Toggling is gated behind `isReady` (flipped by `enableMiniPlayerToggling`.)
+   * Until the embedded player is ready, the iframe stays at full size, so that
+   * YouTube loads a full-resolution poster that remains crisp when the mini-
+   * player later expands back to full size.
    */
   function initMiniPlayer(videoEl: HTMLElement): void {
+    let isReady = false;
+    let isOffscreen = false;
     let isDismissed = false;
     const sentinel = document.querySelector('.js-video-sentinel')!;
 
@@ -21,25 +29,27 @@
     closeBtn.textContent = '×';
     closeBtn.hidden = true;
 
+    const updateMiniPlayer = (): void => {
+      const isMini = isReady && !isDismissed && isOffscreen;
+      videoEl.classList.toggle('js-video__is-mini', isMini);
+      closeBtn.hidden = !isMini;
+    };
+
+    enableMiniPlayerToggling = () => {
+      isReady = true;
+      updateMiniPlayer();
+    };
+
     const observer = new IntersectionObserver((entries) => {
       const [entry] = entries;
       if (!entry) return;
-      const isOffscreen = !entry.isIntersecting;
-
-      if (isDismissed) {
-        videoEl.classList.remove('js-video__is-mini');
-        closeBtn.hidden = true;
-        return;
-      }
-
-      videoEl.classList.toggle('js-video__is-mini', isOffscreen);
-      closeBtn.hidden = !isOffscreen;
+      isOffscreen = !entry.isIntersecting;
+      updateMiniPlayer();
     }, { threshold: 0 });
 
     closeBtn.addEventListener('click', () => {
-      videoEl.classList.remove('js-video__is-mini');
-      closeBtn.hidden = true;
       isDismissed = true;
+      updateMiniPlayer();
     });
 
     videoEl.parentElement!.append(closeBtn);
@@ -74,6 +84,7 @@
       player = new YT.Player(videoEl, {
         events: {
           onReady: () => {
+            enableMiniPlayerToggling();
             if (transcript) {
               transcript.addEventListener('dblclick', (evt) => {
                 if (!player) return;
