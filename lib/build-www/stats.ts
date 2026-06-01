@@ -1,7 +1,12 @@
 import { parseDuration } from '@lib/shared/duration.js';
 import { getAllRssItems, type RssItem } from '@lib/shared/rss.js';
 import type { EpisodeArtifacts } from '@lib/build-www/discover.js';
-import type { PodcastStats, EpisodeStat, EpisodeWordStat } from '@lib/build-www/types.js';
+import type {
+  PodcastStats,
+  EpisodeStat,
+  EpisodeWordStat,
+  EpisodeRateStat,
+} from '@lib/build-www/types.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
 
 /**
@@ -54,6 +59,12 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
   const mostFucks = fuckStats.reduce((a, b) =>
     b.wordCount > a.wordCount ? b : a,
   );
+  const totalFucks = fuckStats.reduce((sum, s) => sum + s.wordCount, 0);
+  const averageFucks = totalFucks / totalTranscribedEpisodes;
+  const rateStats = fuckStats.map((s) => toEpisodeRateStat(s));
+  const mostFucksPerHour = rateStats.reduce((a, b) =>
+    b.fucksPerHour > a.fucksPerHour ? b : a,
+  );
 
   return {
     totalEpisodes,
@@ -66,6 +77,9 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
     averageTranscribedEpisodeWordCount,
     wordiestEpisode,
     leastWordiestEpisode,
+    totalFucks,
+    averageFucks,
+    mostFucksPerHour,
     mostFucks,
   };
 }
@@ -102,4 +116,12 @@ function toEpisodeWordStat(
     url: `/episodes/${metadata.episodeNumber}.html`,
     wordCount,
   };
+}
+
+function toEpisodeRateStat(stat: EpisodeWordStat): EpisodeRateStat {
+  const fucksPerHour =
+    stat.durationSeconds > 0
+      ? stat.wordCount / (stat.durationSeconds / 3600)
+      : 0;
+  return { ...stat, fucksPerHour };
 }

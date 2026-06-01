@@ -53,9 +53,23 @@ isAboutPage: true
 
         <dt>Tersest episode</dt>
         <dd><a href="{{ stats.leastWordiestEpisode.url }}">{{ stats.leastWordiestEpisode.title }}</a> ({{ stats.leastWordiestEpisode.wordCount | formatNumber }} words)</a></dd>
+      </dl>
+    </section>
+
+    <section>
+      <h3>Fuck Stats</h3>
+      <dl>
+        <dt>Total fucks</dt>
+        <dd>{{ stats.totalFucks | formatNumber }} fucks</dd>
+
+        <dt>Average fucks per episode</dt>
+        <dd>{{ stats.averageFucks | formatDecimal }} fucks</dd>
 
         <dt>Most fucks given</dt>
         <dd><a href="{{ stats.mostFucks.url }}">{{ stats.mostFucks.title }}</a> ({{ stats.mostFucks.wordCount | formatNumber }} fucks)</dd>
+
+        <dt>Greatest fucks per hour</dt>
+        <dd><a href="{{ stats.mostFucksPerHour.url }}">{{ stats.mostFucksPerHour.title }}</a> ({{ stats.mostFucksPerHour.fucksPerHour | formatDecimal }} fucks/hour)</dd>
       </dl>
     </section>
   </aside>

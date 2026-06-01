@@ -138,6 +138,19 @@ export default function(eleventyConfig) {
   });
 
   /**
+   * Format a number with exactly one decimal place.
+   * @example
+   * {{ 12 | formatDecimal }}   // => "12.0"
+   * {{ 12.34 | formatDecimal }} // => "12.3"
+   */
+  eleventyConfig.addFilter('formatDecimal', (n) => {
+    return Number(n).toLocaleString('en-US', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+  });
+
+  /**
    * Format seconds to a timecode string, rounded to the nearest minute.
    * @example
    * {{ 65 | formatRoundedTimecode }}   // => "1:00"

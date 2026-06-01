@@ -43,6 +43,10 @@ export interface EpisodeWordStat extends EpisodeStat {
   wordCount: number;
 }
 
+export interface EpisodeRateStat extends EpisodeWordStat {
+  fucksPerHour: number;
+}
+
 export interface PodcastStats {
   totalEpisodes: number;
   totalDurationSeconds: number;
@@ -54,5 +58,8 @@ export interface PodcastStats {
   averageTranscribedEpisodeWordCount: number;
   wordiestEpisode: EpisodeWordStat;
   leastWordiestEpisode: EpisodeWordStat;
+  totalFucks: number;
+  averageFucks: number;
+  mostFucksPerHour: EpisodeRateStat;
   mostFucks: EpisodeWordStat;
 }
