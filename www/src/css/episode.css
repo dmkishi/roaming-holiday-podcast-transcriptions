@@ -197,7 +197,8 @@
 
   hr {
     width: 33%;
-    margin: 3rem auto;
+    margin: var(--rule-space) auto;
+    border-top-width: var(--rule-width);
   }
 }
 

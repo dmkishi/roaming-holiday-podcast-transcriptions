@@ -8,6 +8,9 @@
   --space-2: 2rem;
   --click-offset: .75px;
 
+  --rule-width: 3px;
+  --rule-space: 3.666rem;
+
   --font-x-small: .75rem; /* 12px - Episode meta and timecode */
   --font-small: 1rem; /* 16px - Index description */
   --font-base: 1.125rem; /* 18px */
@@ -176,11 +179,11 @@ a {
 }
 
 .site-footer {
-  margin-top: var(--gutter);
+  margin-top: var(--rule-space);
 }
 
 .site-footer-nav {
-  border-top: 2px solid var(--color-black);
+  border-top: var(--rule-width) solid var(--color-black);
   padding-top: 10px;
 }
 
