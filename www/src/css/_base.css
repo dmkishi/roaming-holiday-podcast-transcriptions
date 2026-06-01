@@ -10,6 +10,7 @@
 
   --rule-width: 3px;
   --rule-space: 3.666rem;
+  --underline-thickness: 1.125px;
 
   --font-x-small: .75rem; /* 12px - Episode meta and timecode */
   --font-small: 1rem; /* 16px - Index description */
@@ -63,6 +64,8 @@ h2 { font-size: var(--font-large); }
 h3 { font-size: var(--font-base); }
 
 a {
+  text-decoration-thickness: var(--underline-thickness);
+  text-underline-offset: 1.25px;
   color: var(--color-black);
   transition: background-color .2s ease;
 
@@ -161,7 +164,7 @@ a {
   left: .0333em;
   font-size: var(--font-x-small);
   text-transform: uppercase;
-  text-decoration-thickness: 1.25px;
+  text-decoration-thickness: var(--underline-thickness);
   text-underline-offset: 1.5px;
 
   &::after {

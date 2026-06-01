@@ -191,8 +191,9 @@
   }
 
   .is-active {
-    background: var(--color-tint-1);
-    border-radius: 2px;
+    text-decoration: underline;
+    text-decoration-thickness: var(--rule-width);
+    text-decoration-skip-ink: none;
   }
 
   hr {
