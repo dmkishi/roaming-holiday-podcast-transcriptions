@@ -87,14 +87,14 @@
 }
 
 .episode--video-shortcuts-list {
-  --gap: .333em;
+  --gap: .1666em;
   --key-icon-width: 2.125em;
 
   display: grid;
   grid-template-columns: min-content auto;
-  gap: var(--gap) calc(var(--gap) * 2);
+  gap: calc(var(--gap) * 2) calc(var(--gap) * 2.5);
   margin-block: 6px 1em;
-  padding-inline: var(--gutter);
+  padding-inline: calc(var(--gutter) / 2);
   opacity: .875;
   font-size: var(--font-x-small);
   line-height: 1.333;
