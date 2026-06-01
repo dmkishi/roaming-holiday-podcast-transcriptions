@@ -45,16 +45,20 @@ export const FadeFileSchema = z.object({
   fades: z.array(FadePairSchema),
 });
 
+/** Round a timestamp to two decimal places (~10ms). */
+const round2 = (n: number): number => Math.round(n * 100) / 100;
+const timestamp = z.number().transform(round2);
+
 const SegmentSchema = z.object({
   id: z.number(),
-  start: z.number(),
-  end: z.number(),
+  start: timestamp,
+  end: timestamp,
   text: z.string(),
   words: z.array(
     z.object({
       text: z.string(),
-      start: z.number(),
-      end: z.number(),
+      start: timestamp,
+      end: timestamp,
       confidence: z.number().optional(),
     }),
   ),
