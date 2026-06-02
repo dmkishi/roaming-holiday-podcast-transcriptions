@@ -151,6 +151,31 @@ export default function(eleventyConfig) {
   );
 
   /**
+   * Pluralize a word by appending "s" unless the count is exactly 1.
+   * @example
+   * {{ 'Bible' | pluralize(2) }} // "Bibles"
+   */
+  eleventyConfig.addFilter('pluralize', pluralize);
+
+  /**
+   * @example
+   * {{ 2.2 | bibles | safe }}  // 📖📖
+   * {{ 2.25 | bibles | safe }} // 📖📖 + half 📖
+   * {{ 2.5 | bibles | safe }}  // 📖📖 + half 📖
+   * {{ 2.74 | bibles | safe }} // 📖📖 + half 📖
+   * {{ 2.75 | bibles | safe }} // 📖📖📖
+   */
+  eleventyConfig.addFilter('bibleEmojis', (count) => {
+    // Snap to the nearest half: e.g. 2.2 → 2, 2.25 → 2.5, 2.75 → 3.
+    const rounded = Math.round(count * 2) / 2;
+    const whole = Math.floor(rounded);
+    const hasHalf = rounded > whole;
+    const emojis =
+      '📖'.repeat(whole) + (hasHalf ? '<span class="bible-half">📖</span>' : '');
+    return `<span role="img">${emojis}</span>`;
+  });
+
+  /**
    * Format seconds to a timecode string, rounded to the nearest minute.
    * @example
    * {{ 65 | formatRoundedTimecode }}   // => "1:00"

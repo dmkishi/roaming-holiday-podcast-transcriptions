@@ -43,7 +43,17 @@ isAboutPage: true
         <dd>{{ stats.totalTranscribedEpisodes }} episodes</dd>
 
         <dt>Total transcribed words</dt>
-        <dd>{{ stats.totalTranscribedWordCount | formatNumber }} words</dd>
+        <dd>
+          {{- stats.totalTranscribedWordCount | formatNumber }} words
+          <aside>
+            {%- set bibleCount = stats.totalTranscribedWordCount / 750000 %}
+            or
+            <span class="bible-count-emojis" title="{{ bibleCount | formatDecimal }}"}>
+              {{- bibleCount | bibleEmojis | safe -}}
+            </span>
+            {{ 'New American Bible Revised Edition' | pluralize(bibleCount) }}
+          </aside>
+        </dd>
 
         <dt>Average words per episode</dt>
         <dd>{{ stats.averageTranscribedEpisodeWordCount | formatNumber }} words</dd>
