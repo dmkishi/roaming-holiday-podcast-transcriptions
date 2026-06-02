@@ -20,6 +20,15 @@
   background-color: var(--color-tint-1);
   font-style: italic;
 
+  @media (width < 500px) {
+    grid-template-columns: 1fr 1fr;
+    padding: 1rem;
+
+    dl {
+      column-gap: var(--gutter-half);
+    }
+  }
+
   section {
     display: contents;
   }
@@ -45,5 +54,9 @@
     &::after {
       content: ':';
     }
+  }
+
+  dd {
+    font-style: normal;
   }
 }

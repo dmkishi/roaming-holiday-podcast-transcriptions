@@ -59,19 +59,20 @@
   width: calc((min(100%, var(--max-width-video)) - var(--max-width)) / 2);
   max-width: 20em;
 
-  @media (width < 1150px) {
+  @media (width < 1075px) {
     position: relative;
     width: var(--max-width);
     max-width: 100%;
-    margin-bottom: var(--gutter);
+    margin-bottom: 10px;
     align-self: center;
 
-    dl {
+    .episode--video-shortcuts-list {
       grid-template-columns: repeat(5, 1fr);
       grid-template-rows: auto auto;
       grid-auto-flow: column;
       grid-auto-columns: max-content;
       align-items: start;
+      padding-inline: var(--gutter);
     }
 
     dt {
@@ -94,10 +95,14 @@
   grid-template-columns: min-content auto;
   gap: calc(var(--gap) * 2) calc(var(--gap) * 2.5);
   margin-block: 6px 1em;
-  padding-inline: calc(var(--gutter) / 2);
+  padding-inline: var(--gutter-third) var(--gutter-half);
   opacity: .875;
   font-size: var(--font-x-small);
-  line-height: 1.333;
+  line-height: var(--font-line-height-tight);
+
+  @media (width < 500px) {
+    padding-inline: var(--gutter-third) !important;
+  }
 
   @media (hover: none) or (pointer: coarse) {
     /* display: none; */
@@ -144,11 +149,17 @@
 }
 
 .episode--title {
-  margin-block: 2px -5px;
+  margin-block: 1rem 4px;
+  line-height: var(--font-line-height-xx-tight);
+  text-wrap: auto;
+}
+
+.episode-subheading {
+  margin-block: -1px 0;
 }
 
 .episode--meta {
-  margin-top: .4em;
+  margin-top: .6em;
 }
 
 .episode--content {
@@ -165,7 +176,11 @@
   padding: var(--space-1);
   background-color: var(--color-warning);
   color: var(--color-bg);
-  margin-block: 1.5rem -.875rem;
+  margin-block: 1.5rem -15px;
+
+  @media (width < 1075px) {
+    margin-top: 1rem;
+  }
 }
 
 .episode--transcript {

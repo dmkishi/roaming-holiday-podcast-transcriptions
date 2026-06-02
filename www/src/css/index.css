@@ -31,6 +31,10 @@
   aspect-ratio: 1;
 }
 
+.episode-card--heading {
+  line-height: var(--font-line-height-x-tight);
+}
+
 .episode-card--title-link {
   text-decoration: none;
 

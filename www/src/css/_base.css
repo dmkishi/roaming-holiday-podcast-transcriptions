@@ -4,6 +4,8 @@
   --max-width: 700px;
 
   --gutter: 1.5rem;
+  --gutter-half: calc(var(--gutter) / 2);
+  --gutter-third: calc(var(--gutter) / 3);
   --space-1: 1rem;
   --space-2: 2rem;
   --click-offset: .75px;
@@ -21,6 +23,9 @@
   --font-timecode: ui-monospace, 'SF Mono', monospace;
   --font-line-height-regular: 1.5;
   --font-line-height-tighter: 1.45;
+  --font-line-height-tight: 1.333;
+  --font-line-height-x-tight: 1.25;
+  --font-line-height-xx-tight: 1.2;
 
   --color-bg: #f0ead6;
   --color-black: #1c1917;
@@ -40,10 +45,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--gutter);
   margin-block: var(--space-1);
   font-size: var(--font-base);
   color: var(--color-black);
+
+  @media (width < 500px) {
+    gap: var(--gutter-half);
+  }
 }
 
 main {
