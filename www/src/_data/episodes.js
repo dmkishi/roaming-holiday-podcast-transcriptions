@@ -1,6 +1,10 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
+/**
+ * @typedef {import('../../../lib/build-www/types.js').SiteEpisode} SiteEpisode
+ */
+
 const EPISODES_DIR = resolve(import.meta.dirname, '../_episodes');
 
 /**
@@ -18,9 +22,17 @@ export default function loadEpisodes() {
   }
 
   return files
-    .map((f) => {
-      const episode = JSON.parse(readFileSync(join(EPISODES_DIR, f), 'utf8'));
-      return { ...episode, url: `/episodes/${episode.episodeNumber}.html` };
+    .map((file) => {
+      const json = readFileSync(join(EPISODES_DIR, file), 'utf8');
+
+      // JSON.parse is `any` by design; this is the one unavoidable typed seam.
+      // eslint-disable-next-line typescript/no-unsafe-type-assertion
+      const episode = /** @type {SiteEpisode} */ (JSON.parse(json));
+
+      return {
+        ...episode,
+        url: `/episodes/${episode.episodeNumber}.html`,
+      };
     })
     .toSorted((a, b) => a.episodeNumber - b.episodeNumber);
 }
