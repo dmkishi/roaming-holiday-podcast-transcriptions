@@ -112,12 +112,14 @@ a {
   position: relative;
   top: calc(var(--unit) * -5);
   display: inline-block;
+  min-width: 1.75em;
   margin-right: var(--unit);
   border: var(--unit) solid black;
   border-radius: calc(var(--unit) * 2);
   padding: calc(var(--unit) * 3) calc(var(--unit) * 3) calc(var(--unit) * 2.5);
   font-size: 50%;
   line-height: 1;
+  text-align: center;
 }
 
 .c-episode-meta {
