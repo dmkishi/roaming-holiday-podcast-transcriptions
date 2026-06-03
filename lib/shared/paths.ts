@@ -17,6 +17,9 @@ export const SITE_EPISODES_DIR = resolve(SITE_DIR, '_episodes');
 export const SITE_IMG_DIR = resolve(SITE_DIR, 'img');
 export const SITE_EPISODES_IMG_DIR = resolve(SITE_IMG_DIR, 'episodes');
 
+export const SITE_DIST_DIR = resolve(ROOT, 'www/dist');
+export const SITE_DIST_EPISODES_DIR = resolve(SITE_DIST_DIR, 'episodes');
+
 export function toRelative(absolutePath: string): string {
   return relative(ROOT, absolutePath);
 }

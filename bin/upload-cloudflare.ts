@@ -1,10 +1,8 @@
-import { readFileSync, statSync } from 'node:fs';
-import { basename } from 'node:path';
-import {
-  paths, hasMetadata, hasMarkdown, listEpisodeNumbers, readMetadata,
-} from '@lib/shared/artifacts.js';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { basename, join } from 'node:path';
+import { hasMetadata, readMetadata } from '@lib/shared/artifacts.js';
 import { loadSupplements } from '@lib/shared/supplements.js';
-import { toRelative } from '@lib/shared/paths.js';
+import { SITE_DIST_EPISODES_DIR, toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
 import { pluralize } from '@lib/shared/strings.js';
 import { MAX_ITEM_BYTES } from '@lib/config/cloudflare.js';
@@ -28,13 +26,29 @@ const env = envResult.env;
 // =============================================================================
 // Resolve episode set
 // =============================================================================
+const markdownPathFor = (n: number): string => join(SITE_DIST_EPISODES_DIR, `${n}.md`);
+
 let episodeNumbers: number[];
 let isAll = false;
 if (opts.episodeNums === 'all') {
   isAll = true;
-  episodeNumbers = listEpisodeNumbers().filter((n) => hasMarkdown(n));
+  episodeNumbers = listSiteEpisodeNumbers();
 } else {
   episodeNumbers = [...opts.episodeNums].toSorted((a, b) => a - b);
+}
+
+/**
+ * Returns sorted episode numbers from the www build's `episodes/<n>.md` files.
+ */
+function listSiteEpisodeNumbers(): number[] {
+  if (!existsSync(SITE_DIST_EPISODES_DIR)) return [];
+  const numbers: number[] = [];
+  for (const file of readdirSync(SITE_DIST_EPISODES_DIR)) {
+    if (!file.endsWith('.md')) continue;
+    const n = Number(file.slice(0, -'.md'.length));
+    if (Number.isInteger(n) && n > 0) numbers.push(n);
+  }
+  return numbers.toSorted((a, b) => a - b);
 }
 
 if (episodeNumbers.length === 0) {
@@ -75,7 +89,8 @@ let skipped = 0;
 let failed = 0;
 
 for (const n of episodeNumbers) {
-  if (!hasMarkdown(n)) {
+  const markdownPath = markdownPathFor(n);
+  if (!existsSync(markdownPath)) {
     printLog.warn(`#${n}: No transcript Markdown - skipping`);
     skipped += 1;
     continue;
@@ -86,7 +101,6 @@ for (const n of episodeNumbers) {
     continue;
   }
 
-  const markdownPath = paths(n).markdown;
   const key = basename(markdownPath);
 
   if (!opts.force && existingKeys.has(key)) {

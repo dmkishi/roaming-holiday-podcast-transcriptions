@@ -10,11 +10,10 @@ import {
   type ToTranscribe, type Transcript,
 } from '@lib/transcribe-episodes/transcript.js';
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
-import { buildMarkdown } from '@lib/transcribe-episodes/markdown.js';
 import {
   paths, hasMetadata, readMetadata, writeMetadata,
   hasTranscript, hasGaps, hasFade, hasMp3,
-  hasParagraph, readParagraph, writeParagraph, writeMarkdown,
+  hasParagraph, writeParagraph,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
@@ -25,13 +24,9 @@ import { RSS_FEED_URL } from '@lib/config/rss.js';
 // Parse CLI args
 // =============================================================================
 const opts = getTranscribeCliArgs(process.argv);
-const { runTranscript, runParagraph, runMarkdown } = opts.runPipeline;
+const { runTranscript, runParagraph } = opts.runPipeline;
 
-let modeLabel: string;
-if (runTranscript) modeLabel = 'full pipeline';
-else if (runParagraph) modeLabel = 'paragraph only';
-else modeLabel = 'markdown only';
-
+const modeLabel = runTranscript ? 'full pipeline' : 'paragraph only';
 const banner = [
   `Transcribe ${pluralize(opts.episodeNums.size, 'episode')} (${modeLabel}): ${[...opts.episodeNums].join(', ')}`,
 ];
@@ -292,24 +287,6 @@ if (runParagraph) {
       `  Groups:     ${formatNumber(stats.paragraphGroups)}`,
       `  Fades:      ${formatNumber(stats.fades)}`,
     ]);
-  }
-  print.emptyLine();
-}
-
-// =============================================================================
-// Build Markdown transcripts (for LLMs)
-// =============================================================================
-if (runMarkdown) {
-  print.info('Building Markdown transcripts...');
-  for (const episodeNumber of episodeNumbers) {
-    if (!hasParagraph(episodeNumber)) {
-      printLog.warn(`#${episodeNumber}: No paragraph sidecar - skipping`);
-      continue;
-    }
-    const { paragraphGroups } = readParagraph(episodeNumber);
-    const markdown = buildMarkdown(readMetadata(episodeNumber), paragraphGroups);
-    const markdownPath = writeMarkdown(episodeNumber, markdown);
-    printLog.info(`#${episodeNumber}: Saved "${toRelative(markdownPath)}"`);
   }
   print.emptyLine();
 }
