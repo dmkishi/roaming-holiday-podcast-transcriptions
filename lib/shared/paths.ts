@@ -1,6 +1,6 @@
 import { relative, resolve } from 'node:path';
 
-const ROOT = resolve(import.meta.dirname, '..', '..');
+export const ROOT = resolve(import.meta.dirname, '..', '..');
 export const TMP_DIR = '/tmp';
 
 export const LOG_PATH = resolve(ROOT, 'LOG');
