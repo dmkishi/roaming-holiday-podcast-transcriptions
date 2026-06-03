@@ -2,7 +2,7 @@
  * Shows a timestamp tooltip that follows the cursor while hovering transcript
  * words.
  */
-(function() {
+(function initTimeline() {
   'use strict';
 
   const transcript = document.querySelector<HTMLElement>('[data-transcript]');

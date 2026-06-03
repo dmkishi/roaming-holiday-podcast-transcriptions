@@ -9,7 +9,7 @@ const EPISODES_DIR = resolve(import.meta.dirname, '../_episodes');
  *
  * @returns {object[]} Episode objects sorted by episodeNumber.
  */
-export default function() {
+export default function loadEpisodes() {
   let files;
   try {
     files = readdirSync(EPISODES_DIR).filter((f) => f.endsWith('.json'));

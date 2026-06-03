@@ -73,7 +73,7 @@ function setupCss(eleventyConfig) {
   });
 }
 
-export default function(eleventyConfig) {
+export default function configureEleventy(eleventyConfig) {
   setupCss(eleventyConfig);
 
   // eleventyConfig.addPassthroughCopy({ 'www/src/img/*.svg': 'img' });

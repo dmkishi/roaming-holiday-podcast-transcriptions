@@ -1,9 +1,10 @@
-(function() {
+(function initYouTube() {
   'use strict';
 
   const videoElement = document.querySelector('.js-video');
   if (!(videoElement instanceof HTMLElement)) return;
 
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   let enableMiniPlayerToggling = (): void => {};
   initMiniPlayer(videoElement);
   initPlayer(videoElement);
