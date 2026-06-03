@@ -8,29 +8,30 @@ Install
 ```sh
 pnpm install
 
-# 1. Create a Python venv (environment manager) at `.venv`.
-# 2. pip install into it.
-#
-# Packages:
-#   - Silero VAD is used to split audio files into chunks before transcription.
-#   - Essentia is used to detect audio fades.
+# Create a Python venv (environment manager) at `.venv`.
 python3 -m venv .venv
+
+# pip install packages into the venv:
+#
+# - whisper-timestamped transcribes with word-level timestamps and confidence.
+# - silero-vad detects audio and speech gaps for chunking and paragraphing.
+# - essentia detects audio fades.
 .venv/bin/pip install whisper-timestamped silero-vad essentia
 
 # ffmpeg is required for audio decoding and chunking.
 brew install ffmpeg
 ```
 
-Usage
+Transcribe
 --------------------------------------------------------------------------------
-### Transcribe
 Runs the full pipeline for an episode from download to paragraph sidecar. Reads
 the RSS feed, downloads the MP3 to `/tmp/`, transcribes it using Whisper, and
 writes a metadata sidecar and transcript to `episodes/`.
 
+### Usage
 ```sh
-# Transcribe a single or multiple episodes
-pnpm transcribe 101 [102 103]
+# Transcribe a single episode, multiple episodes, or a range of episodes.
+pnpm transcribe 101 [102 103] [120-129]
 
 # Select Whisper model (default: `base`)
 pnpm transcribe 101 --model small
@@ -45,26 +46,47 @@ pnpm transcribe 101 --only-paragraphs  # Rebuild paragraphs + groups only
 # transcribe). `--force-rss` is isolated: refetching the feed only refreshes
 # metadata. Fade runs in the paragraph phase, so `--force-fade` is valid in
 # `--only-paragraphs` mode; `--force-download` also cascades into fade.
-pnpm transcribe 101 --force-rss         # Bypass the RSS feed ETag cache
+pnpm transcribe 101 --force-rss         # Re-download the RSS feed
 pnpm transcribe 101 --force-download    # Re-download the MP3
-pnpm transcribe 101 --force-gaps        # Re-run VAD
+pnpm transcribe 101 --force-gaps        # Re-run gap detection
 pnpm transcribe 101 --force-fade        # Re-run fade detection
 pnpm transcribe 101 --force-transcribe  # Re-generate the transcript
 pnpm transcribe 101 --force-all
 ```
 
-### Build Site
+### Outputs
+- `LOG` Per-run log capturing CLI output and errors.
+- `episodes/`
+  - `N.metadata.json` Episode metadata from the RSS feed.
+  - `N.audio-gaps.json` Silence gaps in audio.
+  - `N.transcript.json` Raw JSON output from whisper-timestamped.
+  - `N.audio-fade.json` Fade-out/fade-in pairs in audio.
+  - `N.transcript.paragraph.json` Transcript segmented into paragraphs and
+    paragraph groups with word-level timing.
+- `/tmp/`
+  - `N.mp3`
+  - `N.chunk-NN.mp3`
+  - `N.chunk-NN.mp3.words.json`
+  - `N.pcm`
+
+Build
+--------------------------------------------------------------------------------
 Builds the static site from the transcription output. Reads episode metadata
-and transcripts from `episodes/` and compiles them into a Eleventy site in
+and transcripts from `episodes/` and compiles them into an Eleventy site in
 `www/`.
 
+### Usage
 ```sh
 # Build the site data and the static site using the transcription output
-pnpm www:build
+pnpm build-www
 
 # Serve the site locally and watch
-pnpm www:dev
+pnpm dev-www
 ```
+
+Upload Cloudflare
+--------------------------------------------------------------------------------
+Upload episode markdown files to Cloudflare.
 
 Models
 --------------------------------------------------------------------------------
@@ -81,25 +103,3 @@ Speed" figures below are from an Apple M1 machine transcribing a 1 hour episode.
 | large-v3 | 1.5 B  | ~3.0 GB |  ?          | ?               |
 
 *Default model
-
-Output Files
---------------------------------------------------------------------------------
-All output goes to `episodes/`.
-
-- **Transcription**: `0179 [2026-03-18] Approaching Yinghanling in insane heat--base.json`
-  Whisper's JSON output with full text, segment timestamps, and per-segment
-  confidence scores.
-
-- **Metadata sidecar**: `0179 [2026-03-18] Approaching Yinghanling in insane heat.meta.json`
-  Episode metadata from the RSS feed (title, date, description, duration,
-  image URL, MP3 URL). Written before transcription starts.
-
-- **Run log**: `transcribe-20260320T120000.log`
-  Per-run log capturing all CLI output, progress, and errors.
-
-MP3 Caching
---------------------------------------------------------------------------------
-MP3s are downloaded to `/tmp/` (e.g., `/tmp/RH0179.mp3`). If a file already
-exists with matching size, the download is skipped. This avoids re-downloading
-when re-transcribing with a different model. Files in `/tmp/` are cleaned up by
-the OS.
