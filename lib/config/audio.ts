@@ -54,11 +54,11 @@ export const FADE_CUTOFF_LOW = .2;
  * Minimum fade duration (seconds) to keep. Shorter fades are usually speech
  * dynamics, not audio fades, and are discarded.
  */
-export const FADE_MIN_LENGTH_SECONDS = 2;
+export const FADE_MIN_LENGTH_SECONDS = 4;
 
 /**
  * The longest silence (in seconds) allowed between a fade-out and the following
  * fade-in for them to be considered a pair. Crossfades (negative gaps) are
  * always paired regardless of length.
  */
-export const FADE_PAIR_MAX_GAP_SECONDS = 2;
+export const FADE_PAIR_MAX_GAP_SECONDS = 30;

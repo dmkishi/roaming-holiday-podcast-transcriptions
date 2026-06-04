@@ -29,10 +29,7 @@ export default function loadEpisodes() {
       // eslint-disable-next-line typescript/no-unsafe-type-assertion
       const episode = /** @type {SiteEpisode} */ (JSON.parse(json));
 
-      return {
-        ...episode,
-        url: `/episodes/${episode.episodeNumber}.html`,
-      };
+      return episode;
     })
     .toSorted((a, b) => a.episodeNumber - b.episodeNumber);
 }

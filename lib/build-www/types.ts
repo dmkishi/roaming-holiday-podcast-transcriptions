@@ -13,6 +13,8 @@ export interface TranscriptSegment {
   timelineMarker?: boolean;
 }
 
+export type JsonLd = Record<string, unknown>;
+
 export interface SiteEpisode {
   episodeNumber: number;
   title: string;
@@ -26,6 +28,8 @@ export interface SiteEpisode {
   location?: string;
   youtubeUrl?: string;
   isInterlude?: boolean;
+  url: string;
+  jsonLd: JsonLd[];
 }
 
 // =============================================================================

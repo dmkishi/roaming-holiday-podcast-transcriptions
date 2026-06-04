@@ -17,6 +17,7 @@ LOG
 episodes/*
 !episodes/.gitkeep
 www/dist/
-www/src/_data/stats.json
+www/src/_data/*.json
+!www/src/_data/tsconfig.json
 www/src/_episodes/
 www/src/img/episodes/

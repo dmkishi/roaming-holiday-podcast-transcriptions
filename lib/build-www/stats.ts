@@ -8,6 +8,7 @@ import type {
   EpisodeRateStat,
 } from '@lib/build-www/types.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
+import { episodeUrl } from '@lib/shared/paths.js';
 
 /**
  * Fetch the RSS feed and combine it with built artifacts to produce aggregate
@@ -99,7 +100,7 @@ function toEpisodeStat(item: RssItem): EpisodeStat {
     title: item.title,
     pubDate: new Date(item.pubDate).toISOString(),
     durationSeconds: parseDuration(item['itunes:duration']).seconds,
-    url: `/episodes/${episodeNumber}.html`,
+    url: episodeUrl(episodeNumber),
   };
 }
 
@@ -113,7 +114,7 @@ function toEpisodeWordStat(
     title: metadata.title,
     pubDate: metadata.pubDate,
     durationSeconds: metadata.duration.seconds,
-    url: `/episodes/${metadata.episodeNumber}.html`,
+    url: episodeUrl(metadata.episodeNumber),
     wordCount,
   };
 }

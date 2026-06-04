@@ -9,6 +9,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { jsonLdScriptContent } from './lib/build-www/jsonLdScriptContent.ts';
 
 const CSS_DIR = 'www/src/css';
 
@@ -231,6 +232,17 @@ export default function configureEleventy(eleventyConfig) {
   eleventyConfig.addFilter('youtubeId', (url) =>
     new URL(url).searchParams.get('v') ?? ''
   );
+
+  /**
+   * Serialize a JSON-LD object into escaped JSON for embedding inside a
+   * `<script type="application/ld+json">` element. Pipe through `safe` so
+   * Nunjucks emits the JSON verbatim rather than HTML-escaping it.
+   * @example
+   * <script type="application/ld+json">
+   *   {{- ldObject | jsonLdScriptContent | safe -}}
+   * </script>
+   */
+  eleventyConfig.addFilter('jsonLdScriptContent', jsonLdScriptContent);
 
   return {
     dir: {

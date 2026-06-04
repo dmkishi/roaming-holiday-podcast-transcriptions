@@ -20,6 +20,10 @@ export const SITE_EPISODES_IMG_DIR = resolve(SITE_IMG_DIR, 'episodes');
 export const SITE_DIST_DIR = resolve(ROOT, 'www/dist');
 export const SITE_DIST_EPISODES_DIR = resolve(SITE_DIST_DIR, 'episodes');
 
+export function episodeUrl(episodeNumber: number): string {
+  return `/episodes/${episodeNumber}.html`;
+}
+
 export function toRelative(absolutePath: string): string {
   return relative(ROOT, absolutePath);
 }

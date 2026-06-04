@@ -2,13 +2,15 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
 import { downloadImage } from '@lib/build-www/images.js';
+import { episodeLd, breadcrumbLd, seriesLd } from '@lib/build-www/jsonLd.js';
 import { loadSupplements } from '@lib/shared/supplements.js';
 import { collectStats } from '@lib/build-www/stats.js';
 import { addTimelineMarkers } from '@lib/build-www/timeline.js';
 import type { SiteEpisode } from '@lib/build-www/types.js';
-import { SITE_DATA_DIR, SITE_EPISODES_DIR, toRelative } from '@lib/shared/paths.js';
+import { SITE_DATA_DIR, SITE_EPISODES_DIR, episodeUrl, toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
 import { formatEpisodeNumber, pluralize, toPrettyJson } from '@lib/shared/strings.js';
+import { SITE } from '@lib/config/site.js';
 
 // =============================================================================
 // Discover episodes
@@ -50,7 +52,7 @@ for (const { metadata, paragraph } of artifacts) {
   const paragraphGroups = addTimelineMarkers(paragraph.paragraphGroups);
   const supplement = supplements.get(ep);
 
-  const episode: SiteEpisode = {
+  const fields = {
     episodeNumber: ep,
     title: metadata.title,
     description: metadata.description,
@@ -63,7 +65,10 @@ for (const { metadata, paragraph } of artifacts) {
     location: supplement?.location,
     youtubeUrl: supplement?.youtube,
     isInterlude: supplement?.isInterlude,
+    url: episodeUrl(ep),
   };
+  const jsonLd = [episodeLd(fields), breadcrumbLd(fields)];
+  const episode: SiteEpisode = { ...fields, jsonLd };
 
   const filepath = join(SITE_EPISODES_DIR, `${formatEpisodeNumber(ep)}.json`);
   writeFileSync(filepath, toPrettyJson(episode));
@@ -73,6 +78,15 @@ for (const { metadata, paragraph } of artifacts) {
 
 print.emptyLine();
 printLog.info(`Built data for ${built} ${pluralize(built, 'episode')}`);
+
+// =============================================================================
+// Build site-level JSON-LD
+// =============================================================================
+print.emptyLine();
+print.info('Building site-level JSON-LD...');
+const seriesJsonLdPath = join(SITE_DATA_DIR, 'seriesJsonLd.json');
+writeFileSync(seriesJsonLdPath, toPrettyJson(seriesLd(SITE)));
+printLog.info(`Saved "${toRelative(seriesJsonLdPath)}"`);
 
 // =============================================================================
 // Collect and write stats

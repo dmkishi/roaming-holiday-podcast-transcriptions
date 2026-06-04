@@ -48,5 +48,17 @@
         <a href="#" class="site-footer--top-link no-highlight">Return to top</a>
       </nav>
     </footer>
+
+    {% if isIndexPage %}
+      <script type="application/ld+json">
+        {{- seriesJsonLd | jsonLdScriptContent | safe -}}
+      </script>
+    {% elif episode %}
+      {% for block in episode.jsonLd %}
+        <script type="application/ld+json">
+          {{- block | jsonLdScriptContent | safe -}}
+        </script>
+      {% endfor %}
+    {% endif %}
   </body>
 </html>
