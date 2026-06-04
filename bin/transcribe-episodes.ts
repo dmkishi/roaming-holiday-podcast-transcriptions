@@ -12,8 +12,7 @@ import {
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import {
   paths, hasRss, readRss, writeRss,
-  hasTranscript, hasGaps, hasFade, hasMp3,
-  hasParagraph, writeParagraph,
+  hasMp3, hasGaps, hasTranscript, hasFade, hasParagraph, writeParagraph,
 } from '@lib/shared/artifacts.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
