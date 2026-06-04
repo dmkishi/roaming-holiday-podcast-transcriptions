@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const MetadataFileSchema = z.object({
+export const RssFileSchema = z.object({
   episodeNumber: z.number().int().positive(),
   title: z.string(),
   description: z.string(),

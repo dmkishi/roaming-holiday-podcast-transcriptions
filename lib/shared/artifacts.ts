@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join } from 'node:path';
 import { OUTPUTS_DIR, TMP_DIR } from '@lib/shared/paths.js';
 import {
-  MetadataFileSchema,
+  RssFileSchema,
   GapsFileSchema,
   FadeFileSchema,
   TranscriptFileSchema,
@@ -11,14 +11,14 @@ import {
 } from '@lib/shared/schemas.js';
 import { formatEpisodeNumber, toPrettyJson } from '@lib/shared/strings.js';
 
-export type MetadataFile = z.infer<typeof MetadataFileSchema>;
+export type RssFile = z.infer<typeof RssFileSchema>;
 export type GapsFile = z.infer<typeof GapsFileSchema>;
 export type FadeFile = z.infer<typeof FadeFileSchema>;
 export type TranscriptFile = z.infer<typeof TranscriptFileSchema>;
 export type ParagraphFile = z.infer<typeof ParagraphFileSchema>;
 
 const SUFFIX = {
-  metadata: '.metadata.json',
+  rss: '.rss.json',
   gaps: '.audio-gaps.json',
   fade: '.audio-fade.json',
   transcript: '.transcript.json',
@@ -34,7 +34,7 @@ function mp3PathFor(episodeNumber: number): string {
 }
 
 export function paths(episodeNumber: number): {
-  metadata: string;
+  rss: string;
   mp3: string;
   gaps: string;
   fade: string;
@@ -42,7 +42,7 @@ export function paths(episodeNumber: number): {
   paragraph: string;
 } {
   return {
-    metadata: pathFor(episodeNumber, SUFFIX.metadata),
+    rss: pathFor(episodeNumber, SUFFIX.rss),
     mp3: mp3PathFor(episodeNumber),
     gaps: pathFor(episodeNumber, SUFFIX.gaps),
     fade: pathFor(episodeNumber, SUFFIX.fade),
@@ -51,7 +51,7 @@ export function paths(episodeNumber: number): {
   };
 }
 
-export const hasMetadata = (n: number): boolean => existsSync(pathFor(n, SUFFIX.metadata));
+export const hasRss = (n: number): boolean => existsSync(pathFor(n, SUFFIX.rss));
 export const hasMp3 = (n: number): boolean => existsSync(mp3PathFor(n));
 export const hasGaps = (n: number): boolean => existsSync(pathFor(n, SUFFIX.gaps));
 export const hasFade = (n: number): boolean => existsSync(pathFor(n, SUFFIX.fade));
@@ -68,8 +68,8 @@ function writeJson<S extends z.ZodType>(path: string, schema: S, data: z.infer<S
   return path;
 }
 
-export const readMetadata = (n: number): MetadataFile =>
-  readJson(pathFor(n, SUFFIX.metadata), MetadataFileSchema);
+export const readRss = (n: number): RssFile =>
+  readJson(pathFor(n, SUFFIX.rss), RssFileSchema);
 export const readGaps = (n: number): GapsFile =>
   readJson(pathFor(n, SUFFIX.gaps), GapsFileSchema);
 export const readFade = (n: number): FadeFile =>
@@ -79,8 +79,8 @@ export const readTranscript = (n: number): TranscriptFile =>
 export const readParagraph = (n: number): ParagraphFile =>
   readJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema);
 
-export const writeMetadata = (n: number, data: MetadataFile): string =>
-  writeJson(pathFor(n, SUFFIX.metadata), MetadataFileSchema, data);
+export const writeRss = (n: number, data: RssFile): string =>
+  writeJson(pathFor(n, SUFFIX.rss), RssFileSchema, data);
 export const writeGaps = (n: number, data: GapsFile): string =>
   writeJson(pathFor(n, SUFFIX.gaps), GapsFileSchema, data);
 export const writeFade = (n: number, data: FadeFile): string =>
@@ -91,14 +91,14 @@ export const writeParagraph = (n: number, data: ParagraphFile): string =>
   writeJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema, data);
 
 /**
- * Returns sorted episode numbers derived from `*.metadata.json` filenames in
- * the outputs directory.
+ * Returns sorted episode numbers derived from `*.rss.json` filenames in the
+ * outputs directory.
  */
 export function listEpisodeNumbers(): number[] {
   const numbers: number[] = [];
   for (const file of readdirSync(OUTPUTS_DIR)) {
-    if (!file.endsWith(SUFFIX.metadata)) continue;
-    const prefix = file.slice(0, -SUFFIX.metadata.length);
+    if (!file.endsWith(SUFFIX.rss)) continue;
+    const prefix = file.slice(0, -SUFFIX.rss.length);
     const n = Number(prefix);
     if (Number.isInteger(n) && n > 0) numbers.push(n);
   }

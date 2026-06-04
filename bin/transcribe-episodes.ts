@@ -11,7 +11,7 @@ import {
 } from '@lib/transcribe-episodes/transcript.js';
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import {
-  paths, hasMetadata, readMetadata, writeMetadata,
+  paths, hasRss, readRss, writeRss,
   hasTranscript, hasGaps, hasFade, hasMp3,
   hasParagraph, writeParagraph,
 } from '@lib/shared/artifacts.js';
@@ -52,8 +52,8 @@ function loadFromDisk(requires: 'transcript' | 'paragraph'): number[] {
       printLog.warn(`#${episodeNumber}: No ${requires} found - skipping`);
       continue;
     }
-    if (!hasMetadata(episodeNumber)) {
-      printLog.warn(`#${episodeNumber}: No metadata found - skipping`);
+    if (!hasRss(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No RSS data found - skipping`);
       continue;
     }
 
@@ -86,7 +86,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   printLog.info(`RSS feed: ${feed.items.length} items (${pc.blue(feed.status)})`);
 
   // ===========================================================================
-  // Write episode metadata file(s) via RSS feed
+  // Write episode RSS sidecar file(s) from the RSS feed
   // ===========================================================================
   const episodes = findEpisodes(feed.items, opts.episodeNums);
   const foundEpisodeNums = episodes.map((e) => e.episodeNumber);
@@ -106,7 +106,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   }
 
   for (const episode of episodes) {
-    const filepath = writeMetadata(episode.episodeNumber, {
+    const filepath = writeRss(episode.episodeNumber, {
       ...episode,
       pubDate: episode.pubDate.toISOString(),
     });
@@ -249,7 +249,7 @@ if (runParagraph) {
       const mp3Path = paths(episodeNumber).mp3;
 
       if (!hasMp3(episodeNumber)) {
-        const { mp3Url } = readMetadata(episodeNumber);
+        const { mp3Url } = readRss(episodeNumber);
         const mp3 = await downloadMp3(mp3Url, mp3Path, false);
         if (mp3.status === 'failed') {
           printLog.warn(

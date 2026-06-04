@@ -40,10 +40,10 @@ print.info('Building episode data...');
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
 let built = 0;
 const supplements = loadSupplements();
-for (const { metadata, paragraph } of artifacts) {
-  const ep = metadata.episodeNumber;
+for (const { rss, paragraph } of artifacts) {
+  const ep = rss.episodeNumber;
 
-  const image = await downloadImage(ep, metadata.imageUrl);
+  const image = await downloadImage(ep, rss.imageUrl);
   if (image.status === 'failed') {
     printLog.warn(`#${ep}: Image download failed - ${image.error}`);
   }
@@ -61,12 +61,12 @@ for (const { metadata, paragraph } of artifacts) {
       youtubeUrl: supplement?.youtube,
     },
     rss: {
-      title: metadata.title,
-      description: metadata.description,
-      mp3Url: metadata.mp3Url,
-      duration: metadata.duration,
-      pubDate: metadata.pubDate,
-      imageUrl: metadata.imageUrl,
+      title: rss.title,
+      description: rss.description,
+      mp3Url: rss.mp3Url,
+      duration: rss.duration,
+      pubDate: rss.pubDate,
+      imageUrl: rss.imageUrl,
     },
     paragraphGroups,
   };

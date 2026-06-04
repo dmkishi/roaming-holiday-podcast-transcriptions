@@ -26,7 +26,7 @@ Transcribe
 --------------------------------------------------------------------------------
 Runs the full pipeline for an episode from download to paragraph sidecar. Reads
 the RSS feed, downloads the MP3 to `/tmp/`, transcribes it using Whisper, and
-writes a metadata sidecar and transcript to `episodes/`.
+writes an RSS sidecar and transcript to `episodes/`.
 
 ### Usage
 ```sh
@@ -57,7 +57,7 @@ pnpm transcribe 101 --force-all
 ### Outputs
 - `LOG` Per-run log capturing CLI output and errors.
 - `episodes/`
-  - `N.metadata.json` Episode metadata from the RSS feed.
+  - `N.rss.json` Episode data from the RSS feed.
   - `N.audio-gaps.json` Silence gaps in audio.
   - `N.transcript.json` Raw JSON output from whisper-timestamped.
   - `N.audio-fade.json` Fade-out/fade-in pairs in audio.

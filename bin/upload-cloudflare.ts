@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { hasMetadata, readMetadata } from '@lib/shared/artifacts.js';
+import { hasRss, readRss } from '@lib/shared/artifacts.js';
 import { loadSupplements } from '@lib/shared/supplements.js';
 import { SITE_DIST_EPISODES_DIR, toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
@@ -95,8 +95,8 @@ for (const n of episodeNumbers) {
     skipped += 1;
     continue;
   }
-  if (!hasMetadata(n)) {
-    printLog.warn(`#${n}: No metadata - skipping`);
+  if (!hasRss(n)) {
+    printLog.warn(`#${n}: No RSS data - skipping`);
     skipped += 1;
     continue;
   }
@@ -116,7 +116,7 @@ for (const n of episodeNumbers) {
     continue;
   }
 
-  const metadata = buildItemMetadata(readMetadata(n), supplements.get(n));
+  const metadata = buildItemMetadata(readRss(n), supplements.get(n));
   const bytes = readFileSync(markdownPath);
 
   const res = await uploadItem(env, key, bytes, metadata);

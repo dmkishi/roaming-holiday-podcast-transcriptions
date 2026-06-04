@@ -1,11 +1,11 @@
 import {
-  listEpisodeNumbers, readMetadata,
+  listEpisodeNumbers, readRss,
   hasTranscript, hasParagraph, readParagraph,
-  type MetadataFile, type ParagraphFile,
+  type RssFile, type ParagraphFile,
 } from '@lib/shared/artifacts.js';
 
 export interface EpisodeArtifacts {
-  metadata: MetadataFile;
+  rss: RssFile;
   paragraph: ParagraphFile;
 }
 
@@ -14,17 +14,16 @@ export type DiscoveryResult =
   | { ok: false; episodeNumber: number; reason: string };
 
 /**
- * Scan the outputs directory and return a result per metadata file. Episodes
- * missing a transcript or paragraph sidecar are returned as `{ ok: false }`
- * entries so the caller can report the skip with a reason. The paragraph
- * sidecar carries the grouped paragraphs; its presence signals a complete
- * pipeline run.
+ * Scan the outputs directory and return a result per RSS file. Episodes missing
+ * a transcript or paragraph sidecar are returned as `{ ok: false }` entries so
+ * the caller can report the skip with a reason. The paragraph sidecar carries
+ * the grouped paragraphs; its presence signals a complete pipeline run.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
   const results: DiscoveryResult[] = [];
 
   for (const episodeNumber of listEpisodeNumbers()) {
-    const metadata = readMetadata(episodeNumber);
+    const rss = readRss(episodeNumber);
 
     if (!hasTranscript(episodeNumber)) {
       results.push({ ok: false, episodeNumber, reason: 'No transcript found' });
@@ -43,7 +42,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
     results.push({
       ok: true,
       artifacts: {
-        metadata,
+        rss,
         paragraph,
       },
     });

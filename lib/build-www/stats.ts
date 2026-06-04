@@ -108,13 +108,13 @@ function toEpisodeWordStat(
   artifacts: EpisodeArtifacts,
   wordCount: number,
 ): EpisodeWordStat {
-  const { metadata } = artifacts;
+  const { rss } = artifacts;
   return {
-    episodeNumber: metadata.episodeNumber,
-    title: metadata.title,
-    pubDate: metadata.pubDate,
-    durationSeconds: metadata.duration.seconds,
-    url: episodeUrl(metadata.episodeNumber),
+    episodeNumber: rss.episodeNumber,
+    title: rss.title,
+    pubDate: rss.pubDate,
+    durationSeconds: rss.duration.seconds,
+    url: episodeUrl(rss.episodeNumber),
     wordCount,
   };
 }
