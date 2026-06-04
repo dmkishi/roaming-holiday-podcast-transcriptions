@@ -17,19 +17,19 @@ export type JsonLd = Record<string, unknown>;
 
 export interface SiteEpisode {
   episodeNumber: number;
-  title: string;
-  description: string;
-  pubDate: string;
-  duration: Duration;
-  imageUrl: string;
-  mp3Url: string;
+  url: string;
   imagePath: string;
-  paragraphGroups: TranscriptSegment[][][];
+  isInterlude?: boolean;
   location?: string;
   youtubeUrl?: string;
-  isInterlude?: boolean;
-  url: string;
+  title: string;
+  description: string;
+  mp3Url: string;
+  duration: Duration;
+  pubDate: string;
+  imageUrl: string;
   jsonLd: JsonLd[];
+  paragraphGroups: TranscriptSegment[][][];
 }
 
 // =============================================================================

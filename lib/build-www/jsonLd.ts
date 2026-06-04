@@ -25,15 +25,15 @@ export function seriesLd(site: Pick<Site, 'descriptionHtml' | 'podcast'>, baseUr
 type EpisodeInput = Pick<
   SiteEpisode,
   | 'episodeNumber'
-  | 'title'
-  | 'description'
-  | 'pubDate'
-  | 'duration'
-  | 'imageUrl'
-  | 'mp3Url'
+  | 'url'
   | 'location'
   | 'youtubeUrl'
-  | 'url'
+  | 'title'
+  | 'description'
+  | 'mp3Url'
+  | 'duration'
+  | 'pubDate'
+  | 'imageUrl'
 >;
 
 /**
