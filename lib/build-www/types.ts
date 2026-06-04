@@ -19,15 +19,19 @@ export interface SiteEpisode {
   episodeNumber: number;
   url: string;
   imagePath: string;
-  isInterlude?: boolean;
-  location?: string;
-  youtubeUrl?: string;
-  title: string;
-  description: string;
-  mp3Url: string;
-  duration: Duration;
-  pubDate: string;
-  imageUrl: string;
+  supplement: {
+    isInterlude?: boolean;
+    location?: string;
+    youtubeUrl?: string;
+  };
+  rss: {
+    title: string;
+    description: string;
+    mp3Url: string;
+    duration: Duration;
+    pubDate: string;
+    imageUrl: string;
+  };
   jsonLd: JsonLd[];
   paragraphGroups: TranscriptSegment[][][];
 }

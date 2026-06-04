@@ -13,12 +13,12 @@ export const data = {
 export function render({ episode }) {
   const frontmatter = stringifyYaml({
     episode_number: episode.episodeNumber,
-    title: episode.title,
-    description: episode.description,
-    pub_date: new Date(episode.pubDate).toISOString().slice(0, 10),
+    title: episode.rss.title,
+    description: episode.rss.description,
+    pub_date: new Date(episode.rss.pubDate).toISOString().slice(0, 10),
   });
 
-  const blocks = [`# ${episode.title}`];
+  const blocks = [`# ${episode.rss.title}`];
   for (const [i, group] of episode.paragraphGroups.entries()) {
     if (i > 0) blocks.push('---');
     for (const paragraph of group) {

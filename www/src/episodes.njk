@@ -12,17 +12,17 @@ pagination:
 permalink: "{{ episode.url }}"
 tags: episode
 eleventyComputed:
-  title: "{{ episode.episodeNumber }}. {{ episode.title }}"
+  title: "{{ episode.episodeNumber }}. {{ episode.rss.title }}"
 ---
 {% from "macros/episodeMeta.njk" import episodeMeta %}
 
 <article class="episode">
   <header>
-    {% if episode.youtubeUrl %}
+    {% if episode.supplement.youtubeUrl %}
       <div class="js-video-sentinel episode--video-container">
         <iframe
           class="episode--video js-video"
-          src="https://www.youtube-nocookie.com/embed/{{ episode.youtubeUrl | youtubeId }}?fs=0&enablejsapi=1"
+          src="https://www.youtube-nocookie.com/embed/{{ episode.supplement.youtubeUrl | youtubeId }}?fs=0&enablejsapi=1"
           title="Episode {{ episode.episodeNumber }}"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -72,10 +72,10 @@ eleventyComputed:
 
     <h1 class="episode--title wrapper">
       <span class="c-episode-number">#{{ episode.episodeNumber }}</span>
-      {{ episode.title }}
+      {{ episode.rss.title }}
     </h1>
     <p class="episode-subheading wrapper">
-      {{- episode.description -}}
+      {{- episode.rss.description -}}
     </p>
     <p class="episode--meta c-episode-meta wrapper">
       {{- episodeMeta(episode) -}}

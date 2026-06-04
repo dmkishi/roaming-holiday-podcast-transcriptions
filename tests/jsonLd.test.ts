@@ -6,18 +6,27 @@ import {
   breadcrumbLd,
 } from '@lib/build-www/jsonLd.js';
 import { jsonLdScriptContent } from '@lib/build-www/jsonLdScriptContent.js';
+import type { SiteEpisode } from '@lib/build-www/types.js';
 
-function makeEpisode(overrides: Record<string, unknown> = {}) {
+function makeEpisode(
+  overrides: {
+    supplement?: SiteEpisode['supplement'];
+    rss?: Partial<SiteEpisode['rss']>;
+  } = {},
+) {
   return {
     episodeNumber: 1,
-    title: 'My first trip to Japan',
-    description: '',
-    pubDate: '2023-09-22T11:42:57.000Z',
-    duration: { seconds: 5_491, timestamp: '1:31:31', human: '1h 31m 31s' },
-    imageUrl: 'https://keithcourage.com/rh/images/rhlogo.jpg',
-    mp3Url: 'https://keithcourage.com/rh/pod/RH0001.mp3',
     url: '/episodes/1.html',
-    ...overrides,
+    supplement: { ...overrides.supplement },
+    rss: {
+      title: 'My first trip to Japan',
+      description: '',
+      pubDate: '2023-09-22T11:42:57.000Z',
+      duration: { seconds: 5_491, timestamp: '1:31:31', human: '1h 31m 31s' },
+      imageUrl: 'https://keithcourage.com/rh/images/rhlogo.jpg',
+      mp3Url: 'https://keithcourage.com/rh/pod/RH0001.mp3',
+      ...overrides.rss,
+    },
   };
 }
 
@@ -87,7 +96,7 @@ describe('episodeLd', () => {
   });
 
   test('uses the supplied description when present', () => {
-    const ld = episodeLd(makeEpisode({ description: 'A real description.' }));
+    const ld = episodeLd(makeEpisode({ rss: { description: 'A real description.' } }));
     expect(ld['description']).toBe('A real description.');
   });
 
@@ -99,7 +108,7 @@ describe('episodeLd', () => {
 
   test('adds a VideoObject derived from youtubeUrl', () => {
     const ld = episodeLd(
-      makeEpisode({ youtubeUrl: 'https://www.youtube.com/watch?v=boEEK4AIt8Y' }),
+      makeEpisode({ supplement: { youtubeUrl: 'https://www.youtube.com/watch?v=boEEK4AIt8Y' } }),
     );
     expect(ld['video']).toMatchObject({
       '@type': 'VideoObject',
@@ -110,7 +119,7 @@ describe('episodeLd', () => {
   });
 
   test('adds contentLocation when location is set', () => {
-    const ld = episodeLd(makeEpisode({ location: 'Taipei, Taiwan' }));
+    const ld = episodeLd(makeEpisode({ supplement: { location: 'Taipei, Taiwan' } }));
     expect(ld['contentLocation']).toEqual({ '@type': 'Place', name: 'Taipei, Taiwan' });
   });
 });

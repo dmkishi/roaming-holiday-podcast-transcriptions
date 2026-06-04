@@ -1,11 +1,11 @@
 {% macro episodeMeta(episode) %}
-  <time datetime="{{ episode.pubDate }}">
-    {{- episode.pubDate | formatDate -}}
+  <time datetime="{{ episode.rss.pubDate }}">
+    {{- episode.rss.pubDate | formatDate -}}
   </time>
   <span class="duration">
-    {{- episode.duration.seconds | formatRoundedHuman -}}
+    {{- episode.rss.duration.seconds | formatRoundedHuman -}}
   </span>
-  {%- if episode.location %}
-    <span class="location">{{ episode.location }}</span>
+  {%- if episode.supplement.location %}
+    <span class="location">{{ episode.supplement.location }}</span>
   {%- endif %}
 {% endmacro %}

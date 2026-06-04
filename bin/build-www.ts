@@ -55,15 +55,19 @@ for (const { metadata, paragraph } of artifacts) {
     episodeNumber: ep,
     url: episodeUrl(ep),
     imagePath: image.path,
-    isInterlude: supplement?.isInterlude,
-    location: supplement?.location,
-    youtubeUrl: supplement?.youtube,
-    title: metadata.title,
-    description: metadata.description,
-    mp3Url: metadata.mp3Url,
-    duration: metadata.duration,
-    pubDate: metadata.pubDate,
-    imageUrl: metadata.imageUrl,
+    supplement: {
+      isInterlude: supplement?.isInterlude,
+      location: supplement?.location,
+      youtubeUrl: supplement?.youtube,
+    },
+    rss: {
+      title: metadata.title,
+      description: metadata.description,
+      mp3Url: metadata.mp3Url,
+      duration: metadata.duration,
+      pubDate: metadata.pubDate,
+      imageUrl: metadata.imageUrl,
+    },
     paragraphGroups,
   };
   const jsonLd = [episodeLd(fields), breadcrumbLd(fields)];

@@ -22,63 +22,52 @@ export function seriesLd(site: Pick<Site, 'descriptionHtml' | 'podcast'>, baseUr
 }
 
 
-type EpisodeInput = Pick<
-  SiteEpisode,
-  | 'episodeNumber'
-  | 'url'
-  | 'location'
-  | 'youtubeUrl'
-  | 'title'
-  | 'description'
-  | 'mp3Url'
-  | 'duration'
-  | 'pubDate'
-  | 'imageUrl'
->;
+type EpisodeInput = Pick<SiteEpisode, 'episodeNumber' | 'url' | 'supplement' | 'rss'>;
 
 /**
  * `PodcastEpisode` for an episode page. `partOfSeries` is an `@id`-only
  * reference whose full node is defined by `seriesLd` on the homepage.
  */
 export function episodeLd(episode: EpisodeInput, baseUrl = BASE_URL): JsonLd {
+  const { supplement, rss } = episode;
   const absUrl = `${baseUrl}${episode.url}`;
-  const duration = isoDuration(episode.duration.seconds);
+  const duration = isoDuration(rss.duration.seconds);
   const description =
-    episode.description ||
-    `Machine-generated transcript of Roaming Holiday episode ${episode.episodeNumber}: ${episode.title}.`;
+    rss.description ||
+    `Machine-generated transcript of Roaming Holiday episode ${episode.episodeNumber}: ${rss.title}.`;
 
   const data: JsonLd = {
     '@context': 'https://schema.org',
     '@type': 'PodcastEpisode',
     '@id': `${absUrl}#episode`,
     url: absUrl,
-    name: episode.title,
+    name: rss.title,
     episodeNumber: episode.episodeNumber,
-    datePublished: episode.pubDate,
+    datePublished: rss.pubDate,
     description,
-    image: episode.imageUrl,
+    image: rss.imageUrl,
     timeRequired: duration,
     inLanguage: 'en',
     associatedMedia: {
       '@type': 'AudioObject',
-      contentUrl: episode.mp3Url,
+      contentUrl: rss.mp3Url,
       encodingFormat: 'audio/mpeg',
       duration,
     },
   };
 
-  if (episode.location !== undefined && episode.location !== '') {
-    data['contentLocation'] = { '@type': 'Place', name: episode.location };
+  if (supplement.location !== undefined && supplement.location !== '') {
+    data['contentLocation'] = { '@type': 'Place', name: supplement.location };
   }
 
-  if (episode.youtubeUrl !== undefined && episode.youtubeUrl !== '') {
-    const videoId = new URL(episode.youtubeUrl).searchParams.get('v') ?? '';
+  if (supplement.youtubeUrl !== undefined && supplement.youtubeUrl !== '') {
+    const videoId = new URL(supplement.youtubeUrl).searchParams.get('v') ?? '';
     data['video'] = {
       '@type': 'VideoObject',
-      name: episode.title,
+      name: rss.title,
       description,
-      thumbnailUrl: episode.imageUrl,
-      uploadDate: episode.pubDate,
+      thumbnailUrl: rss.imageUrl,
+      uploadDate: rss.pubDate,
       duration,
       embedUrl: `https://www.youtube.com/embed/${videoId}`,
     };
@@ -104,7 +93,7 @@ export function breadcrumbLd(episode: EpisodeInput, baseUrl = BASE_URL): JsonLd 
       {
         '@type': 'ListItem',
         position: 2,
-        name: `#${episode.episodeNumber} ${episode.title}`,
+        name: `#${episode.episodeNumber} ${episode.rss.title}`,
         item: `${baseUrl}${episode.url}`,
       },
     ],
