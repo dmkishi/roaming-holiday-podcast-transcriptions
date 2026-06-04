@@ -7,5 +7,22 @@
   "options": {
     "typeAware": true, // Enable rules that require type information
     "typeCheck": true // Enable experimental type checking
-  }
+  },
+  "overrides": [
+    {
+      // These `.js` islands aren't in any tsconfig, so Eleventy/PostCSS values
+      // all resolve to `any` and the type-aware rules can only emit noise. Keep
+      // every other rule; switch off the ones that fire purely on `any`.
+      "files": ["eleventy.config.js", "www/src/episode-markdown.11ty.js"],
+      "rules": {
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-return": "off",
+        "typescript/consistent-return": "off",
+        "typescript/strict-boolean-expressions": "off"
+      }
+    }
+  ]
 }

@@ -6,7 +6,7 @@ import { stringify as stringifyYaml } from 'yaml';
  */
 export const data = {
   pagination: { data: 'episodes', size: 1, alias: 'episode' },
-  permalink: (data) => `/episodes/${data.episode.episodeNumber}.md`,
+  permalink: (item) => `/episodes/${item.episode.episodeNumber}.md`,
   eleventyExcludeFromCollections: true,
 };
 
