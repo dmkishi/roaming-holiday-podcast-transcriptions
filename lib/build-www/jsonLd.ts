@@ -1,11 +1,14 @@
 import type { JsonLd, SiteEpisode } from '@lib/build-www/types.js';
 import { BASE_URL, type Site } from '@lib/config/site.js';
 
+type SeriesInput = Pick<Site, 'descriptionHtml' | 'podcast'>;
+type EpisodeInput = Pick<SiteEpisode, 'episodeNumber' | 'url' | 'supplement' | 'rss'>;
+
 /**
  * `PodcastSeries` for the homepage. The `@id` matches the episode pages'
  * `partOfSeries` reference, linking the two across pages.
  */
-export function seriesLd(site: Pick<Site, 'descriptionHtml' | 'podcast'>, baseUrl = BASE_URL): JsonLd {
+export function seriesLd(site: SeriesInput, baseUrl = BASE_URL): JsonLd {
   const { podcast } = site;
   return {
     '@context': 'https://schema.org',
@@ -20,9 +23,6 @@ export function seriesLd(site: Pick<Site, 'descriptionHtml' | 'podcast'>, baseUr
     sameAs: Object.values(podcast.platforms),
   };
 }
-
-
-type EpisodeInput = Pick<SiteEpisode, 'episodeNumber' | 'url' | 'supplement' | 'rss'>;
 
 /**
  * `PodcastEpisode` for an episode page. `partOfSeries` is an `@id`-only
