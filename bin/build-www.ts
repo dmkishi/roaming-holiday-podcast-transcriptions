@@ -37,10 +37,9 @@ print.emptyLine();
 // Build episode data
 // =============================================================================
 print.info('Building episode data...');
-const supplements = loadSupplements();
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
 let built = 0;
-
+const supplements = loadSupplements();
 for (const { metadata, paragraph } of artifacts) {
   const ep = metadata.episodeNumber;
 
