@@ -88,6 +88,11 @@ Upload Cloudflare
 --------------------------------------------------------------------------------
 Upload episode markdown files to Cloudflare.
 
+Website
+--------------------------------------------------------------------------------
+### Analytics
+https://cloud.umami.is/analytics/us/websites/fd878e03-5c0c-4633-bee0-131855510981
+
 Models
 --------------------------------------------------------------------------------
 ### Transcription Models (OpenAI Whisper)
