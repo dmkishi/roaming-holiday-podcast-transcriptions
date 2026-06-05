@@ -1,4 +1,4 @@
-@import '@dmkishi/css-reset/dist/reset.css' layer(reset);
+@import url('@dmkishi/css-reset/dist/reset.css') layer(reset);
 
 :root {
   --max-width: 700px;
@@ -30,8 +30,8 @@
   --color-bg: #f0ead6;
   --color-black: #1c1917;
   --color-black-light: oklch(from var(--color-black) calc(l + .333) c h);
-  --color-tint-1: rgba(from var(--color-black) r g b / 5%);
-  --color-tint-2: rgba(from var(--color-black) r g b / 15%);
+  --color-tint-1: rgb(from var(--color-black) r g b / 5%);
+  --color-tint-2: rgb(from var(--color-black) r g b / 15%);
   --color-warning: #ce5656;
 }
 
@@ -109,6 +109,7 @@ a {
  * -------------------------------------------------------------------------- */
 .c-episode-number {
   --unit: .0625em;
+
   position: relative;
   top: calc(var(--unit) * -5);
   display: inline-block;
@@ -186,7 +187,7 @@ a {
   }
 
   &:active {
-    &&:after {
+    &&::after {
       top: calc(-.2em + var(--click-offset));
     }
   }

@@ -1,4 +1,4 @@
-@import './_base.css';
+@import url('./_base.css');
 
 .about-page {
   line-height: var(--font-line-height-tighter);

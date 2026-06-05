@@ -1,4 +1,4 @@
-@import './_base.css';
+@import url('./_base.css');
 
 .episode-list {
   display: flex;
@@ -14,7 +14,8 @@
 }
 
 .episode-card__interlude {
-  --color: rgba(190, 113, 27, 0.09);
+  --color: rgb(190 113 27 / 9%);
+
   outline: calc(var(--space-1) - .5px) solid var(--color);
   background-color: var(--color);
 }
@@ -23,6 +24,7 @@
   margin-top: -7.25px; /* Align to top of thumbnail */
 }
 
+.episode-card--title-link:hover .episode-card--title,
 .episode-card--thumb-link:hover + .episode-card--header .episode-card--title {
   text-decoration: underline;
 }
@@ -41,10 +43,6 @@
   &:visited {
     color: var(--color-black-light);
   }
-
-  &:hover .episode-card--title {
-    text-decoration: underline;
-  }
 }
 
 .episode-card--episode-number {
@@ -62,7 +60,7 @@
   margin-top: .35em;
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .episode-card a {
     flex-direction: column;
     align-items: center;

@@ -1,4 +1,4 @@
-@import './_base.css';
+@import url('./_base.css');
 
 .episode {
   display: flex;
@@ -27,7 +27,7 @@
   bottom: var(--space-1);
   right: var(--space-1);
   width: 320px;
-  box-shadow: 0 4px 12px rgba(0 0 0 / .3);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
 }
 
 .js-mini-player--close-btn {
@@ -249,7 +249,7 @@
   pointer-events: none;
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .timeline-marker {
     position: static;
     display: inline-block;
