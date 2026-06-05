@@ -21,7 +21,7 @@ import { getAllRssItems } from '@lib/shared/rss.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
 
 // =============================================================================
-// Parse CLI args
+// Main
 // =============================================================================
 const cli = getTranscribeCliArgs(process.argv);
 
@@ -33,48 +33,28 @@ if (cli.runTranscript) banner.push(`  Whisper model: ${cli.transcribeModel}`);
 printLog.info(banner);
 print.emptyLine();
 
-// Segments keyed by episode number, the single source of truth for which
-// episodes the paragraph stage processes. The transcribe path fills it with
-// freshly merged Whisper segments; `--only-paragraphs` fills it by flattening
-// the existing on-disk transcript. The paragraph stage iterates this map
-// directly.
+/**
+ * Segments keyed by episode number, the single source of truth for which
+ * episodes the paragraph stage processes. The transcribe path fills it with
+ * freshly merged Whisper segments; `--only-paragraphs` fills it by flattening
+ * the existing on-disk transcript. The paragraph stage iterates this map
+ * directly.
+ */
 const segmentsByEpisode = new Map<number, ParagraphSegment[]>();
-if (cli.runTranscript) await runTranscriptPipeline();
+
+if (cli.runTranscript) await transcribeFromFeed();
 else loadFromDisk();
 
-// =============================================================================
-// Load existing transcripts from disk (--only-paragraphs)
-// =============================================================================
-function loadFromDisk(): void {
-  print.info('Loading existing transcripts...');
-  for (const episodeNumber of cli.episodeNums) {
-    if (!hasTranscript(episodeNumber)) {
-      printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
-      continue;
-    }
-    if (!hasRss(episodeNumber)) {
-      printLog.warn(`#${episodeNumber}: No RSS data found - skipping`);
-      continue;
-    }
-
-    segmentsByEpisode.set(episodeNumber, readTranscript(episodeNumber).paragraphGroups.flat(2));
-    printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).transcript)}"`);
-  }
-
-  if (segmentsByEpisode.size === 0) {
-    printLog.error('No transcripts to process.');
-    process.exit(1);
-  }
-  print.emptyLine();
-}
+if (cli.runParagraph) await buildTranscripts();
 
 // =============================================================================
-// Run transcript pipeline
+// Functions
 // =============================================================================
-async function runTranscriptPipeline(): Promise<void> {
-  // ---------------------------------------------------------------------------
-  // Get RSS feed
-  // ---------------------------------------------------------------------------
+/**
+ * Fill `segmentsByEpisode` via the full pipeline: feed, MP3s, gaps, Whisper.
+ */
+async function transcribeFromFeed(): Promise<void> {
+  // Get RSS feed --------------------------------------------------------------
   print.info('Fetching RSS feed...');
   const feed = await getAllRssItems(RSS_FEED_URL, cli.forceRss);
   if (feed.status === 'failed') {
@@ -83,9 +63,7 @@ async function runTranscriptPipeline(): Promise<void> {
   }
   printLog.info(`RSS feed: ${feed.items.length} items (${pc.blue(feed.status)})`);
 
-  // ---------------------------------------------------------------------------
-  // Write episode RSS sidecar file(s) from the RSS feed
-  // ---------------------------------------------------------------------------
+  // Write episode RSS sidecar file(s)------------------------------------------
   const episodes = findEpisodes(feed.items, cli.episodeNums);
   const foundEpisodeNums = episodes.map((e) => e.episodeNumber);
   if (episodes.length < cli.episodeNums.size) {
@@ -116,9 +94,7 @@ async function runTranscriptPipeline(): Promise<void> {
   }
   print.emptyLine();
 
-  // ---------------------------------------------------------------------------
-  // Make transcription requests
-  // ---------------------------------------------------------------------------
+  // Make transcription requests -----------------------------------------------
   print.info('Preparing for transcription...');
   let toTranscribes: ToTranscribe[] = [];
   for (const episode of episodes) {
@@ -148,9 +124,7 @@ async function runTranscriptPipeline(): Promise<void> {
   }
   print.emptyLine();
 
-  // ---------------------------------------------------------------------------
-  // Download MP3s
-  // ---------------------------------------------------------------------------
+  // Download MP3s -------------------------------------------------------------
   print.info('Downloading MP3s...');
   for (const toTranscribe of toTranscribes) {
     const mp3 = await downloadMp3(
@@ -177,9 +151,7 @@ async function runTranscriptPipeline(): Promise<void> {
   }
   print.emptyLine();
 
-  // ---------------------------------------------------------------------------
-  // Detect audio gaps and save (for transcribing and building paragraphs)
-  // ---------------------------------------------------------------------------
+  // Detect audio gaps and save (for transcribing and building paragraphs) -----
   print.info('Detecting audio gaps...');
   for (const toTranscribe of toTranscribes) {
     const res = await detectGaps(toTranscribe.episodeNumber, toTranscribe.mp3.path, cli.forceGaps);
@@ -199,9 +171,7 @@ async function runTranscriptPipeline(): Promise<void> {
   }
   print.emptyLine();
 
-  // ---------------------------------------------------------------------------
-  // Transcribe
-  // ---------------------------------------------------------------------------
+  // Transcribe ----------------------------------------------------------------
   print.info('Transcribing...');
   const transcripts: Transcript[] = [];
   for (const toTranscribe of toTranscribes) {
@@ -229,10 +199,36 @@ async function runTranscriptPipeline(): Promise<void> {
   print.emptyLine();
 }
 
-// =============================================================================
-// Build paragraphs and paragraph groups
-// =============================================================================
-if (cli.runParagraph) {
+/**
+ * Fill `segmentsByEpisode` from on-disk transcripts (`--only-paragraphs`).
+ */
+function loadFromDisk(): void {
+  print.info('Loading existing transcripts...');
+  for (const episodeNumber of cli.episodeNums) {
+    if (!hasTranscript(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
+      continue;
+    }
+    if (!hasRss(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No RSS data found - skipping`);
+      continue;
+    }
+
+    segmentsByEpisode.set(episodeNumber, readTranscript(episodeNumber).paragraphGroups.flat(2));
+    printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).transcript)}"`);
+  }
+
+  if (segmentsByEpisode.size === 0) {
+    printLog.error('No transcripts to process.');
+    process.exit(1);
+  }
+  print.emptyLine();
+}
+
+/**
+ * Build paragraphs and paragraph groups.
+ */
+async function buildTranscripts(): Promise<void> {
   print.info('Building transcripts...');
   for (const [episodeNumber, segments] of segmentsByEpisode) {
     if (!hasGaps(episodeNumber)) {
