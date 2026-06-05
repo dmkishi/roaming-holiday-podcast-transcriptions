@@ -17,8 +17,8 @@
   grid-template-columns: max-content 1fr;
   margin-block: var(--gutter);
   padding: 1.125rem 2rem 1.666rem;
-  background-color: var(--color-tint-1);
   font-style: italic;
+  background-color: var(--color-tint-1);
 
   @media (width < 500px) {
     grid-template-columns: 1fr 1fr;
@@ -63,8 +63,8 @@
 
 .bible-count-emojis {
   margin-inline: .2em -.125em;
-  letter-spacing: .2em;
   text-shadow: 0 1px 2px rgb(0 0 0 / 33%);
+  letter-spacing: .2em;
 }
 
 .bible-half {

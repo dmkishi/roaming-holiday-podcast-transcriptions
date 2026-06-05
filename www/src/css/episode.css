@@ -17,34 +17,34 @@
 
 .episode--video {
   aspect-ratio: 16/9;
-  transition: width .2s ease, box-shadow .2s ease;
   max-width: var(--max-width-video);
+  transition: width .2s ease, box-shadow .2s ease;
 }
 
 .js-video__is-mini {
   position: fixed;
   z-index: 1; /* Above .section-title */
-  bottom: var(--space-1);
   right: var(--space-1);
+  bottom: var(--space-1);
   width: 320px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 30%);
 }
 
 .js-mini-player--close-btn {
-  display: none;
+  cursor: pointer;
   position: fixed;
   z-index: 1;
-  bottom: calc(320px * 9/16 + var(--space-1) + .25rem);
   right: var(--space-1);
+  bottom: calc(320px * 9/16 + var(--space-1) + .25rem);
+  display: none;
   width: 1.5rem;
   height: 1.5rem;
   border: none;
   border-radius: 50%;
-  background: var(--color-black);
-  color: var(--color-bg);
   font-size: 1rem;
   line-height: 1;
-  cursor: pointer;
+  color: var(--color-bg);
+  background: var(--color-black);
 
   .js-video__is-mini ~ & {
     display: block;
@@ -52,25 +52,25 @@
 }
 
 .episode--video-shortcuts {
-  align-self: end;
   position: absolute;
   top: 100%;
   right: calc((100% - min(100%, var(--max-width-video))) / 2);
+  align-self: end;
   width: calc((min(100%, var(--max-width-video)) - var(--max-width)) / 2);
   max-width: 20em;
 
   @media (width < 1075px) {
     position: relative;
+    align-self: center;
     width: var(--max-width);
     max-width: 100%;
     margin-bottom: 10px;
-    align-self: center;
 
     .episode--video-shortcuts-list {
+      grid-auto-columns: max-content;
+      grid-auto-flow: column;
       grid-template-columns: repeat(5, 1fr);
       grid-template-rows: auto auto;
-      grid-auto-flow: column;
-      grid-auto-columns: max-content;
       align-items: start;
       padding-inline: var(--gutter);
     }
@@ -96,9 +96,9 @@
   gap: calc(var(--gap) * 2) calc(var(--gap) * 2.5);
   margin-block: 6px 1em;
   padding-inline: var(--gutter-third) var(--gutter-half);
-  opacity: .875;
   font-size: var(--font-x-small);
   line-height: var(--font-line-height-tight);
+  opacity: .875;
 
   @media (width < 500px) {
     padding-inline: var(--gutter-third) !important;
@@ -114,17 +114,17 @@
   }
 
   .key-icon {
+    cursor: default;
+    user-select: none;
     display: inline-block;
     width: var(--key-icon-width);
     height: 1.333em;
     border: 1px solid var(--color-black);
     border-radius: .2em;
-    box-shadow: 0 .125em 0 var(--color-black);
     font-family: serif;
-    text-align: center;
     line-height: 1.1; /* Adjusts vertical positioning */
-    cursor: default;
-    user-select: none;
+    text-align: center;
+    box-shadow: 0 .125em 0 var(--color-black);
   }
 
   .key-icon__space {
@@ -173,10 +173,10 @@
 }
 
 .episode--content-warning {
-  padding: var(--space-1);
-  background-color: var(--color-warning);
-  color: var(--color-bg);
   margin-block: 1.5rem -15px;
+  padding: var(--space-1);
+  color: var(--color-bg);
+  background-color: var(--color-warning);
 
   @media (width < 1075px) {
     margin-top: 1rem;
@@ -201,8 +201,8 @@
   /* Hover: highlight the innermost interactive unit — a word in hybrid mode,
      or the whole segment when it has no word breakdown. */
   .word:hover {
-    background: var(--color-tint-1);
     border-radius: 2px;
+    background: var(--color-tint-1);
   }
 
   .is-active {
@@ -219,16 +219,16 @@
 }
 
 .timeline-marker {
-  display: block;
+  user-select: none;
   position: absolute;
   left: -9ch;
+  display: block;
   width: 7ch;
   margin-top: .45em; /* Align to baseline of transcript */
   font-family: var(--font-timecode);
   font-size: var(--font-x-small);
-  text-align: right;
   color: var(--color-black-light);
-  user-select: none;
+  text-align: right;
 
   .episode--transcript > p:first-child & {
     display: none;
@@ -237,16 +237,16 @@
 
 /* Timeline hover tooltip */
 .timeline-tooltip {
+  pointer-events: none;
   position: fixed;
   z-index: 1;
   padding: .2rem .5rem;
   border-radius: 4px;
-  background: var(--color-black);
-  color: var(--color-bg);
   font-family: var(--font-timecode);
   font-size: var(--font-x-small);
+  color: var(--color-bg);
   white-space: nowrap;
-  pointer-events: none;
+  background: var(--color-black);
 }
 
 @media (width <= 640px) {
@@ -254,7 +254,7 @@
     position: static;
     display: inline-block;
     width: auto;
-    text-align: left;
     margin: 1rem 0 .25rem;
+    text-align: left;
   }
 }

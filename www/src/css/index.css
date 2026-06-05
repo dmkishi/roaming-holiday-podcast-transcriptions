@@ -16,8 +16,8 @@
 .episode-card__interlude {
   --color: rgb(190 113 27 / 9%);
 
-  outline: calc(var(--space-1) - .5px) solid var(--color);
   background-color: var(--color);
+  outline: calc(var(--space-1) - .5px) solid var(--color);
 }
 
 .episode-card--header {
