@@ -23,14 +23,13 @@ import { RSS_FEED_URL } from '@lib/config/rss.js';
 // =============================================================================
 // Parse CLI args
 // =============================================================================
-const opts = getTranscribeCliArgs(process.argv);
-const { runTranscript, runParagraph } = opts.runPipeline;
+const cli = getTranscribeCliArgs(process.argv);
 
-const modeLabel = runTranscript ? 'full pipeline' : 'paragraph only';
+const modeLabel = cli.runTranscript ? 'full pipeline' : 'paragraph only';
 const banner = [
-  `Transcribe ${pluralize(opts.episodeNums.size, 'episode')} (${modeLabel}): ${[...opts.episodeNums].join(', ')}`,
+  `Transcribe ${pluralize(cli.episodeNums.size, 'episode')} (${modeLabel}): ${[...cli.episodeNums].join(', ')}`,
 ];
-if (runTranscript) banner.push(`  Whisper model: ${opts.transcribeModel}`);
+if (cli.runTranscript) banner.push(`  Whisper model: ${cli.transcribeModel}`);
 printLog.info(banner);
 print.emptyLine();
 
@@ -40,7 +39,7 @@ print.emptyLine();
 // paragraph sidecar instead).
 const segmentsByEpisode = new Map<number, ParagraphSegment[]>();
 
-const episodeNumbers: number[] = runTranscript
+const episodeNumbers: number[] = cli.runTranscript
   ? await runTranscriptPipeline()
   : loadFromDisk();
 
@@ -50,7 +49,7 @@ const episodeNumbers: number[] = runTranscript
 function loadFromDisk(): number[] {
   print.info('Loading existing paragraph sidecars...');
   const items: number[] = [];
-  for (const episodeNumber of opts.episodeNums) {
+  for (const episodeNumber of cli.episodeNums) {
     if (!hasParagraph(episodeNumber)) {
       printLog.warn(`#${episodeNumber}: No paragraph sidecar found - skipping`);
       continue;
@@ -80,7 +79,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   // Get RSS feed
   // ---------------------------------------------------------------------------
   print.info('Fetching RSS feed...');
-  const feed = await getAllRssItems(RSS_FEED_URL, opts.forceRss);
+  const feed = await getAllRssItems(RSS_FEED_URL, cli.forceRss);
   if (feed.status === 'failed') {
     printLog.error(`Failed to fetch RSS feed <${RSS_FEED_URL}>`);
     process.exit(1);
@@ -90,14 +89,14 @@ async function runTranscriptPipeline(): Promise<number[]> {
   // ---------------------------------------------------------------------------
   // Write episode RSS sidecar file(s) from the RSS feed
   // ---------------------------------------------------------------------------
-  const episodes = findEpisodes(feed.items, opts.episodeNums);
+  const episodes = findEpisodes(feed.items, cli.episodeNums);
   const foundEpisodeNums = episodes.map((e) => e.episodeNumber);
-  if (episodes.length < opts.episodeNums.size) {
+  if (episodes.length < cli.episodeNums.size) {
     if (episodes.length === 0) {
       printLog.error('No episodes found');
       process.exit(1);
     }
-    const missingEpisodeNums = [...opts.episodeNums].filter((num) => !foundEpisodeNums.includes(num));
+    const missingEpisodeNums = [...cli.episodeNums].filter((num) => !foundEpisodeNums.includes(num));
     printLog.warn(
       `${pluralize(missingEpisodeNums.length, 'Episode')} NOT found: ${missingEpisodeNums.map((num) => pc.red(num)).join(', ')}`,
     );
@@ -126,7 +125,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   print.info('Preparing for transcription...');
   let toTranscribes: ToTranscribe[] = [];
   for (const episode of episodes) {
-    const toTranscribe = await makeToTranscribe(episode, opts.forceTranscribe);
+    const toTranscribe = await makeToTranscribe(episode, cli.forceTranscribe);
     if (!toTranscribe) {
       printLog.warn(`#${episode.episodeNumber}: Skipping - transcript already exists`);
       continue;
@@ -160,7 +159,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
     const mp3 = await downloadMp3(
       toTranscribe.mp3.url,
       toTranscribe.mp3.path,
-      opts.forceDownload,
+      cli.forceDownload,
     );
     if (mp3.status === 'failed') {
       toTranscribes = toTranscribes.filter((t) => t !== toTranscribe);
@@ -186,7 +185,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   // ---------------------------------------------------------------------------
   print.info('Detecting audio gaps...');
   for (const toTranscribe of toTranscribes) {
-    const res = await detectGaps(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceGaps);
+    const res = await detectGaps(toTranscribe.episodeNumber, toTranscribe.mp3.path, cli.forceGaps);
     if (!res.ok) {
       toTranscribes = toTranscribes.filter((t) => t !== toTranscribe);
       printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
@@ -209,7 +208,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
   print.info('Transcribing...');
   const transcripts: Transcript[] = [];
   for (const toTranscribe of toTranscribes) {
-    const res = await promptTranscript(toTranscribe, opts.transcribeModel);
+    const res = await promptTranscript(toTranscribe, cli.transcribeModel);
     if (res.ok) {
       const { audioDuration, workDuration } = res.stats;
       const workPercentage = Math.round((workDuration.seconds / audioDuration.seconds) * 100);
@@ -238,7 +237,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
 // =============================================================================
 // Build paragraphs and paragraph groups
 // =============================================================================
-if (runParagraph) {
+if (cli.runParagraph) {
   print.info('Building paragraph sidecars...');
   for (const episodeNumber of episodeNumbers) {
     if (!hasGaps(episodeNumber)) {
@@ -246,7 +245,7 @@ if (runParagraph) {
       continue;
     }
 
-    const needsFade = opts.forceFade || !hasFade(episodeNumber);
+    const needsFade = cli.forceFade || !hasFade(episodeNumber);
 
     if (needsFade) {
       const mp3Path = paths(episodeNumber).mp3;
@@ -277,7 +276,7 @@ if (runParagraph) {
     // Full pipeline sources segments from the in-memory transcribe results;
     // --only-paragraphs flattens the existing paragraph sidecar back to its
     // ordered segment list (lossless minus the unused segment id).
-    const segments = runTranscript
+    const segments = cli.runTranscript
       ? segmentsByEpisode.get(episodeNumber)
       : readParagraph(episodeNumber).paragraphGroups.flat(2);
     if (segments === undefined) {

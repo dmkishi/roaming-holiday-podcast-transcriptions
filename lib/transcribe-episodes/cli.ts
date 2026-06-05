@@ -4,10 +4,8 @@ import { DEFAULT_MODEL } from '@lib/config/whisper.js';
 interface CliOptions {
   episodeNums: Set<number>;
   transcribeModel: string;
-  runPipeline: {
-    runTranscript: boolean;
-    runParagraph: boolean;
-  };
+  runTranscript: boolean;
+  runParagraph: boolean;
   forceRss: boolean;
   forceDownload: boolean;
   forceGaps: boolean;
@@ -100,7 +98,8 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
   return {
     episodeNums,
     transcribeModel: argv.model,
-    runPipeline: { runTranscript, runParagraph },
+    runTranscript,
+    runParagraph,
     forceRss,
     forceDownload,
     forceGaps,
