@@ -1,6 +1,5 @@
 import pc from 'picocolors';
 import { getTranscribeCliArgs } from '@lib/transcribe-episodes/cli.js';
-import { getAllRssItems } from '@lib/shared/rss.js';
 import { findEpisodes } from '@lib/transcribe-episodes/episode.js';
 import { downloadMp3 } from '@lib/transcribe-episodes/mp3.js';
 import { detectGaps } from '@lib/transcribe-episodes/audioGaps.js';
@@ -18,6 +17,7 @@ import type { ParagraphSegment } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
+import { getAllRssItems } from '@lib/shared/rss.js';
 import { RSS_FEED_URL } from '@lib/config/rss.js';
 
 // =============================================================================
