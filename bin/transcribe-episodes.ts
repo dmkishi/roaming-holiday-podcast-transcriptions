@@ -33,22 +33,20 @@ if (cli.runTranscript) banner.push(`  Whisper model: ${cli.transcribeModel}`);
 printLog.info(banner);
 print.emptyLine();
 
-// Merged Whisper segments produced by the transcribe pipeline, keyed by episode
-// number, so the paragraph stage can build from memory without re-reading from
-// disk. Empty under `--only-paragraphs` (segments are read from the existing
-// transcript instead).
+// Segments keyed by episode number, the single source of truth for which
+// episodes the paragraph stage processes. The transcribe path fills it with
+// freshly merged Whisper segments; `--only-paragraphs` fills it by flattening
+// the existing on-disk transcript. The paragraph stage iterates this map
+// directly.
 const segmentsByEpisode = new Map<number, ParagraphSegment[]>();
-
-const episodeNumbers: number[] = cli.runTranscript
-  ? await runTranscriptPipeline()
-  : loadFromDisk();
+if (cli.runTranscript) await runTranscriptPipeline();
+else loadFromDisk();
 
 // =============================================================================
 // Load existing transcripts from disk (--only-paragraphs)
 // =============================================================================
-function loadFromDisk(): number[] {
+function loadFromDisk(): void {
   print.info('Loading existing transcripts...');
-  const items: number[] = [];
   for (const episodeNumber of cli.episodeNums) {
     if (!hasTranscript(episodeNumber)) {
       printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
@@ -59,22 +57,21 @@ function loadFromDisk(): number[] {
       continue;
     }
 
-    items.push(episodeNumber);
+    segmentsByEpisode.set(episodeNumber, readTranscript(episodeNumber).paragraphGroups.flat(2));
     printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).transcript)}"`);
   }
 
-  if (items.length === 0) {
+  if (segmentsByEpisode.size === 0) {
     printLog.error('No transcripts to process.');
     process.exit(1);
   }
   print.emptyLine();
-  return items;
 }
 
 // =============================================================================
 // Run transcript pipeline
 // =============================================================================
-async function runTranscriptPipeline(): Promise<number[]> {
+async function runTranscriptPipeline(): Promise<void> {
   // ---------------------------------------------------------------------------
   // Get RSS feed
   // ---------------------------------------------------------------------------
@@ -230,8 +227,6 @@ async function runTranscriptPipeline(): Promise<number[]> {
     process.exit(1);
   }
   print.emptyLine();
-
-  return transcripts.map((t) => t.episodeNumber);
 }
 
 // =============================================================================
@@ -239,7 +234,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
 // =============================================================================
 if (cli.runParagraph) {
   print.info('Building transcripts...');
-  for (const episodeNumber of episodeNumbers) {
+  for (const [episodeNumber, segments] of segmentsByEpisode) {
     if (!hasGaps(episodeNumber)) {
       printLog.warn(`#${episodeNumber}: No gaps file - skipping`);
       continue;
@@ -271,17 +266,6 @@ if (cli.runParagraph) {
       }
     } else {
       printLog.warn(`#${episodeNumber}: Skipping - fade file already exists`);
-    }
-
-    // Full pipeline sources segments from the in-memory transcribe results;
-    // --only-paragraphs flattens the existing transcript back to its ordered
-    // segment list (lossless minus the unused segment id).
-    const segments = cli.runTranscript
-      ? segmentsByEpisode.get(episodeNumber)
-      : readTranscript(episodeNumber).paragraphGroups.flat(2);
-    if (segments === undefined) {
-      printLog.warn(`#${episodeNumber}: No transcript segments - skipping`);
-      continue;
     }
 
     const paragraphsRes = buildParagraphs(episodeNumber, segments);
