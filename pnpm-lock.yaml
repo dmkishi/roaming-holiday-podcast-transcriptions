@@ -17,9 +17,6 @@ importers:
       '@dmkishi/css-reset':
         specifier: ^1.3.1
         version: 1.3.1
-      '@dmkishi/markdownlint-cli2.yaml':
-        specifier: ^0.0.3
-        version: 0.0.3
       '@dmkishi/oxlintrc':
         specifier: ^0.3.0
         version: 0.3.0
@@ -447,10 +444,6 @@ packages:
 
   '@dmkishi/css-reset@1.3.1':
     resolution: {integrity: sha512-7TUFnqEsFOmvkytMeXoLnX3ElnlchZT7w6FpovyDScnEIhWUWTcugwjXMIU/8knlDp4Er/z2FiaYZnpQF02qIw==}
-
-  '@dmkishi/markdownlint-cli2.yaml@0.0.3':
-    resolution: {integrity: sha512-bTR3JrspskfhacWKc5i+rC15nyoiFXqs6PFjgCArATketRdJ6xUatFHSdVafi6Ws3lHjVcXEMAKTFoVs+nmlXQ==}
-    hasBin: true
 
   '@dmkishi/oxlintrc@0.3.0':
     resolution: {integrity: sha512-i53Mkcd5bKNYkChNbBgCSv9PfithBN1LceoLpO3UusFTdzLO7itfYAqrZg4Mn+7geTUx/7dF2KFyMF/mbBjMQA==}
@@ -2937,8 +2930,6 @@ snapshots:
       postcss: 8.5.14
 
   '@dmkishi/css-reset@1.3.1': {}
-
-  '@dmkishi/markdownlint-cli2.yaml@0.0.3': {}
 
   '@dmkishi/oxlintrc@0.3.0': {}
 
