@@ -40,7 +40,7 @@ print.info('Building episode data...');
 mkdirSync(SITE_EPISODES_DIR, { recursive: true });
 let built = 0;
 const supplements = loadSupplements();
-for (const { rss, paragraph } of artifacts) {
+for (const { rss, transcript } of artifacts) {
   const ep = rss.episodeNumber;
 
   const image = await downloadImage(ep, rss.imageUrl);
@@ -48,7 +48,7 @@ for (const { rss, paragraph } of artifacts) {
     printLog.warn(`#${ep}: Image download failed - ${image.error}`);
   }
 
-  const paragraphGroups = addTimelineMarkers(paragraph.paragraphGroups);
+  const paragraphGroups = addTimelineMarkers(transcript.paragraphGroups);
   const supplement = supplements.get(ep);
 
   const fields = {

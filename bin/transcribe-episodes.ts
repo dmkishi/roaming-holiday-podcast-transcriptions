@@ -11,8 +11,8 @@ import {
 } from '@lib/transcribe-episodes/transcript.js';
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import {
-  paths, hasRss, readRss, writeRss,
-  hasMp3, hasGaps, hasFade, hasParagraph, readParagraph, writeParagraph,
+  paths, hasRss, readRss, writeRss, hasMp3, hasGaps, hasFade,
+  hasTranscript, readTranscript, writeTranscript,
 } from '@lib/shared/artifacts.js';
 import type { ParagraphSegment } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
@@ -34,9 +34,9 @@ printLog.info(banner);
 print.emptyLine();
 
 // Merged Whisper segments produced by the transcribe pipeline, keyed by episode
-// number, so the paragraph stage can build from memory without a transcript
-// sidecar. Empty under `--only-paragraphs` (segments are read from the existing
-// paragraph sidecar instead).
+// number, so the paragraph stage can build from memory without re-reading from
+// disk. Empty under `--only-paragraphs` (segments are read from the existing
+// transcript instead).
 const segmentsByEpisode = new Map<number, ParagraphSegment[]>();
 
 const episodeNumbers: number[] = cli.runTranscript
@@ -44,14 +44,14 @@ const episodeNumbers: number[] = cli.runTranscript
   : loadFromDisk();
 
 // =============================================================================
-// Load existing paragraph sidecars from disk (--only-paragraphs)
+// Load existing transcripts from disk (--only-paragraphs)
 // =============================================================================
 function loadFromDisk(): number[] {
-  print.info('Loading existing paragraph sidecars...');
+  print.info('Loading existing transcripts...');
   const items: number[] = [];
   for (const episodeNumber of cli.episodeNums) {
-    if (!hasParagraph(episodeNumber)) {
-      printLog.warn(`#${episodeNumber}: No paragraph sidecar found - skipping`);
+    if (!hasTranscript(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No transcript found - skipping`);
       continue;
     }
     if (!hasRss(episodeNumber)) {
@@ -60,11 +60,11 @@ function loadFromDisk(): number[] {
     }
 
     items.push(episodeNumber);
-    printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).paragraph)}"`);
+    printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).transcript)}"`);
   }
 
   if (items.length === 0) {
-    printLog.error('No paragraph sidecars to process.');
+    printLog.error('No transcripts to process.');
     process.exit(1);
   }
   print.emptyLine();
@@ -238,7 +238,7 @@ async function runTranscriptPipeline(): Promise<number[]> {
 // Build paragraphs and paragraph groups
 // =============================================================================
 if (cli.runParagraph) {
-  print.info('Building paragraph sidecars...');
+  print.info('Building transcripts...');
   for (const episodeNumber of episodeNumbers) {
     if (!hasGaps(episodeNumber)) {
       printLog.warn(`#${episodeNumber}: No gaps file - skipping`);
@@ -274,11 +274,11 @@ if (cli.runParagraph) {
     }
 
     // Full pipeline sources segments from the in-memory transcribe results;
-    // --only-paragraphs flattens the existing paragraph sidecar back to its
-    // ordered segment list (lossless minus the unused segment id).
+    // --only-paragraphs flattens the existing transcript back to its ordered
+    // segment list (lossless minus the unused segment id).
     const segments = cli.runTranscript
       ? segmentsByEpisode.get(episodeNumber)
-      : readParagraph(episodeNumber).paragraphGroups.flat(2);
+      : readTranscript(episodeNumber).paragraphGroups.flat(2);
     if (segments === undefined) {
       printLog.warn(`#${episodeNumber}: No transcript segments - skipping`);
       continue;
@@ -293,7 +293,7 @@ if (cli.runParagraph) {
     }
     const { paragraphGroups, stats } = paragraphsRes;
 
-    const path = writeParagraph(episodeNumber, { paragraphGroups });
+    const path = writeTranscript(episodeNumber, { paragraphGroups });
     printLog.info([
       `#${episodeNumber}: Saved "${toRelative(path)}"`,
       `  Paragraphs: ${formatNumber(stats.paragraphs)}`,

@@ -66,7 +66,7 @@ const SegmentSchema = z.object({
 
 export type Segment = z.infer<typeof SegmentSchema>;
 
-export const TranscriptFileSchema = z.object({
+export const WhisperOutputSchema = z.object({
   text: z.string().default(''),
   segments: z.array(SegmentSchema).optional(),
 });
@@ -79,6 +79,6 @@ export type ParagraphSegment = z.infer<typeof ParagraphSegmentSchema>;
 export type Paragraph = z.infer<typeof ParagraphSchema>;
 export type ParagraphGroup = z.infer<typeof ParagraphGroupSchema>;
 
-export const ParagraphFileSchema = z.object({
+export const TranscriptFileSchema = z.object({
   paragraphGroups: z.array(ParagraphGroupSchema),
 });

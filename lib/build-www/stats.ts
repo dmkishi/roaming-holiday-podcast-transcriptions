@@ -86,7 +86,7 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
 }
 
 function fullText(artifacts: EpisodeArtifacts): string {
-  return artifacts.paragraph.paragraphGroups
+  return artifacts.transcript.paragraphGroups
     .flat(2)
     .map((s) => s.text.trim())
     .join(' ');

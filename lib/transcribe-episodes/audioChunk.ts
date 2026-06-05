@@ -4,7 +4,7 @@ import { promisify } from 'node:util';
 import type { z } from 'zod';
 import type { Gap } from '@lib/transcribe-episodes/audioGaps.js';
 import { TMP_DIR, FFMPEG } from '@lib/shared/paths.js';
-import { TranscriptFileSchema } from '@lib/shared/schemas.js';
+import { WhisperOutputSchema } from '@lib/shared/schemas.js';
 
 interface ChunkSpec {
   index: number;
@@ -19,11 +19,12 @@ export interface CutPointOptions {
   maxWindowMinutes: number;
 }
 
-type TranscriptSegment = NonNullable<z.infer<typeof TranscriptFileSchema>['segments']>[number];
+type WhisperSegment =
+  NonNullable<z.infer<typeof WhisperOutputSchema>['segments']>[number];
 
 interface MergedTranscript {
   text: string;
-  segments: TranscriptSegment[];
+  segments: WhisperSegment[];
 }
 
 // eslint-disable-next-line typescript/strict-void-return
@@ -105,7 +106,7 @@ export function mergeChunkTranscripts(
   const texts: string[] = [];
 
   for (const chunk of chunks) {
-    const parsed = TranscriptFileSchema.parse(chunk.json);
+    const parsed = WhisperOutputSchema.parse(chunk.json);
     if (parsed.text) {
       texts.push(parsed.text.trim());
     }

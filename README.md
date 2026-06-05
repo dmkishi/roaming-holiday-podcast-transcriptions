@@ -24,9 +24,9 @@ brew install ffmpeg
 
 Transcribe
 --------------------------------------------------------------------------------
-Runs the full pipeline for an episode from download to paragraph sidecar. Reads
-the RSS feed, downloads the MP3 to `/tmp/`, transcribes it using Whisper, and
-writes an RSS sidecar and transcript to `episodes/`.
+Runs the full pipeline for an episode from download to transcript. Reads the RSS
+feed, downloads the MP3 to `/tmp/`, transcribes it using Whisper, and writes an
+RSS sidecar and transcript to `episodes/`.
 
 ### Usage
 ```sh
@@ -59,10 +59,9 @@ pnpm transcribe 101 --force-all
 - `episodes/`
   - `N.rss.json` Episode data from the RSS feed.
   - `N.audio-gaps.json` Silence gaps in audio.
-  - `N.transcript.json` Raw JSON output from whisper-timestamped.
   - `N.audio-fade.json` Fade-out/fade-in pairs in audio.
-  - `N.transcript.paragraph.json` Transcript segmented into paragraphs and
-    paragraph groups with word-level timing.
+  - `N.transcript.json` Transcript segmented into paragraphs and paragraph
+    groups with word-level timing.
 - `/tmp/`
   - `N.mp3`
   - `N.chunk-NN.mp3`

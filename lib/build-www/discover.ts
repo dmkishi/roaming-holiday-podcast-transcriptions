@@ -1,11 +1,11 @@
 import {
-  listEpisodeNumbers, readRss, hasParagraph, readParagraph,
-  type RssFile, type ParagraphFile,
+  listEpisodeNumbers, readRss, hasTranscript, readTranscript,
+  type RssFile, type TranscriptFile,
 } from '@lib/shared/artifacts.js';
 
 export interface EpisodeArtifacts {
   rss: RssFile;
-  paragraph: ParagraphFile;
+  transcript: TranscriptFile;
 }
 
 export type DiscoveryResult =
@@ -14,9 +14,9 @@ export type DiscoveryResult =
 
 /**
  * Scan the outputs directory and return a result per RSS file. Episodes missing
- * a paragraph sidecar are returned as `{ ok: false }` entries so the caller can
- * report the skip with a reason. The paragraph sidecar carries the grouped
- * paragraphs; its presence signals a complete pipeline run.
+ * a transcript are returned as `{ ok: false }` entries so the caller can report
+ * the skip with a reason. The transcript carries the grouped paragraphs; its
+ * presence signals a complete pipeline run.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
   const results: DiscoveryResult[] = [];
@@ -24,13 +24,13 @@ export function discoverEpisodes(): DiscoveryResult[] {
   for (const episodeNumber of listEpisodeNumbers()) {
     const rss = readRss(episodeNumber);
 
-    if (!hasParagraph(episodeNumber)) {
-      results.push({ ok: false, episodeNumber, reason: 'No paragraph sidecar found' });
+    if (!hasTranscript(episodeNumber)) {
+      results.push({ ok: false, episodeNumber, reason: 'No transcript found' });
       continue;
     }
-    const paragraph = readParagraph(episodeNumber);
-    if (paragraph.paragraphGroups.length === 0) {
-      results.push({ ok: false, episodeNumber, reason: 'No paragraph groups in sidecar' });
+    const transcript = readTranscript(episodeNumber);
+    if (transcript.paragraphGroups.length === 0) {
+      results.push({ ok: false, episodeNumber, reason: 'No paragraph groups in transcript' });
       continue;
     }
 
@@ -38,7 +38,7 @@ export function discoverEpisodes(): DiscoveryResult[] {
       ok: true,
       artifacts: {
         rss,
-        paragraph,
+        transcript,
       },
     });
   }

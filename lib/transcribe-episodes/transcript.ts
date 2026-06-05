@@ -7,7 +7,7 @@ import {
 } from '@lib/transcribe-episodes/audioChunk.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import {
-  paths, hasParagraph, hasGaps, readGaps,
+  paths, hasTranscript, hasGaps, readGaps,
 } from '@lib/shared/artifacts.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import { VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
@@ -99,14 +99,14 @@ export async function makePrompt(title: string, description?: string): Promise<{
 }
 
 /**
- * Make a transcription request for an episode, skipping if a paragraph sidecar
- * already exists (unless forced).
+ * Make a transcription request for an episode, skipping if a transcript already
+ * exists (unless forced).
  */
 export async function makeToTranscribe(
   episode: Episode,
   force: boolean,
 ): Promise<ToTranscribe | undefined> {
-  if (hasParagraph(episode.episodeNumber) && !force) {
+  if (hasTranscript(episode.episodeNumber) && !force) {
     return undefined;
   }
 
