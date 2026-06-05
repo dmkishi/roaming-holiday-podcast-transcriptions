@@ -1,6 +1,5 @@
 import {
-  listEpisodeNumbers, readRss,
-  hasTranscript, hasParagraph, readParagraph,
+  listEpisodeNumbers, readRss, hasParagraph, readParagraph,
   type RssFile, type ParagraphFile,
 } from '@lib/shared/artifacts.js';
 
@@ -15,9 +14,9 @@ export type DiscoveryResult =
 
 /**
  * Scan the outputs directory and return a result per RSS file. Episodes missing
- * a transcript or paragraph sidecar are returned as `{ ok: false }` entries so
- * the caller can report the skip with a reason. The paragraph sidecar carries
- * the grouped paragraphs; its presence signals a complete pipeline run.
+ * a paragraph sidecar are returned as `{ ok: false }` entries so the caller can
+ * report the skip with a reason. The paragraph sidecar carries the grouped
+ * paragraphs; its presence signals a complete pipeline run.
  */
 export function discoverEpisodes(): DiscoveryResult[] {
   const results: DiscoveryResult[] = [];
@@ -25,10 +24,6 @@ export function discoverEpisodes(): DiscoveryResult[] {
   for (const episodeNumber of listEpisodeNumbers()) {
     const rss = readRss(episodeNumber);
 
-    if (!hasTranscript(episodeNumber)) {
-      results.push({ ok: false, episodeNumber, reason: 'No transcript found' });
-      continue;
-    }
     if (!hasParagraph(episodeNumber)) {
       results.push({ ok: false, episodeNumber, reason: 'No paragraph sidecar found' });
       continue;

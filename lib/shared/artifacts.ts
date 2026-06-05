@@ -6,7 +6,6 @@ import {
   RssFileSchema,
   GapsFileSchema,
   FadeFileSchema,
-  TranscriptFileSchema,
   ParagraphFileSchema,
 } from '@lib/shared/schemas.js';
 import { formatEpisodeNumber, toPrettyJson } from '@lib/shared/strings.js';
@@ -14,14 +13,12 @@ import { formatEpisodeNumber, toPrettyJson } from '@lib/shared/strings.js';
 export type RssFile = z.infer<typeof RssFileSchema>;
 export type GapsFile = z.infer<typeof GapsFileSchema>;
 export type FadeFile = z.infer<typeof FadeFileSchema>;
-export type TranscriptFile = z.infer<typeof TranscriptFileSchema>;
 export type ParagraphFile = z.infer<typeof ParagraphFileSchema>;
 
 const SUFFIX = {
   rss: '.rss.json',
   gaps: '.audio-gaps.json',
   fade: '.audio-fade.json',
-  transcript: '.transcript.json',
   paragraph: '.transcript.paragraph.json',
 } as const;
 
@@ -38,7 +35,6 @@ export function paths(episodeNumber: number): {
   mp3: string;
   gaps: string;
   fade: string;
-  transcript: string;
   paragraph: string;
 } {
   return {
@@ -46,7 +42,6 @@ export function paths(episodeNumber: number): {
     mp3: mp3PathFor(episodeNumber),
     gaps: pathFor(episodeNumber, SUFFIX.gaps),
     fade: pathFor(episodeNumber, SUFFIX.fade),
-    transcript: pathFor(episodeNumber, SUFFIX.transcript),
     paragraph: pathFor(episodeNumber, SUFFIX.paragraph),
   };
 }
@@ -55,7 +50,6 @@ export const hasRss = (n: number): boolean => existsSync(pathFor(n, SUFFIX.rss))
 export const hasMp3 = (n: number): boolean => existsSync(mp3PathFor(n));
 export const hasGaps = (n: number): boolean => existsSync(pathFor(n, SUFFIX.gaps));
 export const hasFade = (n: number): boolean => existsSync(pathFor(n, SUFFIX.fade));
-export const hasTranscript = (n: number): boolean => existsSync(pathFor(n, SUFFIX.transcript));
 export const hasParagraph = (n: number): boolean => existsSync(pathFor(n, SUFFIX.paragraph));
 
 function readJson<S extends z.ZodType>(path: string, schema: S): z.infer<S> {
@@ -74,8 +68,6 @@ export const readGaps = (n: number): GapsFile =>
   readJson(pathFor(n, SUFFIX.gaps), GapsFileSchema);
 export const readFade = (n: number): FadeFile =>
   readJson(pathFor(n, SUFFIX.fade), FadeFileSchema);
-export const readTranscript = (n: number): TranscriptFile =>
-  readJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema);
 export const readParagraph = (n: number): ParagraphFile =>
   readJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema);
 
@@ -85,8 +77,6 @@ export const writeGaps = (n: number, data: GapsFile): string =>
   writeJson(pathFor(n, SUFFIX.gaps), GapsFileSchema, data);
 export const writeFade = (n: number, data: FadeFile): string =>
   writeJson(pathFor(n, SUFFIX.fade), FadeFileSchema, data);
-export const writeTranscript = (n: number, data: TranscriptFile): string =>
-  writeJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema, data);
 export const writeParagraph = (n: number, data: ParagraphFile): string =>
   writeJson(pathFor(n, SUFFIX.paragraph), ParagraphFileSchema, data);
 

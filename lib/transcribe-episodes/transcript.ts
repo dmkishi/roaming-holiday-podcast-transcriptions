@@ -7,10 +7,11 @@ import {
 } from '@lib/transcribe-episodes/audioChunk.js';
 import type { Episode } from '@lib/transcribe-episodes/episode.js';
 import {
-  paths, hasTranscript, hasGaps, readGaps, writeTranscript,
+  paths, hasParagraph, hasGaps, readGaps,
 } from '@lib/shared/artifacts.js';
 import { fromSeconds, type Duration } from '@lib/shared/duration.js';
 import { VENV_PYTHON, VENV_WHISPER } from '@lib/shared/paths.js';
+import type { Segment } from '@lib/shared/schemas.js';
 import {
   CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
 } from '@lib/config/audio.js';
@@ -33,7 +34,7 @@ export interface ToTranscribe {
 export interface Transcript {
   ok: true;
   episodeNumber: number;
-  path: string;
+  segments: Segment[];
   stats: {
     words: number;
     characters: number;
@@ -98,14 +99,14 @@ export async function makePrompt(title: string, description?: string): Promise<{
 }
 
 /**
- * Make a transcription request for an episode, skipping if a transcript
+ * Make a transcription request for an episode, skipping if a paragraph sidecar
  * already exists (unless forced).
  */
 export async function makeToTranscribe(
   episode: Episode,
   force: boolean,
 ): Promise<ToTranscribe | undefined> {
-  if (hasTranscript(episode.episodeNumber) && !force) {
+  if (hasParagraph(episode.episodeNumber) && !force) {
     return undefined;
   }
 
@@ -127,9 +128,10 @@ export async function makeToTranscribe(
 }
 
 /**
- * Runs Whisper on an episode in ~15-minute chunks split on speech gaps
- * detected by Silero VAD. Merges per-chunk outputs into a single
- * transcript with absolute timestamps and saves it to disk.
+ * Runs Whisper on an episode in ~15-minute chunks split on speech gaps detected
+ * by Silero VAD. Merges per-chunk outputs into a single transcript with
+ * absolute timestamps and returns its segments in memory for the caller to
+ * build paragraphs from.
  */
 export async function promptTranscript(
   toTranscribe: ToTranscribe,
@@ -194,7 +196,6 @@ export async function promptTranscript(
 
     // Merge all chunk transcripts with rebased timestamps.
     const merged = mergeChunkTranscripts(chunkResults);
-
     if (merged.text === '') {
       return { ok: false, error: 'Whisper transcript is empty' };
     }
@@ -202,12 +203,10 @@ export async function promptTranscript(
     const wordCount = merged.text.split(/\s+/u).filter(Boolean).length;
     const characterCount = merged.text.length;
 
-    const path = writeTranscript(toTranscribe.episodeNumber, merged);
-
     return {
       ok: true,
       episodeNumber: toTranscribe.episodeNumber,
-      path,
+      segments: merged.segments,
       stats: {
         words: wordCount,
         characters: characterCount,

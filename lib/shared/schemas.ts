@@ -75,6 +75,7 @@ const ParagraphSegmentSchema = SegmentSchema.omit({ id: true });
 const ParagraphSchema = z.array(ParagraphSegmentSchema);
 const ParagraphGroupSchema = z.array(ParagraphSchema);
 
+export type ParagraphSegment = z.infer<typeof ParagraphSegmentSchema>;
 export type Paragraph = z.infer<typeof ParagraphSchema>;
 export type ParagraphGroup = z.infer<typeof ParagraphGroupSchema>;
 

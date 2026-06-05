@@ -7,14 +7,12 @@ describe('paths', () => {
     const p = paths(123);
     expect(basename(p.rss)).toBe('123.rss.json');
     expect(basename(p.gaps)).toBe('123.audio-gaps.json');
-    expect(basename(p.transcript)).toBe('123.transcript.json');
     expect(basename(p.paragraph)).toBe('123.transcript.paragraph.json');
   });
 
   test('zero-pads episode numbers to 3 digits', () => {
     const p = paths(1);
     expect(basename(p.rss)).toBe('001.rss.json');
-    expect(basename(p.transcript)).toBe('001.transcript.json');
     expect(basename(p.paragraph)).toBe('001.transcript.paragraph.json');
   });
 
@@ -25,7 +23,7 @@ describe('paths', () => {
 
   test('all paths share the same directory', () => {
     const p = paths(1);
-    const dirs = [p.rss, p.gaps, p.transcript, p.paragraph]
+    const dirs = [p.rss, p.gaps, p.paragraph]
       .map((x) => x.replace(basename(x), ''));
     expect(new Set(dirs).size).toBe(1);
   });

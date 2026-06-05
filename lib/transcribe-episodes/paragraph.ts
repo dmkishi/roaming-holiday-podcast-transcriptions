@@ -1,9 +1,7 @@
 import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import {
-  hasGaps, readGaps, hasFade, readFade, readTranscript,
-} from '@lib/shared/artifacts.js';
+import { hasGaps, readGaps, hasFade, readFade } from '@lib/shared/artifacts.js';
 import type {
-  FadePair, Paragraph, ParagraphGroup, Segment,
+  FadePair, Paragraph, ParagraphGroup, ParagraphSegment,
 } from '@lib/shared/schemas.js';
 import { PARAGRAPH_GAP_SECONDS } from '@lib/config/audio.js';
 
@@ -21,15 +19,14 @@ interface Paragraphs {
 export type ParagraphsResponse = FailResponse | Paragraphs;
 
 /**
- * Reads a transcript file and computes paragraph breaks.
+ * Computes paragraph breaks from a transcript's segments.
  */
 export function buildParagraphs(
   episodeNumber: number,
+  segments: ParagraphSegment[],
 ): ParagraphsResponse {
   try {
-    const { segments } = readTranscript(episodeNumber);
-
-    if (segments === undefined || segments.length === 0) {
+    if (segments.length === 0) {
       return {
         ok: false,
         error: 'No segments in transcript',
@@ -113,7 +110,7 @@ export function findSegmentFadeBoundaries(
  * is non-empty.
  */
 export function buildParagraphBreaks(
-  segments: Segment[],
+  segments: ParagraphSegment[],
   gaps: readonly { start: number; end: number; duration: number }[],
   paragraphGapSeconds: number,
 ): number[] {
@@ -135,7 +132,7 @@ export function buildParagraphBreaks(
  * Returns the index of the last segment whose `end` time is at or before
  * `time`, using binary search. Returns -1 when no segment qualifies.
  */
-function findSegmentBeforeTime(segments: Segment[], time: number): number {
+function findSegmentBeforeTime(segments: ParagraphSegment[], time: number): number {
   let lo = 0;
   let hi = segments.length - 1;
   let result = -1;

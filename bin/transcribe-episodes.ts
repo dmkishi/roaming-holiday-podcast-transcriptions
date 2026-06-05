@@ -12,8 +12,9 @@ import {
 import { buildParagraphs } from '@lib/transcribe-episodes/paragraph.js';
 import {
   paths, hasRss, readRss, writeRss,
-  hasMp3, hasGaps, hasTranscript, hasFade, hasParagraph, writeParagraph,
+  hasMp3, hasGaps, hasFade, hasParagraph, readParagraph, writeParagraph,
 } from '@lib/shared/artifacts.js';
+import type { ParagraphSegment } from '@lib/shared/schemas.js';
 import { formatDate, formatNumber, pluralize } from '@lib/shared/strings.js';
 import { toRelative } from '@lib/shared/paths.js';
 import { print, printLog } from '@lib/shared/print.js';
@@ -33,22 +34,25 @@ if (runTranscript) banner.push(`  Whisper model: ${opts.transcribeModel}`);
 printLog.info(banner);
 print.emptyLine();
 
-let episodeNumbers: number[];
-if (runTranscript) episodeNumbers = await runTranscriptPipeline();
-else if (runParagraph) episodeNumbers = loadFromDisk('transcript');
-else episodeNumbers = loadFromDisk('paragraph');
+// Merged Whisper segments produced by the transcribe pipeline, keyed by episode
+// number, so the paragraph stage can build from memory without a transcript
+// sidecar. Empty under `--only-paragraphs` (segments are read from the existing
+// paragraph sidecar instead).
+const segmentsByEpisode = new Map<number, ParagraphSegment[]>();
+
+const episodeNumbers: number[] = runTranscript
+  ? await runTranscriptPipeline()
+  : loadFromDisk();
 
 // =============================================================================
-// Load existing artifacts from disk
+// Load existing paragraph sidecars from disk (--only-paragraphs)
 // =============================================================================
-function loadFromDisk(requires: 'transcript' | 'paragraph'): number[] {
-  const artifact = requires === 'transcript' ? 'transcripts' : 'paragraph sidecars';
-  print.info(`Loading existing ${artifact}...`);
+function loadFromDisk(): number[] {
+  print.info('Loading existing paragraph sidecars...');
   const items: number[] = [];
   for (const episodeNumber of opts.episodeNums) {
-    const has = requires === 'transcript' ? hasTranscript(episodeNumber) : hasParagraph(episodeNumber);
-    if (!has) {
-      printLog.warn(`#${episodeNumber}: No ${requires} found - skipping`);
+    if (!hasParagraph(episodeNumber)) {
+      printLog.warn(`#${episodeNumber}: No paragraph sidecar found - skipping`);
       continue;
     }
     if (!hasRss(episodeNumber)) {
@@ -57,12 +61,11 @@ function loadFromDisk(requires: 'transcript' | 'paragraph'): number[] {
     }
 
     items.push(episodeNumber);
-    const path = requires === 'transcript' ? paths(episodeNumber).transcript : paths(episodeNumber).paragraph;
-    printLog.info(`#${episodeNumber}: Loaded "${toRelative(path)}"`);
+    printLog.info(`#${episodeNumber}: Loaded "${toRelative(paths(episodeNumber).paragraph)}"`);
   }
 
   if (items.length === 0) {
-    printLog.error(`No ${artifact} to process.`);
+    printLog.error('No paragraph sidecars to process.');
     process.exit(1);
   }
   print.emptyLine();
@@ -211,11 +214,12 @@ async function runTranscriptPipeline(): Promise<number[]> {
       const { audioDuration, workDuration } = res.stats;
       const workPercentage = Math.round((workDuration.seconds / audioDuration.seconds) * 100);
       printLog.info([
-        `#${toTranscribe.episodeNumber}: Saved "${toRelative(res.path)}"`,
+        `#${toTranscribe.episodeNumber}: Transcribed`,
         `  Work time:  ${workDuration.human} (${workPercentage}% of ${audioDuration.timestamp})`,
         `  Words:      ${formatNumber(res.stats.words)}`,
         `  Characters: ${formatNumber(res.stats.characters)}`,
       ]);
+      segmentsByEpisode.set(res.episodeNumber, res.segments);
       transcripts.push(res);
     } else {
       printLog.warn(`#${toTranscribe.episodeNumber}: Failed ${res.error ? `- ${res.error}` : ''}`);
@@ -270,7 +274,18 @@ if (runParagraph) {
       printLog.warn(`#${episodeNumber}: Skipping - fade file already exists`);
     }
 
-    const paragraphsRes = buildParagraphs(episodeNumber);
+    // Full pipeline sources segments from the in-memory transcribe results;
+    // --only-paragraphs flattens the existing paragraph sidecar back to its
+    // ordered segment list (lossless minus the unused segment id).
+    const segments = runTranscript
+      ? segmentsByEpisode.get(episodeNumber)
+      : readParagraph(episodeNumber).paragraphGroups.flat(2);
+    if (segments === undefined) {
+      printLog.warn(`#${episodeNumber}: No transcript segments - skipping`);
+      continue;
+    }
+
+    const paragraphsRes = buildParagraphs(episodeNumber, segments);
     if (!paragraphsRes.ok) {
       printLog.warn(
         `#${episodeNumber}: Failed ${paragraphsRes.error ? `- ${paragraphsRes.error}` : ''}`,
