@@ -33,9 +33,9 @@ const execFileAsync = promisify(execFile);
 /**
  * Choose cut points for chunking. Always includes 0 and totalDuration.
  *
- * For each target boundary, picks the midpoint of the longest gap within
- * a search window that widens incrementally. Falls back to a hard cut at
- * the exact target time if no gap is found.
+ * For each target boundary, picks the midpoint of the longest gap within a
+ * search window that widens incrementally. Falls back to a hard cut at the
+ * exact target time if no gap is found.
  */
 export function chooseCutPoints(
   gaps: readonly Gap[],
@@ -67,8 +67,8 @@ export function chooseCutPoints(
 }
 
 /**
- * Find the best gap near a target time within a given window range.
- * Prefers the longest gap; ties broken by proximity to target.
+ * Find the best gap near a target time within a given window range. Prefers the
+ * longest gap; ties broken by proximity to target.
  */
 function findBestGap(
   gaps: readonly Gap[],
@@ -181,8 +181,8 @@ export async function whisperChunk(
     '--verbose', 'True',
     '--initial_prompt', prompt,
     // whisper-timestamped defaults to greedy decoding; --accurate restores
-    // openai-whisper's beam search + temperature fallback so transcription
-    // text stays consistent with the existing corpus.
+    // openai-whisper's beam search + temperature fallback so transcription text
+    // stays consistent with the existing corpus.
     '--accurate',
   ];
 
