@@ -1,6 +1,6 @@
 import { basename } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { paths } from '@lib/shared/artifacts.js';
+import { paths } from '#lib/shared/artifacts.js';
 
 describe('paths', () => {
   test('produces correct filenames for a basic episode', () => {

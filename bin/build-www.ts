@@ -1,16 +1,16 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { discoverEpisodes, type EpisodeArtifacts } from '@lib/build-www/discover.js';
-import { downloadImage } from '@lib/build-www/images.js';
-import { episodeLd, breadcrumbLd, seriesLd } from '@lib/build-www/jsonLd.js';
-import { loadSupplements } from '@lib/shared/supplements.js';
-import { collectStats } from '@lib/build-www/stats.js';
-import { addTimelineMarkers } from '@lib/build-www/timeline.js';
-import type { SiteEpisode } from '@lib/build-www/types.js';
-import { SITE_DATA_DIR, SITE_EPISODES_DIR, episodeUrl, toRelative } from '@lib/shared/paths.js';
-import { print, printLog } from '@lib/shared/print.js';
-import { formatEpisodeNumber, pluralize, toPrettyJson } from '@lib/shared/strings.js';
-import { SITE } from '@lib/config/site.js';
+import { discoverEpisodes, type EpisodeArtifacts } from '#lib/build-www/discover.js';
+import { downloadImage } from '#lib/build-www/images.js';
+import { episodeLd, breadcrumbLd, seriesLd } from '#lib/build-www/jsonLd.js';
+import { loadSupplements } from '#lib/shared/supplements.js';
+import { collectStats } from '#lib/build-www/stats.js';
+import { addTimelineMarkers } from '#lib/build-www/timeline.js';
+import type { SiteEpisode } from '#lib/build-www/types.js';
+import { SITE_DATA_DIR, SITE_EPISODES_DIR, episodeUrl, toRelative } from '#lib/shared/paths.js';
+import { print, printLog } from '#lib/shared/print.js';
+import { formatEpisodeNumber, pluralize, toPrettyJson } from '#lib/shared/strings.js';
+import { SITE } from '#lib/config/site.js';
 
 // =============================================================================
 // Discover episodes

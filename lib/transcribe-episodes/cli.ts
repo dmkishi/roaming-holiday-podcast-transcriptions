@@ -1,5 +1,5 @@
 import minimist from 'minimist';
-import { DEFAULT_MODEL } from '@lib/config/whisper.js';
+import { DEFAULT_MODEL } from '#lib/config/whisper.js';
 
 interface CliOptions {
   episodeNums: Set<number>;

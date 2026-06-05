@@ -3,6 +3,9 @@
   "author": "DM Kishi <dm.kishi@gmail.com>",
   "version": "1.0.0",
   "type": "module",
+  "imports": {
+    "#lib/*": "./lib/*"
+  },
   "scripts": {
     "transcribe": "tsx bin/transcribe-episodes.ts",
     "upload-cloudflare": "tsx --env-file=.env bin/upload-cloudflare.ts",

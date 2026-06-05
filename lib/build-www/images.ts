@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { SITE_DIR, SITE_EPISODES_IMG_DIR } from '@lib/shared/paths.js';
-import { formatEpisodeNumber } from '@lib/shared/strings.js';
+import { SITE_DIR, SITE_EPISODES_IMG_DIR } from '#lib/shared/paths.js';
+import { formatEpisodeNumber } from '#lib/shared/strings.js';
 
 export type ImageResponse =
   | { status: 'downloaded' | 'alreadyExists'; path: string }

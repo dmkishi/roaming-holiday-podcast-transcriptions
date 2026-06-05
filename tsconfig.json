@@ -11,9 +11,6 @@
     "moduleDetection": "force",
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "paths": {
-      "@lib/*": ["./lib/*"]
-    },
     "types": ["node"],
 
     /* TYPE CHECKING RULES */

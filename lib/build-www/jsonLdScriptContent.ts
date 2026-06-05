@@ -1,6 +1,6 @@
 /**
  * @file Import-free so Eleventy can register it as a filter without pulling in
- * the `@lib`-aliased data builders.
+ * the `#lib`-aliased data builders.
  */
 
 export function jsonLdScriptContent(data: unknown): string {

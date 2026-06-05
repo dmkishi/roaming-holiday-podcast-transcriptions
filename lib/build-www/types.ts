@@ -1,4 +1,4 @@
-import type { Duration } from '@lib/shared/duration.js';
+import type { Duration } from '#lib/shared/duration.js';
 
 export interface TranscriptSegment {
   start: number;

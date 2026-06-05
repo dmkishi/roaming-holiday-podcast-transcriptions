@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse } from 'yaml';
 import { z } from 'zod';
-import { ROOT } from '@lib/shared/paths.js';
+import { ROOT } from '#lib/shared/paths.js';
 
 const EpisodeSupplementSchema = z.object({
   location: z.string().optional(),

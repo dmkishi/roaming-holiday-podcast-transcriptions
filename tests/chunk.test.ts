@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { findGapsOverThreshold } from '@lib/transcribe-episodes/audioGaps.js';
+import { findGapsOverThreshold } from '#lib/transcribe-episodes/audioGaps.js';
 import {
   chooseCutPoints,
   mergeChunkTranscripts,
   type CutPointOptions,
-} from '@lib/transcribe-episodes/audioChunk.js';
+} from '#lib/transcribe-episodes/audioChunk.js';
 
 const defaultOpts: CutPointOptions = {
   targetChunkMinutes: 15,

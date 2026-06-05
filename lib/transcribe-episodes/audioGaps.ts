@@ -1,11 +1,11 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { FailResponse } from '@lib/transcribe-episodes/types.js';
-import { decodePcm } from '@lib/transcribe-episodes/audioPcm.js';
-import { hasGaps, paths, writeGaps } from '@lib/shared/artifacts.js';
-import { VENV_PYTHON, VAD_SCRIPT } from '@lib/shared/paths.js';
-import { VadOutputSchema } from '@lib/shared/schemas.js';
-import { MIN_GAP_SECONDS } from '@lib/config/audio.js';
+import type { FailResponse } from '#lib/transcribe-episodes/types.js';
+import { decodePcm } from '#lib/transcribe-episodes/audioPcm.js';
+import { hasGaps, paths, writeGaps } from '#lib/shared/artifacts.js';
+import { VENV_PYTHON, VAD_SCRIPT } from '#lib/shared/paths.js';
+import { VadOutputSchema } from '#lib/shared/schemas.js';
+import { MIN_GAP_SECONDS } from '#lib/config/audio.js';
 
 export interface Gap {
   start: number;
