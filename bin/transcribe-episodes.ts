@@ -73,9 +73,9 @@ function loadFromDisk(requires: 'transcript' | 'paragraph'): number[] {
 // Run transcript pipeline
 // =============================================================================
 async function runTranscriptPipeline(): Promise<number[]> {
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   // Get RSS feed
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   print.info('Fetching RSS feed...');
   const feed = await getAllRssItems(RSS_FEED_URL, opts.forceRss);
   if (feed.status === 'failed') {
@@ -84,9 +84,9 @@ async function runTranscriptPipeline(): Promise<number[]> {
   }
   printLog.info(`RSS feed: ${feed.items.length} items (${pc.blue(feed.status)})`);
 
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   // Write episode RSS sidecar file(s) from the RSS feed
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   const episodes = findEpisodes(feed.items, opts.episodeNums);
   const foundEpisodeNums = episodes.map((e) => e.episodeNumber);
   if (episodes.length < opts.episodeNums.size) {
@@ -117,9 +117,9 @@ async function runTranscriptPipeline(): Promise<number[]> {
   }
   print.emptyLine();
 
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   // Make transcription requests
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   print.info('Preparing for transcription...');
   let toTranscribes: ToTranscribe[] = [];
   for (const episode of episodes) {
@@ -149,9 +149,9 @@ async function runTranscriptPipeline(): Promise<number[]> {
   }
   print.emptyLine();
 
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   // Download MP3s
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   print.info('Downloading MP3s...');
   for (const toTranscribe of toTranscribes) {
     const mp3 = await downloadMp3(
@@ -178,9 +178,9 @@ async function runTranscriptPipeline(): Promise<number[]> {
   }
   print.emptyLine();
 
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   // Detect audio gaps and save (for transcribing and building paragraphs)
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   print.info('Detecting audio gaps...');
   for (const toTranscribe of toTranscribes) {
     const res = await detectGaps(toTranscribe.episodeNumber, toTranscribe.mp3.path, opts.forceGaps);
@@ -200,9 +200,9 @@ async function runTranscriptPipeline(): Promise<number[]> {
   }
   print.emptyLine();
 
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   // Transcribe
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   print.info('Transcribing...');
   const transcripts: Transcript[] = [];
   for (const toTranscribe of toTranscribes) {
