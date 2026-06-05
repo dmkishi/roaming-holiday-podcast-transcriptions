@@ -14,6 +14,7 @@
     {% for src in scripts %}
       <script src="{{ src | hashUrl }}" defer></script>
     {% endfor %}
+    <link rel="canonical" href="{{ baseUrl }}{{ page.url }}">
     {% if episode %}
       <link rel="alternate" type="text/markdown" href="/episodes/{{ episode.episodeNumber }}.md" title="{{ episode.rss.title }}">
     {% endif %}
