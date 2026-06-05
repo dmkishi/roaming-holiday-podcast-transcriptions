@@ -1,14 +1,14 @@
 import type { z } from 'zod';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { OUTPUTS_DIR, TMP_DIR } from '#lib/shared/paths.js';
+import { OUTPUTS_DIR, TMP_DIR } from '#lib/shared/paths.ts';
 import {
   RssFileSchema,
   GapsFileSchema,
   FadeFileSchema,
   TranscriptFileSchema,
-} from '#lib/shared/schemas.js';
-import { formatEpisodeNumber, toPrettyJson } from '#lib/shared/strings.js';
+} from '#lib/shared/schemas.ts';
+import { formatEpisodeNumber, toPrettyJson } from '#lib/shared/strings.ts';
 
 export type RssFile = z.infer<typeof RssFileSchema>;
 export type GapsFile = z.infer<typeof GapsFileSchema>;

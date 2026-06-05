@@ -1,9 +1,9 @@
-import type { FailResponse } from '#lib/transcribe-episodes/types.js';
-import { hasGaps, readGaps, hasFade, readFade } from '#lib/shared/artifacts.js';
+import type { FailResponse } from '#lib/transcribe-episodes/types.ts';
+import { hasGaps, readGaps, hasFade, readFade } from '#lib/shared/artifacts.ts';
 import type {
   FadePair, Paragraph, ParagraphGroup, ParagraphSegment,
-} from '#lib/shared/schemas.js';
-import { PARAGRAPH_GAP_SECONDS } from '#lib/config/audio.js';
+} from '#lib/shared/schemas.ts';
+import { PARAGRAPH_GAP_SECONDS } from '#lib/config/audio.ts';
 
 interface Paragraphs {
   ok: true;

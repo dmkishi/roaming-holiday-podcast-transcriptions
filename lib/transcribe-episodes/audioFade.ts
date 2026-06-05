@@ -1,15 +1,15 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { FailResponse } from '#lib/transcribe-episodes/types.js';
-import { decodePcm } from '#lib/transcribe-episodes/audioPcm.js';
-import { writeFade } from '#lib/shared/artifacts.js';
-import { VENV_PYTHON, FADE_SCRIPT } from '#lib/shared/paths.js';
-import { FadesSchema, type Fade, type FadePair } from '#lib/shared/schemas.js';
+import type { FailResponse } from '#lib/transcribe-episodes/types.ts';
+import { decodePcm } from '#lib/transcribe-episodes/audioPcm.ts';
+import { writeFade } from '#lib/shared/artifacts.ts';
+import { VENV_PYTHON, FADE_SCRIPT } from '#lib/shared/paths.ts';
+import { FadesSchema, type Fade, type FadePair } from '#lib/shared/schemas.ts';
 import {
   FADE_FRAME_SIZE, FADE_HOP_SIZE,
   FADE_CUTOFF_HIGH, FADE_CUTOFF_LOW,
   FADE_MIN_LENGTH_SECONDS, FADE_PAIR_MAX_GAP_SECONDS,
-} from '#lib/config/audio.js';
+} from '#lib/config/audio.ts';
 
 type FadeResponse =
   | FailResponse

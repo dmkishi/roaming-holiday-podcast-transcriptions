@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { formatDate, formatNumber, handleize, pluralize } from '#lib/shared/strings.js';
+import { formatDate, formatNumber, handleize, pluralize } from '#lib/shared/strings.ts';
 
 describe('formatDate', () => {
   test('formats a date as YYYY-MM-DD', () => {

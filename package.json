@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "imports": {
-    "#lib/*.js": "./lib/*.ts"
+    "#lib/*": "./lib/*"
   },
   "scripts": {
     "transcribe": "node bin/transcribe-episodes.ts",

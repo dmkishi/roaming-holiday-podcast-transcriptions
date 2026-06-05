@@ -1,6 +1,6 @@
-import { type Duration, parseDuration } from '#lib/shared/duration.js';
-import type { RssItem } from '#lib/shared/rss.js';
-import { sanitizeRssText } from '#lib/shared/sanitizeRssText.js';
+import { type Duration, parseDuration } from '#lib/shared/duration.ts';
+import type { RssItem } from '#lib/shared/rss.ts';
+import { sanitizeRssText } from '#lib/shared/sanitizeRssText.ts';
 
 export interface Episode {
   episodeNumber: number;

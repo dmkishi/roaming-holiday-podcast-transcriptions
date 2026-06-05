@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { CLOUDFLARE_API_BASE } from '#lib/config/cloudflare.js';
-import type { CloudflareEnv } from '#lib/upload-cloudflare/env.js';
+import { CLOUDFLARE_API_BASE } from '#lib/config/cloudflare.ts';
+import type { CloudflareEnv } from '#lib/upload-cloudflare/env.ts';
 
 const CfErrorSchema = z.object({ code: z.number(), message: z.string() });
 const CfItemSchema = z.object({ id: z.string(), key: z.string() });

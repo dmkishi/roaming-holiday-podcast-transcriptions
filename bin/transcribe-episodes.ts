@@ -1,24 +1,24 @@
 import pc from 'picocolors';
-import { getTranscribeCliArgs } from '#lib/transcribe-episodes/cli.js';
-import { findEpisodes } from '#lib/transcribe-episodes/episode.js';
-import { downloadMp3 } from '#lib/transcribe-episodes/mp3.js';
-import { detectGaps } from '#lib/transcribe-episodes/audioGaps.js';
-import { runFade } from '#lib/transcribe-episodes/audioFade.js';
+import { getTranscribeCliArgs } from '#lib/transcribe-episodes/cli.ts';
+import { findEpisodes } from '#lib/transcribe-episodes/episode.ts';
+import { downloadMp3 } from '#lib/transcribe-episodes/mp3.ts';
+import { detectGaps } from '#lib/transcribe-episodes/audioGaps.ts';
+import { runFade } from '#lib/transcribe-episodes/audioFade.ts';
 import {
   makeToTranscribe, promptTranscript, PROMPT_TOKEN_LIMIT,
   type ToTranscribe, type Transcript,
-} from '#lib/transcribe-episodes/transcript.js';
-import { buildParagraphs } from '#lib/transcribe-episodes/paragraph.js';
+} from '#lib/transcribe-episodes/transcript.ts';
+import { buildParagraphs } from '#lib/transcribe-episodes/paragraph.ts';
 import {
   paths, hasRss, readRss, writeRss, hasMp3, hasGaps, hasFade,
   hasTranscript, readTranscript, writeTranscript,
-} from '#lib/shared/artifacts.js';
-import type { ParagraphSegment } from '#lib/shared/schemas.js';
-import { formatDate, formatNumber, pluralize } from '#lib/shared/strings.js';
-import { toRelative } from '#lib/shared/paths.js';
-import { print, printLog } from '#lib/shared/print.js';
-import { getAllRssItems } from '#lib/shared/rss.js';
-import { RSS_FEED_URL } from '#lib/config/rss.js';
+} from '#lib/shared/artifacts.ts';
+import type { ParagraphSegment } from '#lib/shared/schemas.ts';
+import { formatDate, formatNumber, pluralize } from '#lib/shared/strings.ts';
+import { toRelative } from '#lib/shared/paths.ts';
+import { print, printLog } from '#lib/shared/print.ts';
+import { getAllRssItems } from '#lib/shared/rss.ts';
+import { RSS_FEED_URL } from '#lib/config/rss.ts';
 
 // =============================================================================
 // Main

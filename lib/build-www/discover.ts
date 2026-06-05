@@ -1,7 +1,7 @@
 import {
   listEpisodeNumbers, readRss, hasTranscript, readTranscript,
   type RssFile, type TranscriptFile,
-} from '#lib/shared/artifacts.js';
+} from '#lib/shared/artifacts.ts';
 
 export interface EpisodeArtifacts {
   rss: RssFile;

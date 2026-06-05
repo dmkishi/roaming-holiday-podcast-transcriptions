@@ -1,15 +1,15 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { hasRss, readRss } from '#lib/shared/artifacts.js';
-import { loadSupplements } from '#lib/shared/supplements.js';
-import { SITE_DIST_EPISODES_DIR, toRelative } from '#lib/shared/paths.js';
-import { print, printLog } from '#lib/shared/print.js';
-import { pluralize } from '#lib/shared/strings.js';
-import { MAX_ITEM_BYTES } from '#lib/config/cloudflare.js';
-import { getUploadCliArgs } from '#lib/upload-cloudflare/cli.js';
-import { loadCloudflareEnv } from '#lib/upload-cloudflare/env.js';
-import { buildItemMetadata } from '#lib/upload-cloudflare/metadata.js';
-import { listItemKeys, uploadItem } from '#lib/upload-cloudflare/api.js';
+import { hasRss, readRss } from '#lib/shared/artifacts.ts';
+import { loadSupplements } from '#lib/shared/supplements.ts';
+import { SITE_DIST_EPISODES_DIR, toRelative } from '#lib/shared/paths.ts';
+import { print, printLog } from '#lib/shared/print.ts';
+import { pluralize } from '#lib/shared/strings.ts';
+import { MAX_ITEM_BYTES } from '#lib/config/cloudflare.ts';
+import { getUploadCliArgs } from '#lib/upload-cloudflare/cli.ts';
+import { loadCloudflareEnv } from '#lib/upload-cloudflare/env.ts';
+import { buildItemMetadata } from '#lib/upload-cloudflare/metadata.ts';
+import { listItemKeys, uploadItem } from '#lib/upload-cloudflare/api.ts';
 
 // =============================================================================
 // Parse CLI args + env

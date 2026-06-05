@@ -1,6 +1,6 @@
 import { appendFileSync } from 'node:fs';
 import { Temporal } from '@js-temporal/polyfill';
-import { LOG_PATH } from '#lib/shared/paths.js';
+import { LOG_PATH } from '#lib/shared/paths.ts';
 
 type LogLevel = 'info' | 'warn' | 'error';
 

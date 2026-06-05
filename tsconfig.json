@@ -11,6 +11,8 @@
     "moduleDetection": "force",
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "types": ["node"],
 
     /* TYPE CHECKING RULES */

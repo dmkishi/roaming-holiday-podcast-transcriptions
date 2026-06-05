@@ -1,5 +1,5 @@
-import type { JsonLd, SiteEpisode } from '#lib/build-www/types.js';
-import { BASE_URL, type Site } from '#lib/config/site.js';
+import type { JsonLd, SiteEpisode } from '#lib/build-www/types.ts';
+import { BASE_URL, type Site } from '#lib/config/site.ts';
 
 type SeriesInput = Pick<Site, 'descriptionHtml' | 'podcast'>;
 type EpisodeInput = Pick<SiteEpisode, 'episodeNumber' | 'url' | 'supplement' | 'rss'>;

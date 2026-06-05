@@ -2,8 +2,8 @@ import { XMLParser } from 'fast-xml-parser';
 import { z } from 'zod';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { TMP_DIR } from '#lib/shared/paths.js';
-import { handleize } from '#lib/shared/strings.js';
+import { TMP_DIR } from '#lib/shared/paths.ts';
+import { handleize } from '#lib/shared/strings.ts';
 
 const RssItemSchema = z.object({
   title: z.string(),

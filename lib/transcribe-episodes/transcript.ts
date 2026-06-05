@@ -1,21 +1,21 @@
 import { execFile } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { promisify } from 'node:util';
-import type { FailResponse } from '#lib/transcribe-episodes/types.js';
+import type { FailResponse } from '#lib/transcribe-episodes/types.ts';
 import {
   chooseCutPoints, splitMp3IntoChunks, whisperChunk, mergeChunkTranscripts,
-} from '#lib/transcribe-episodes/audioChunk.js';
-import type { Episode } from '#lib/transcribe-episodes/episode.js';
+} from '#lib/transcribe-episodes/audioChunk.ts';
+import type { Episode } from '#lib/transcribe-episodes/episode.ts';
 import {
   paths, hasTranscript, hasGaps, readGaps,
-} from '#lib/shared/artifacts.js';
-import { fromSeconds, type Duration } from '#lib/shared/duration.js';
-import { VENV_PYTHON, VENV_WHISPER } from '#lib/shared/paths.js';
-import type { Segment } from '#lib/shared/schemas.js';
+} from '#lib/shared/artifacts.ts';
+import { fromSeconds, type Duration } from '#lib/shared/duration.ts';
+import { VENV_PYTHON, VENV_WHISPER } from '#lib/shared/paths.ts';
+import type { Segment } from '#lib/shared/schemas.ts';
 import {
   CHUNK_TARGET_MINUTES, CHUNK_INITIAL_WINDOW_MINUTES, CHUNK_MAX_WINDOW_MINUTES,
-} from '#lib/config/audio.js';
-import { PROMPT } from '#lib/config/whisper.js';
+} from '#lib/config/audio.ts';
+import { PROMPT } from '#lib/config/whisper.ts';
 
 export interface ToTranscribe {
   episodeNumber: number;

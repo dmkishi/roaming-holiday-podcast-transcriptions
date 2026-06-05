@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { findSegmentFadeBoundaries } from '#lib/transcribe-episodes/paragraph.js';
-import type { FadePair } from '#lib/shared/schemas.js';
+import { findSegmentFadeBoundaries } from '#lib/transcribe-episodes/paragraph.ts';
+import type { FadePair } from '#lib/shared/schemas.ts';
 
 function seg(start: number): { start: number } {
   return { start };

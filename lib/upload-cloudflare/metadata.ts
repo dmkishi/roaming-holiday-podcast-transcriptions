@@ -1,8 +1,8 @@
-import type { RssFile } from '#lib/shared/artifacts.js';
-import type { EpisodeSupplement } from '#lib/shared/supplements.js';
-import { formatDate } from '#lib/shared/strings.js';
-import { episodeUrl } from '#lib/shared/paths.js';
-import { BASE_URL } from '#lib/config/site.js';
+import type { RssFile } from '#lib/shared/artifacts.ts';
+import type { EpisodeSupplement } from '#lib/shared/supplements.ts';
+import { formatDate } from '#lib/shared/strings.ts';
+import { episodeUrl } from '#lib/shared/paths.ts';
+import { BASE_URL } from '#lib/config/site.ts';
 
 export function buildItemMetadata(
   rss: RssFile,
