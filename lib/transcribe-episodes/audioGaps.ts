@@ -69,7 +69,7 @@ export async function detectGaps(
  * Run Silero VAD on a PCM file and return the file's total duration and the
  * start/end timestamps of detected speech intervals.
  */
-export async function detectSpeechIntervals(
+async function detectSpeechIntervals(
   pcmPath: string,
 ): Promise<{
   pcmSeconds: number;

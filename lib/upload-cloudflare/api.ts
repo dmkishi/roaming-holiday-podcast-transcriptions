@@ -62,7 +62,7 @@ async function parseJson<S extends z.ZodType>(res: Response, schema: S):
   return { ok: true, body: parsed.data };
 }
 
-export type ListResult =
+type ListResult =
   | { ok: true; keys: Set<string> }
   | { ok: false; error: string };
 
@@ -97,7 +97,7 @@ export async function listItemKeys(env: CloudflareEnv): Promise<ListResult> {
   return { ok: true, keys };
 }
 
-export type UploadResult =
+type UploadResult =
   | { ok: true; id: string }
   | { ok: false; error: string };
 

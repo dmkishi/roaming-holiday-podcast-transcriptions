@@ -8,7 +8,7 @@ export interface EpisodeArtifacts {
   transcript: TranscriptFile;
 }
 
-export type DiscoveryResult =
+type DiscoveryResult =
   | { ok: true; artifacts: EpisodeArtifacts }
   | { ok: false; episodeNumber: number; reason: string };
 

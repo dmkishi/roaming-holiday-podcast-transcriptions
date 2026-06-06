@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 import { SITE_DIR, SITE_EPISODES_IMG_DIR } from '#lib/shared/paths.ts';
 import { formatEpisodeNumber } from '#lib/shared/strings.ts';
 
-export type ImageResponse =
+type ImageResponse =
   | { status: 'downloaded' | 'alreadyExists'; path: string }
   | { status: 'failed'; path: string; error: string };
 

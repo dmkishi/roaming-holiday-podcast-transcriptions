@@ -44,7 +44,7 @@ export interface Transcript {
   };
 }
 
-export type TranscriptResponse = FailResponse | Transcript;
+type TranscriptResponse = FailResponse | Transcript;
 
 export const PROMPT_TOKEN_LIMIT = 224;
 
@@ -80,7 +80,7 @@ print(len(t.encode(${JSON.stringify(text)})))
  * 3. Place names
  * 4. Basic info
  */
-export async function makePrompt(title: string, description?: string): Promise<{
+async function makePrompt(title: string, description?: string): Promise<{
   prompt: string;
   tokenCount: number;
   isOverLimit: boolean;

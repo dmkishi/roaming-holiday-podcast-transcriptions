@@ -16,7 +16,7 @@ interface Paragraphs {
   };
 }
 
-export type ParagraphsResponse = FailResponse | Paragraphs;
+type ParagraphsResponse = FailResponse | Paragraphs;
 
 /**
  * Computes paragraph breaks from a transcript's segments.
@@ -109,7 +109,7 @@ export function findSegmentFadeBoundaries(
  * The returned array always begins with `0`. Caller must ensure `segments`
  * is non-empty.
  */
-export function buildParagraphBreaks(
+function buildParagraphBreaks(
   segments: ParagraphSegment[],
   gaps: readonly { start: number; end: number; duration: number }[],
   paragraphGapSeconds: number,

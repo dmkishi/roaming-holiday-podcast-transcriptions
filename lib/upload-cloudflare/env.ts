@@ -4,7 +4,7 @@ export interface CloudflareEnv {
   instance: string;
 }
 
-export type LoadEnvResult =
+type LoadEnvResult =
   | { ok: true; env: CloudflareEnv }
   | { ok: false; missing: string[] };
 

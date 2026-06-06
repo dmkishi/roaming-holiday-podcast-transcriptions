@@ -11,8 +11,8 @@ import {
 import { formatEpisodeNumber, toPrettyJson } from '#lib/shared/strings.ts';
 
 export type RssFile = z.infer<typeof RssFileSchema>;
-export type GapsFile = z.infer<typeof GapsFileSchema>;
-export type FadeFile = z.infer<typeof FadeFileSchema>;
+type GapsFile = z.infer<typeof GapsFileSchema>;
+type FadeFile = z.infer<typeof FadeFileSchema>;
 export type TranscriptFile = z.infer<typeof TranscriptFileSchema>;
 
 const SUFFIX = {
