@@ -97,7 +97,7 @@ printLog.info(`Saved "${toRelative(seriesJsonLdPath)}"`);
 print.emptyLine();
 print.info('Collecting stats...');
 try {
-  const stats = await collectStats(artifacts);
+  const stats = collectStats(artifacts);
   const statsPath = join(SITE_DATA_DIR, 'stats.json');
   writeFileSync(statsPath, toPrettyJson(stats));
   printLog.info(`Saved "${toRelative(statsPath)}"`);

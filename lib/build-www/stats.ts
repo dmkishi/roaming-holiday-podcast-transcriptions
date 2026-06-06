@@ -1,5 +1,4 @@
-import { parseDuration } from '#lib/shared/duration.ts';
-import { getAllRssItems, type RssItem } from '#lib/shared/rss.ts';
+import { listEpisodeNumbers, readRss, type RssFile } from '#lib/shared/artifacts.ts';
 import type { EpisodeArtifacts } from '#lib/build-www/discover.ts';
 import type {
   PodcastStats,
@@ -7,29 +6,27 @@ import type {
   EpisodeWordStat,
   EpisodeRateStat,
 } from '#lib/build-www/types.ts';
-import { RSS_FEED_URL } from '#lib/config/rss.ts';
 import { episodeUrl } from '#lib/shared/paths.ts';
 
 /**
- * Fetch the RSS feed and combine it with built artifacts to produce aggregate
- * podcast stats. Throws if the RSS feed cannot be fetched.
+ * Combine the on-disk RSS sidecars with built transcript artifacts to produce
+ * aggregate podcast stats. Reads only data under `episodes/`: podcast-level
+ * stats span every `*.rss.json` sidecar, while transcription and fuck stats
+ * span the transcribed `artifacts`.
  */
-export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<PodcastStats> {
-  const rss = await getAllRssItems(RSS_FEED_URL, false);
-  if (rss.status === 'failed') {
-    throw new Error('Failed to fetch RSS feed');
-  }
+export function collectStats(artifacts: EpisodeArtifacts[]): PodcastStats {
+  const rssFiles = listEpisodeNumbers().map((n) => readRss(n));
 
-  const totalEpisodes = rss.items.length;
-  const totalDurationSeconds = rss.items.reduce(
-    (sum, item) => sum + parseDuration(item['itunes:duration']).seconds,
+  const totalEpisodes = rssFiles.length;
+  const totalDurationSeconds = rssFiles.reduce(
+    (sum, rss) => sum + rss.duration.seconds,
     0,
   );
   const averageEpisodeDurationSeconds = Math.round(
     totalDurationSeconds / totalEpisodes,
   );
 
-  const episodeStats = rss.items.map((item) => toEpisodeStat(item));
+  const episodeStats = rssFiles.map((rss) => toEpisodeStat(rss));
   const longestEpisode = episodeStats.reduce((a, b) =>
     b.durationSeconds > a.durationSeconds ? b : a,
   );
@@ -39,7 +36,7 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
 
   const totalTranscribedEpisodes = artifacts.length;
   const wordStats = artifacts.map((a) =>
-    toEpisodeWordStat(a, fullText(a).split(/\s+/u).filter(Boolean).length),
+    toEpisodeWordStat(a.rss, fullText(a).split(/\s+/u).filter(Boolean).length),
   );
   const totalTranscribedWordCount = wordStats.reduce(
     (sum, s) => sum + s.wordCount,
@@ -55,7 +52,7 @@ export async function collectStats(artifacts: EpisodeArtifacts[]): Promise<Podca
     b.wordCount < a.wordCount ? b : a,
   );
   const fuckStats = artifacts.map((a) =>
-    toEpisodeWordStat(a, (fullText(a).match(/fuck/giu) ?? []).length),
+    toEpisodeWordStat(a.rss, (fullText(a).match(/fuck/giu) ?? []).length),
   );
   const mostFucks = fuckStats.reduce((a, b) =>
     b.wordCount > a.wordCount ? b : a,
@@ -92,31 +89,18 @@ function fullText(artifacts: EpisodeArtifacts): string {
     .join(' ');
 }
 
-function toEpisodeStat(item: RssItem): EpisodeStat {
-  const match = /RH(\d+)/u.exec(item.guid);
-  const episodeNumber = match ? Number(match[1]) : 0;
-  return {
-    episodeNumber,
-    title: item.title,
-    pubDate: new Date(item.pubDate).toISOString(),
-    durationSeconds: parseDuration(item['itunes:duration']).seconds,
-    url: episodeUrl(episodeNumber),
-  };
-}
-
-function toEpisodeWordStat(
-  artifacts: EpisodeArtifacts,
-  wordCount: number,
-): EpisodeWordStat {
-  const { rss } = artifacts;
+function toEpisodeStat(rss: RssFile): EpisodeStat {
   return {
     episodeNumber: rss.episodeNumber,
     title: rss.title,
     pubDate: rss.pubDate,
     durationSeconds: rss.duration.seconds,
     url: episodeUrl(rss.episodeNumber),
-    wordCount,
   };
+}
+
+function toEpisodeWordStat(rss: RssFile, wordCount: number): EpisodeWordStat {
+  return { ...toEpisodeStat(rss), wordCount };
 }
 
 function toEpisodeRateStat(stat: EpisodeWordStat): EpisodeRateStat {
