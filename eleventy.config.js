@@ -75,6 +75,10 @@ function setupCss(eleventyConfig) {
 }
 
 export default function configureEleventy(eleventyConfig) {
+  // In `--watch` or `--serve` mode, ignore changes to a template's imported
+  // JS/TS dependencies. Restart the dev server to pick those up.
+  eleventyConfig.setWatchJavaScriptDependencies(false);
+
   setupCss(eleventyConfig);
 
   // eleventyConfig.addPassthroughCopy({ 'www/src/img/*.svg': 'img' });
