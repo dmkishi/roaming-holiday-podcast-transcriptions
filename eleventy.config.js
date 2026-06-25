@@ -263,9 +263,9 @@ export default function configureEleventy(eleventyConfig) {
   /**
    * Format an ISO date string as a long-form US English date.
    * @example
-   * {{ '2026-04-04' | formatDate }} // => "April 4, 2026"
+   * {{ '2026-04-04' | formatLongDate }} // => "April 4, 2026"
    */
-  eleventyConfig.addFilter('formatDate', (dateStr) => formatLongDate(dateStr));
+  eleventyConfig.addFilter('formatLongDate', (dateStr) => formatLongDate(dateStr));
 
   /**
    * Extract the video ID from a YouTube URL.

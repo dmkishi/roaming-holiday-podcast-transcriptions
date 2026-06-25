@@ -1,6 +1,6 @@
 {% macro episodeMeta(episode) %}
   <time datetime="{{ episode.rss.pubDate }}">
-    {{- episode.rss.pubDate | formatDate -}}
+    {{- episode.rss.pubDate | formatLongDate -}}
   </time>
   <span class="duration">
     {{- episode.rss.duration.seconds | formatRoundedHuman -}}
