@@ -77,10 +77,10 @@ and transcripts from `episodes/` and compiles them into an Eleventy site in
 ### Usage
 ```sh
 # Build the static site from the transcription output
-pnpm build-www
+pnpm www:build
 
 # Serve the site locally and watch
-pnpm dev-www
+pnpm www:dev
 ```
 
 Upload Cloudflare

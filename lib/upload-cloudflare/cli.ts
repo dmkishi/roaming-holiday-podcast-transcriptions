@@ -14,7 +14,7 @@ export function getUploadCliArgs(args: string[]): CliOptions {
   const usage = `Usage: pnpm upload-cloudflare [<episodes...>] [--force]
        <episodes...> accepts integers and ranges, e.g. 100 101 120-129
        When omitted, every episode Markdown file in www/dist/episodes/ is uploaded.
-       Run \`pnpm build-www\` first to generate those files.`;
+       Run \`pnpm www:build\` first to generate those files.`;
 
   const tokens = argv._.map(String);
   if (tokens.length === 0) {

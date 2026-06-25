@@ -28,8 +28,8 @@ function pluralize(word, count) {
  * Bundle and minify CSS, precompile entrypoints so `hashUrl` reflects the
  * resolved output, and register the `hashUrl` filter for cache busting.
  *
- * - isProd = true on `pnpm build-www` (runMode `build`),
- * - isProd = false on `pnpm dev-www` (runMode `serve`).
+ * - isProd = true on `pnpm www:build` (runMode `build`),
+ * - isProd = false on `pnpm www:dev` (runMode `serve`).
  */
 function setupCss(eleventyConfig) {
   let isProd = true;

@@ -8,9 +8,9 @@
   },
   "scripts": {
     "transcribe": "node bin/transcribe-episodes.ts",
+    "www:dev": "eleventy --serve --incremental",
+    "www:build": "eleventy",
     "upload-cloudflare": "node --env-file=.env bin/upload-cloudflare.ts",
-    "build-www": "eleventy",
-    "dev-www": "eleventy --serve --incremental",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "typecheck": "tsc --noEmit && tsc --noEmit -p www/tsconfig.json",
     "lint": "pnpm lint:js && pnpm lint:css",
