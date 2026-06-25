@@ -28,7 +28,12 @@ import { listItemKeys, uploadItem } from '#lib/upload-cloudflare/api.ts';
 // =============================================================================
 // Parse CLI args + env
 // =============================================================================
-const opts = getUploadCliArgs(process.argv);
+const argsResult = getUploadCliArgs(process.argv);
+if (!argsResult.ok) {
+  printLog.error(argsResult.error);
+  process.exit(1);
+}
+const opts = argsResult.opts;
 
 const envResult = loadCloudflareEnv();
 if (!envResult.ok) {
