@@ -1,4 +1,4 @@
-import { stringify as stringifyYaml } from 'yaml';
+import { renderEpisodeMarkdown } from '#lib/shared/episodeMarkdown.ts';
 
 /*
  * Emit a Markdown transcript (`/episodes/N.md`) alongside each episode's HTML
@@ -11,20 +11,8 @@ export const data = {
 };
 
 export function render({ episode }) {
-  const frontmatter = stringifyYaml({
-    episode_number: episode.episodeNumber,
-    title: episode.rss.title,
-    description: episode.rss.description,
-    pub_date: new Date(episode.rss.pubDate).toISOString().slice(0, 10),
-  });
-
-  const blocks = [`# ${episode.rss.title}`];
-  for (const [i, group] of episode.paragraphGroups.entries()) {
-    if (i > 0) blocks.push('---');
-    for (const paragraph of group) {
-      blocks.push(paragraph.map((s) => s.text).join('').trim());
-    }
-  }
-
-  return `---\n${frontmatter}---\n\n${blocks.join('\n\n')}\n`;
+  return renderEpisodeMarkdown(
+    { episodeNumber: episode.episodeNumber, ...episode.rss },
+    episode.paragraphGroups,
+  );
 }
