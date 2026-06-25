@@ -164,11 +164,11 @@ export default function configureEleventy(eleventyConfig) {
 
   /**
    * @example
-   * {{ 2.2 | bibles | safe }}  // 📖📖
-   * {{ 2.25 | bibles | safe }} // 📖📖 + half 📖
-   * {{ 2.5 | bibles | safe }}  // 📖📖 + half 📖
-   * {{ 2.74 | bibles | safe }} // 📖📖 + half 📖
-   * {{ 2.75 | bibles | safe }} // 📖📖📖
+   * {{ 2.2  | bibleEmojis | safe }} // 📖📖
+   * {{ 2.25 | bibleEmojis | safe }} // 📖📖 + half 📖
+   * {{ 2.5  | bibleEmojis | safe }} // 📖📖 + half 📖
+   * {{ 2.74 | bibleEmojis | safe }} // 📖📖 + half 📖
+   * {{ 2.75 | bibleEmojis | safe }} // 📖📖📖
    */
   eleventyConfig.addFilter('bibleEmojis', (count) => {
     // Snap to the nearest half: e.g. 2.2 → 2, 2.25 → 2.5, 2.75 → 3.
