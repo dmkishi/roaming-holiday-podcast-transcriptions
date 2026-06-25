@@ -1,3 +1,17 @@
+/**
+ * Uploads built episode transcript Markdown to Cloudflare for indexing.
+ *
+ * Resolves an episode set (default to all episodes, or explicit numbers and
+ * ranges), then for each episode uploads its transcript with metadata derived
+ * from RSS and supplements. Episodes already indexed are skipped unless
+ * `--force` is given; episodes missing a transcript or RSS data, or exceeding
+ * the per-item byte limit, are skipped. Exits non-zero on env, listing, or any
+ * upload failure.
+ *
+ * Usage: `upload-cloudflare [<episode-numbers...>] [--force]`
+ *        Episode numbers accept ranges, e.g. `100 101 120-129`. When omitted,
+ *        every episode Markdown file in the www build is uploaded.
+ */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { hasRss, readRss } from '#lib/shared/artifacts.ts';
