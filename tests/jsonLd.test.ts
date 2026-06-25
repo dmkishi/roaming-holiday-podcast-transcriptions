@@ -4,9 +4,9 @@ import {
   episodeLd,
   seriesLd,
   breadcrumbLd,
-} from '#lib/build-www/jsonLd.ts';
-import { jsonLdScriptContent } from '#lib/build-www/jsonLdScriptContent.ts';
-import type { SiteEpisode } from '#lib/build-www/types.ts';
+} from '#lib/eleventy/jsonLd.ts';
+import { jsonLdScriptContent } from '#lib/eleventy/jsonLdScriptContent.ts';
+import type { SiteEpisode } from '#lib/eleventy/types.ts';
 
 function makeEpisode(
   overrides: {

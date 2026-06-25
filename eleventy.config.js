@@ -9,12 +9,12 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { buildEpisodes } from './lib/build-www/buildEpisodes.ts';
-import { discoverArtifactsOnce, resetDiscoveryCache } from './lib/build-www/discover.ts';
-import { downloadImage } from './lib/build-www/images.ts';
-import { seriesLd } from './lib/build-www/jsonLd.ts';
-import { jsonLdScriptContent } from './lib/build-www/jsonLdScriptContent.ts';
-import { collectStats } from './lib/build-www/stats.ts';
+import { buildEpisodes } from './lib/eleventy/buildEpisodes.ts';
+import { discoverArtifactsOnce, resetDiscoveryCache } from './lib/eleventy/discover.ts';
+import { downloadImage } from './lib/eleventy/images.ts';
+import { seriesLd } from './lib/eleventy/jsonLd.ts';
+import { jsonLdScriptContent } from './lib/eleventy/jsonLdScriptContent.ts';
+import { collectStats } from './lib/eleventy/stats.ts';
 import { formatLongDate } from './lib/shared/strings.ts';
 import { BASE_URL, SITE } from './lib/config/site.ts';
 

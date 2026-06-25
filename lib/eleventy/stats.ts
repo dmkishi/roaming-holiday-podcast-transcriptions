@@ -1,11 +1,11 @@
 import { listEpisodeNumbers, readRss, type RssFile } from '#lib/shared/artifacts.ts';
-import type { EpisodeArtifacts } from '#lib/build-www/discover.ts';
+import type { EpisodeArtifacts } from '#lib/eleventy/discover.ts';
 import type {
   PodcastStats,
   EpisodeStat,
   EpisodeWordStat,
   EpisodeRateStat,
-} from '#lib/build-www/types.ts';
+} from '#lib/eleventy/types.ts';
 import { episodeUrl } from '#lib/shared/paths.ts';
 
 /**

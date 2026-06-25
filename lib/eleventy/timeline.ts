@@ -1,4 +1,4 @@
-import type { TranscriptSegment } from '#lib/build-www/types.ts';
+import type { TranscriptSegment } from '#lib/eleventy/types.ts';
 
 /**
  * Flag segments at regular intervals as timeline markers for display in the

@@ -1,8 +1,8 @@
-import { discoverArtifactsOnce } from '#lib/build-www/discover.ts';
-import { episodeImagePath } from '#lib/build-www/images.ts';
-import { episodeLd, breadcrumbLd } from '#lib/build-www/jsonLd.ts';
-import { addTimelineMarkers } from '#lib/build-www/timeline.ts';
-import type { SiteEpisode } from '#lib/build-www/types.ts';
+import { discoverArtifactsOnce } from '#lib/eleventy/discover.ts';
+import { episodeImagePath } from '#lib/eleventy/images.ts';
+import { episodeLd, breadcrumbLd } from '#lib/eleventy/jsonLd.ts';
+import { addTimelineMarkers } from '#lib/eleventy/timeline.ts';
+import type { SiteEpisode } from '#lib/eleventy/types.ts';
 import { episodeUrl } from '#lib/shared/paths.ts';
 import { loadSupplements } from '#lib/shared/supplements.ts';
 

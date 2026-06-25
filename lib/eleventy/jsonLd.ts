@@ -1,4 +1,4 @@
-import type { JsonLd, SiteEpisode } from '#lib/build-www/types.ts';
+import type { JsonLd, SiteEpisode } from '#lib/eleventy/types.ts';
 import { BASE_URL, type Site } from '#lib/config/site.ts';
 
 type SeriesInput = Pick<Site, 'descriptionHtml' | 'podcast'>;
