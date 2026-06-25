@@ -8,10 +8,14 @@ interface EpisodeMeta {
 }
 
 /**
- * Render an episode's transcript Markdown: YAML frontmatter, a `# title`
- * heading, then paragraph groups separated by `---`. Pure and console-silent so
- * both the Eleventy `.md` template and the Cloudflare upload share one renderer
- * and stay byte-identical.
+ * Render an episode's transcript Markdown:
+ *
+ * - YAML frontmatter
+ * - `# title` heading
+ * - Paragraph groups separated by `---`.
+ *
+ * Pure and console-silent; used by the Cloudflare upload to build each item's
+ * body in memory.
  */
 export function renderEpisodeMarkdown(
   ep: EpisodeMeta,

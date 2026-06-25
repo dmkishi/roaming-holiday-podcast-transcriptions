@@ -19,7 +19,7 @@ import {
   readRss,
   readTranscript,
 } from '#lib/shared/artifacts.ts';
-import { renderEpisodeMarkdown } from '#lib/shared/episodeMarkdown.ts';
+import { renderEpisodeMarkdown } from '#lib/upload-cloudflare/markdown.ts';
 import { loadSupplements } from '#lib/shared/supplements.ts';
 import { print, printLog } from '#lib/shared/print.ts';
 import { pluralize } from '#lib/shared/strings.ts';
