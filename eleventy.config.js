@@ -9,6 +9,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { discoverArtifactsOnce, resetDiscoveryCache } from './lib/build-www/discover.ts';
+import { downloadImage } from './lib/build-www/images.ts';
 import { jsonLdScriptContent } from './lib/build-www/jsonLdScriptContent.ts';
 
 const CSS_DIR = 'www/src/css';
@@ -78,6 +80,35 @@ export default function configureEleventy(eleventyConfig) {
   // In `--watch` or `--serve` mode, ignore changes to a template's imported
   // JS/TS dependencies. Restart the dev server to pick those up.
   eleventyConfig.setWatchJavaScriptDependencies(false);
+
+  // Watch episode source files so changes to `episodes/*.transcript.json` or
+  // `episode-supplements.yaml` refreshes the dev server live.
+  //
+  // Disable gitignore filtering in Eleventy's watcher so that gitignore episode
+  // source files are watched. This affects Eleventy's whole ignore set, so re-
+  // ignore the output and episode image directories.
+  eleventyConfig.setUseGitIgnore(false);
+  for (const dir of ['www/dist/**', 'www/src/img/episodes/**']) {
+    eleventyConfig.ignores.add(dir);
+    eleventyConfig.watchIgnores.add(dir);
+  }
+  eleventyConfig.addWatchTarget('episodes/*.transcript.json');
+  eleventyConfig.addWatchTarget('episode-supplements.yaml');
+
+  // Before each build: reset the per-build discovery memo so a long-lived
+  // `--serve` process re-reads sources after an edit (a plain module cache would
+  // go stale), then ensure every episode's cover image exists on disk — the
+  // `imageUrl` shortcode reads these source `.jpg` files during render. `downloadImage`
+  // skips files that already exist, so warm rebuilds are just `existsSync` checks.
+  eleventyConfig.on('eleventy.before', async () => {
+    resetDiscoveryCache();
+    for (const { rss } of discoverArtifactsOnce()) {
+      const image = await downloadImage(rss.episodeNumber, rss.imageUrl);
+      if (image.status === 'failed') {
+        console.warn(`#${rss.episodeNumber}: Cover image download failed - ${image.error}`);
+      }
+    }
+  });
 
   setupCss(eleventyConfig);
 

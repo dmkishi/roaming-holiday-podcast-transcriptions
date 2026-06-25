@@ -9,7 +9,7 @@
   "scripts": {
     "transcribe": "node bin/transcribe-episodes.ts",
     "upload-cloudflare": "node --env-file=.env bin/upload-cloudflare.ts",
-    "build-www": "node bin/build-www.ts && eleventy",
+    "build-www": "eleventy",
     "dev-www": "eleventy --serve --incremental",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "typecheck": "tsc --noEmit && tsc --noEmit -p www/tsconfig.json",

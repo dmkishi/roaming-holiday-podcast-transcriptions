@@ -12,8 +12,6 @@ export const FADE_SCRIPT = resolve(ROOT, 'scripts/fade.py');
 export const FFMPEG = 'ffmpeg';
 
 export const SITE_DIR = resolve(ROOT, 'www/src');
-export const SITE_DATA_DIR = resolve(SITE_DIR, '_data');
-export const SITE_EPISODES_DIR = resolve(SITE_DIR, '_episodes');
 const SITE_IMG_DIR = resolve(SITE_DIR, 'img');
 export const SITE_EPISODES_IMG_DIR = resolve(SITE_IMG_DIR, 'episodes');
 

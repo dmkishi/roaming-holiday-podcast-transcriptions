@@ -8,6 +8,16 @@ type ImageResponse =
   | { status: 'failed'; path: string; error: string };
 
 /**
+ * Deterministic site-relative path to an episode's cover image, e.g.
+ * `img/episodes/001.jpg`. Shared by `buildEpisodes` (which needs only the path)
+ * and `downloadImage` (which writes the file) so the two never drift.
+ */
+export function episodeImagePath(episodeNumber: number): string {
+  const filename = `${formatEpisodeNumber(episodeNumber)}.jpg`;
+  return relative(SITE_DIR, join(SITE_EPISODES_IMG_DIR, filename));
+}
+
+/**
  * Downloads an episode cover image from the given URL and saves it to the site
  * image directory. Skips the download if it already exists.
  */
@@ -15,9 +25,8 @@ export async function downloadImage(
   episodeNumber: number,
   imageUrl: string,
 ): Promise<ImageResponse> {
-  const filename = `${formatEpisodeNumber(episodeNumber)}.jpg`;
-  const destPath = join(SITE_EPISODES_IMG_DIR, filename);
-  const relPath = relative(SITE_DIR, destPath);
+  const relPath = episodeImagePath(episodeNumber);
+  const destPath = join(SITE_DIR, relPath);
 
   if (existsSync(destPath)) {
     return { status: 'alreadyExists', path: relPath };

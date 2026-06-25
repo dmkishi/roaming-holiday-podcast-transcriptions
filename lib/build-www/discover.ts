@@ -18,7 +18,7 @@ type DiscoveryResult =
  * the skip with a reason. The transcript carries the grouped paragraphs; its
  * presence signals a complete pipeline run.
  */
-export function discoverEpisodes(): DiscoveryResult[] {
+function discoverEpisodes(): DiscoveryResult[] {
   const results: DiscoveryResult[] = [];
 
   for (const episodeNumber of listEpisodeNumbers()) {
@@ -44,4 +44,30 @@ export function discoverEpisodes(): DiscoveryResult[] {
   }
 
   return results;
+}
+
+let cache: EpisodeArtifacts[] | undefined;
+
+/**
+ * The successfully discovered artifacts, memoized for a single Eleventy build.
+ * `_data/episodes.js` (via `buildEpisodes`), `_data/stats.js`, and the
+ * cover-image `eleventy.before` hook all need the discovered episodes; without
+ * the memo that's three full transcript reads per build.
+ *
+ * Incomplete episodes (missing or empty transcript) are skipped silently. The
+ * cache MUST be reset on `eleventy.before` (see `resetDiscoveryCache`) so a
+ * long-lived `--serve` process re-reads sources after an edit instead of
+ * serving a stale cache.
+ */
+export function discoverArtifactsOnce(): EpisodeArtifacts[] {
+  return (cache ??= discoverEpisodes().flatMap((r) => (r.ok ? [r.artifacts] : [])));
+}
+
+/**
+ * Clear the `discoverArtifactsOnce` memo so the next build re-discovers from
+ * disk. Call from `eleventy.before`; a plain module cache would otherwise go
+ * stale across watch rebuilds in a single `eleventy --serve` process.
+ */
+export function resetDiscoveryCache(): void {
+  cache = undefined;
 }

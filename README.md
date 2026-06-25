@@ -76,7 +76,7 @@ and transcripts from `episodes/` and compiles them into an Eleventy site in
 
 ### Usage
 ```sh
-# Build the site data and the static site using the transcription output
+# Build the static site from the transcription output
 pnpm build-www
 
 # Serve the site locally and watch
