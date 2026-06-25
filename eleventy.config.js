@@ -9,9 +9,13 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { buildEpisodes } from './lib/build-www/buildEpisodes.ts';
 import { discoverArtifactsOnce, resetDiscoveryCache } from './lib/build-www/discover.ts';
 import { downloadImage } from './lib/build-www/images.ts';
+import { seriesLd } from './lib/build-www/jsonLd.ts';
 import { jsonLdScriptContent } from './lib/build-www/jsonLdScriptContent.ts';
+import { collectStats } from './lib/build-www/stats.ts';
+import { BASE_URL, SITE } from './lib/config/site.ts';
 
 const CSS_DIR = 'www/src/css';
 
@@ -94,6 +98,15 @@ export default function configureEleventy(eleventyConfig) {
   }
   eleventyConfig.addWatchTarget('episodes/*.transcript.json');
   eleventyConfig.addWatchTarget('episode-supplements.yaml');
+
+  // Plain values are captured once; the functions are re-evaluated per build,
+  // so `--serve` picks up edits to episode sources (see the `eleventy.before`
+  // memo reset below).
+  eleventyConfig.addGlobalData('baseUrl', BASE_URL);
+  eleventyConfig.addGlobalData('site', SITE);
+  eleventyConfig.addGlobalData('episodes', () => buildEpisodes());
+  eleventyConfig.addGlobalData('seriesJsonLd', () => seriesLd(SITE));
+  eleventyConfig.addGlobalData('stats', () => collectStats(discoverArtifactsOnce()));
 
   // Before each build: reset the per-build discovery memo so a long-lived
   // `--serve` process re-reads sources after an edit (a plain module cache would
