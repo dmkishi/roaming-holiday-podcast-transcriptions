@@ -15,6 +15,7 @@ import { downloadImage } from './lib/build-www/images.ts';
 import { seriesLd } from './lib/build-www/jsonLd.ts';
 import { jsonLdScriptContent } from './lib/build-www/jsonLdScriptContent.ts';
 import { collectStats } from './lib/build-www/stats.ts';
+import { formatLongDate } from './lib/shared/strings.ts';
 import { BASE_URL, SITE } from './lib/config/site.ts';
 
 const CSS_DIR = 'www/src/css';
@@ -264,13 +265,7 @@ export default function configureEleventy(eleventyConfig) {
    * @example
    * {{ '2026-04-04' | formatDate }} // => "April 4, 2026"
    */
-  eleventyConfig.addFilter('formatDate', (dateStr) =>
-    new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  );
+  eleventyConfig.addFilter('formatDate', (dateStr) => formatLongDate(dateStr));
 
   /**
    * Extract the video ID from a YouTube URL.

@@ -6,6 +6,21 @@ export function formatDate(date: Date): string {
 }
 
 /**
+ * Date string → long-form US English date, e.g. "April 4, 2026".
+ *
+ * Formatted in UTC so the output is independent of the build machine's
+ * timezone and consistent with `formatDate`'s UTC-based dates.
+ */
+export function formatLongDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
+/**
  * `1_234_567` → "1,234,567".
  */
 export function formatNumber(n: number): string {
