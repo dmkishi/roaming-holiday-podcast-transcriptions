@@ -1,15 +1,7 @@
 import type { Duration } from '#lib/shared/duration.ts';
+import type { ParagraphSegment } from '#lib/shared/schemas.ts';
 
-export interface TranscriptSegment {
-  start: number;
-  end: number;
-  text: string;
-  words: {
-    text: string;
-    start: number;
-    end: number;
-    confidence?: number;
-  }[];
+export interface TranscriptSegment extends ParagraphSegment {
   timelineMarker?: boolean;
 }
 
