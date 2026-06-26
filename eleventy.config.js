@@ -15,14 +15,12 @@ import { downloadImage } from './lib/eleventy/images.ts';
 import { seriesLd } from './lib/eleventy/jsonLd.ts';
 import { jsonLdScriptContent } from './lib/eleventy/jsonLdScriptContent.ts';
 import { collectStats } from './lib/eleventy/stats.ts';
-import { formatLongDate } from './lib/shared/strings.ts';
+import { formatLongDate, pluralize as pluralizeShared } from './lib/shared/strings.ts';
 import { BASE_URL, SITE } from './lib/config/site.ts';
 
 const CSS_DIR = 'www/src/css';
 
-function pluralize(word, count) {
-  return count === 1 ? word : `${word}s`;
-}
+const pluralize = (word, count) => pluralizeShared(count, word);
 
 /**
  * Bundle and minify CSS, precompile entrypoints so `hashUrl` reflects the
