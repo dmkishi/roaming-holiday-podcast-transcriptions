@@ -1,5 +1,6 @@
 import minimist from 'minimist';
 import { DEFAULT_MODEL } from '#lib/config/whisper.ts';
+import { parseEpisodeNums } from '#lib/shared/episodeArgs.ts';
 
 interface CliOptions {
   episodeNums: Set<number>;
@@ -106,34 +107,4 @@ export function getTranscribeCliArgs(args: string[]): CliOptions {
     forceFade,
     forceTranscribe,
   };
-}
-
-/**
- * Parses positional CLI tokens into a set of episode numbers.
- */
-function parseEpisodeNums(
-  tokens: readonly string[],
-): { episodeNums: Set<number> } | { error: string } {
-  const episodeNums = new Set<number>();
-  for (const token of tokens) {
-    const range = /^(\d+)-(\d+)$/u.exec(token);
-    if (range) {
-      const start = Number(range[1]);
-      const end = Number(range[2]);
-      if (start > end) {
-        return { error: `Invalid range '${token}': start must be <= end.` };
-      }
-      for (let n = start; n <= end; n++) episodeNums.add(n);
-      continue;
-    }
-    if (/^\d+$/u.test(token)) {
-      episodeNums.add(Number(token));
-      continue;
-    }
-    return { error: `Invalid episode argument '${token}'.` };
-  }
-  if (episodeNums.size === 0) {
-    return { error: 'No episodes specified.' };
-  }
-  return { episodeNums };
 }
