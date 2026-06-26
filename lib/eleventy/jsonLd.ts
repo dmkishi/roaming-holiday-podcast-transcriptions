@@ -1,5 +1,6 @@
 import type { JsonLd, SiteEpisode } from '#lib/eleventy/types.ts';
 import { BASE_URL, type Site } from '#lib/config/site.ts';
+import { stripHtmlTags } from '#lib/shared/strings.ts';
 
 type SeriesInput = Pick<Site, 'descriptionHtml' | 'podcast'>;
 type EpisodeInput = Pick<SiteEpisode, 'episodeNumber' | 'url' | 'supplement' | 'rss'>;
@@ -16,7 +17,7 @@ export function seriesLd(site: SeriesInput, baseUrl = BASE_URL): JsonLd {
     '@id': `${baseUrl}/#podcast`,
     name: podcast.name,
     url: podcast.homepage,
-    description: site.descriptionHtml.replaceAll(/<[^>]+>/gu, ''),
+    description: stripHtmlTags(site.descriptionHtml),
     image: podcast.image,
     author: { '@type': 'Person', name: podcast.author },
     webFeed: podcast.rssUrl,

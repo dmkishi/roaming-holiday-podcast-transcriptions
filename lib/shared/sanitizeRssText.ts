@@ -1,3 +1,5 @@
+import { stripHtmlTags } from '#lib/shared/strings.ts';
+
 const NAMED_ENTITIES: Record<string, string> = {
   amp: '&',
   lt: '<',
@@ -13,8 +15,7 @@ const NAMED_ENTITIES: Record<string, string> = {
  * line breaks) to single spaces.
  */
 export function sanitizeRssText(input: string): string {
-  return input
-    .replaceAll(/<[^>]*>/gu, '')
+  return stripHtmlTags(input)
     .replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/gu, (match, entity: string) => {
       if (entity.startsWith('#x') || entity.startsWith('#X')) {
         const code = parseInt(entity.slice(2), 16);

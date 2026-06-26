@@ -52,3 +52,10 @@ export function pluralize(
 export function toPrettyJson(value: unknown): string {
   return JSON.stringify(value, undefined, 2) + '\n';
 }
+
+/**
+ * Strips HTML tags from a string, e.g. "<p>Hi</p>" → "Hi".
+ */
+export function stripHtmlTags(str: string): string {
+  return str.replaceAll(/<[^>]*>/gu, '');
+}
