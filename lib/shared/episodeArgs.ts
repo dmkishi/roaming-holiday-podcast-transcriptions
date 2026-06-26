@@ -11,10 +11,10 @@ export function parseEpisodeNums(
 ): { episodeNums: Set<number> } | { error: string } {
   const episodeNums = new Set<number>();
   for (const token of tokens) {
-    const range = /^(\d+)-(\d+)$/u.exec(token);
+    const range = /^(?<start>\d+)-(?<end>\d+)$/u.exec(token);
     if (range) {
-      const start = Number(range[1]);
-      const end = Number(range[2]);
+      const start = Number(range.groups?.['start']);
+      const end = Number(range.groups?.['end']);
       if (start > end) {
         return { error: `Invalid range '${token}': start must be <= end.` };
       }

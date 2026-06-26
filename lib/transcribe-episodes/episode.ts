@@ -19,10 +19,10 @@ export function findEpisodes(
   const episodes: Episode[] = [];
 
   for (const item of rssItems) {
-    const match = /RH(\d+)/u.exec(item.guid);
+    const match = /RH(?<num>\d+)/u.exec(item.guid);
     if (!match) continue;
 
-    const episodeNumber = Number(match[1]);
+    const episodeNumber = Number(match.groups?.['num']);
     if (!episodeNumbers.has(episodeNumber)) continue;
 
     episodes.push({

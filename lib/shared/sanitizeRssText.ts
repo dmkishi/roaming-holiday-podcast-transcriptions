@@ -16,7 +16,7 @@ const NAMED_ENTITIES: Record<string, string> = {
  */
 export function sanitizeRssText(input: string): string {
   return stripHtmlTags(input)
-    .replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/gu, (match, entity: string) => {
+    .replaceAll(/&(?<entity>#x?[0-9a-fA-F]+|[a-zA-Z]+);/gu, (match, entity: string) => {
       if (entity.startsWith('#x') || entity.startsWith('#X')) {
         const code = parseInt(entity.slice(2), 16);
         return Number.isFinite(code) ? String.fromCodePoint(code) : match;
