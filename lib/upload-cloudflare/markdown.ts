@@ -1,4 +1,5 @@
 import { stringify as stringifyYaml } from 'yaml';
+import { formatDate } from '#lib/shared/strings.ts';
 
 interface EpisodeMeta {
   episodeNumber: number;
@@ -25,7 +26,7 @@ export function renderEpisodeMarkdown(
     episode_number: ep.episodeNumber,
     title: ep.title,
     description: ep.description,
-    pub_date: new Date(ep.pubDate).toISOString().slice(0, 10),
+    pub_date: formatDate(new Date(ep.pubDate)),
   });
 
   const blocks = [`# ${ep.title}`];
