@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { errorMessage } from '#lib/shared/errors.ts';
 import { SITE_DIR, SITE_EPISODES_IMG_DIR } from '#lib/shared/paths.ts';
 import { formatEpisodeNumber } from '#lib/shared/strings.ts';
 
@@ -46,7 +47,7 @@ export async function downloadImage(
     return {
       status: 'failed',
       path: relPath,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage(error),
     };
   }
 }

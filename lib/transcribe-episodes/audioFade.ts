@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 import type { FailResponse } from '#lib/transcribe-episodes/types.ts';
 import { decodePcm } from '#lib/transcribe-episodes/audioPcm.ts';
 import { writeFade } from '#lib/shared/artifacts.ts';
+import { errorMessage } from '#lib/shared/errors.ts';
 import { VENV_PYTHON, FADE_SCRIPT } from '#lib/shared/paths.ts';
 import { FadesSchema, type Fade, type FadePair } from '#lib/shared/schemas.ts';
 import {
@@ -38,7 +39,7 @@ export async function runFade(
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage(error),
     };
   }
 }

@@ -1,5 +1,6 @@
 import type { FailResponse } from '#lib/transcribe-episodes/types.ts';
 import { hasGaps, readGaps, hasFade, readFade } from '#lib/shared/artifacts.ts';
+import { errorMessage } from '#lib/shared/errors.ts';
 import type {
   FadePair, Paragraph, ParagraphGroup, ParagraphSegment,
 } from '#lib/shared/schemas.ts';
@@ -76,7 +77,7 @@ export function buildParagraphs(
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage(error),
     };
   }
 }

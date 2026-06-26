@@ -10,6 +10,7 @@ import {
   paths, hasTranscript, hasGaps, readGaps,
 } from '#lib/shared/artifacts.ts';
 import { fromSeconds, type Duration } from '#lib/shared/duration.ts';
+import { errorMessage } from '#lib/shared/errors.ts';
 import { VENV_PYTHON, VENV_WHISPER } from '#lib/shared/paths.ts';
 import type { Segment } from '#lib/shared/schemas.ts';
 import {
@@ -218,7 +219,7 @@ export async function promptTranscript(
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage(error),
     };
   }
 }

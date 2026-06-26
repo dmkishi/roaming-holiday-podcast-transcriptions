@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 import type { FailResponse } from '#lib/transcribe-episodes/types.ts';
 import { decodePcm } from '#lib/transcribe-episodes/audioPcm.ts';
 import { hasGaps, paths, writeGaps } from '#lib/shared/artifacts.ts';
+import { errorMessage } from '#lib/shared/errors.ts';
 import { VENV_PYTHON, VAD_SCRIPT } from '#lib/shared/paths.ts';
 import { VadOutputSchema } from '#lib/shared/schemas.ts';
 import { MIN_GAP_SECONDS } from '#lib/config/audio.ts';
@@ -60,7 +61,7 @@ export async function detectGaps(
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage(error),
     };
   }
 }

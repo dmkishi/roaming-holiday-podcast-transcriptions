@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { errorMessage } from '#lib/shared/errors.ts';
 import { CLOUDFLARE_API_BASE } from '#lib/config/cloudflare.ts';
 import type { CloudflareEnv } from '#lib/upload-cloudflare/env.ts';
 
@@ -22,10 +23,6 @@ function itemsUrl(env: CloudflareEnv, suffix = ''): string {
 
 function authHeaders(env: CloudflareEnv): Record<string, string> {
   return { Authorization: `Bearer ${env.apiToken}` };
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 function describeErrors(errors: { code: number; message: string }[] | undefined): string {

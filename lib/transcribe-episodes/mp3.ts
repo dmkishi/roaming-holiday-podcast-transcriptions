@@ -1,4 +1,5 @@
 import { existsSync, statSync, writeFileSync } from 'node:fs';
+import { errorMessage } from '#lib/shared/errors.ts';
 
 type Mp3Response =
   | {
@@ -43,7 +44,7 @@ export async function downloadMp3(
   } catch (error) {
     return {
       status: 'failed',
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage(error),
     };
   }
 }
