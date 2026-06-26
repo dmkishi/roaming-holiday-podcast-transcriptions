@@ -27,12 +27,8 @@ export function collectStats(artifacts: EpisodeArtifacts[]): PodcastStats {
   );
 
   const episodeStats = rssFiles.map((rss) => toEpisodeStat(rss));
-  const longestEpisode = episodeStats.reduce((a, b) =>
-    b.durationSeconds > a.durationSeconds ? b : a,
-  );
-  const shortestEpisode = episodeStats.reduce((a, b) =>
-    b.durationSeconds < a.durationSeconds ? b : a,
-  );
+  const longestEpisode = maxBy(episodeStats, (s) => s.durationSeconds);
+  const shortestEpisode = minBy(episodeStats, (s) => s.durationSeconds);
 
   const totalTranscribedEpisodes = artifacts.length;
   const wordStats = artifacts.map((a) =>
@@ -45,24 +41,16 @@ export function collectStats(artifacts: EpisodeArtifacts[]): PodcastStats {
   const averageTranscribedEpisodeWordCount = Math.round(
     totalTranscribedWordCount / totalTranscribedEpisodes,
   );
-  const wordiestEpisode = wordStats.reduce((a, b) =>
-    b.wordCount > a.wordCount ? b : a,
-  );
-  const leastWordiestEpisode = wordStats.reduce((a, b) =>
-    b.wordCount < a.wordCount ? b : a,
-  );
+  const wordiestEpisode = maxBy(wordStats, (s) => s.wordCount);
+  const leastWordiestEpisode = minBy(wordStats, (s) => s.wordCount);
   const fuckStats = artifacts.map((a) =>
     toEpisodeWordStat(a.rss, (fullText(a).match(/fuck/giu) ?? []).length),
   );
-  const mostFucks = fuckStats.reduce((a, b) =>
-    b.wordCount > a.wordCount ? b : a,
-  );
+  const mostFucks = maxBy(fuckStats, (s) => s.wordCount);
   const totalFucks = fuckStats.reduce((sum, s) => sum + s.wordCount, 0);
   const averageFucks = totalFucks / totalTranscribedEpisodes;
   const rateStats = fuckStats.map((s) => toEpisodeRateStat(s));
-  const mostFucksPerHour = rateStats.reduce((a, b) =>
-    b.fucksPerHour > a.fucksPerHour ? b : a,
-  );
+  const mostFucksPerHour = maxBy(rateStats, (s) => s.fucksPerHour);
 
   return {
     totalEpisodes,
@@ -80,6 +68,22 @@ export function collectStats(artifacts: EpisodeArtifacts[]): PodcastStats {
     mostFucksPerHour,
     mostFucks,
   };
+}
+
+/**
+ * Return the item with the highest `value`. Throws on an empty array.
+ * @example maxBy(episodes, (e) => e.durationSeconds) // longest episode
+ */
+function maxBy<T>(items: T[], value: (item: T) => number): T {
+  return items.reduce((a, b) => (value(b) > value(a) ? b : a));
+}
+
+/**
+ * Return the item with the lowest `value`. Throws on an empty array.
+ * @example minBy(episodes, (e) => e.durationSeconds) // shortest episode
+ */
+function minBy<T>(items: T[], value: (item: T) => number): T {
+  return items.reduce((a, b) => (value(b) < value(a) ? b : a));
 }
 
 function fullText(artifacts: EpisodeArtifacts): string {
