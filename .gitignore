@@ -14,7 +14,6 @@ node_modules/
 
 # Outputs
 LOG
-episodes/*
-!episodes/.gitkeep
+/episodes/*.json
 www/dist/
 www/src/img/episodes/

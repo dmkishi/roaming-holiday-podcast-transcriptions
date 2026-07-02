@@ -25,7 +25,7 @@
       {% set headerTag = "h1" if isIndexPage else "h2" %}
       <{{ headerTag }} class="site-header--title">
         <a
-          href="{{ '/' | url }}"
+          href="/"
           class="site-header--title-link {% if isIndexPage %}site-header--title-link__index-page{% endif %} no-highlight"
         >
           {{- site.title -}}
@@ -35,7 +35,7 @@
       {% if not isAboutPage %}
         <p class="tighten">
           {{- site.descriptionHtml | safe }}
-          <a href="{{ '/about.html' | url }}" class="site-header--about-link">About this site</a>
+          <a href="/about.html" class="site-header--about-link">About this site</a>
         </p>
       {% endif %}
     </header>

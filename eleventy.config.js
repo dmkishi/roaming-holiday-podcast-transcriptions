@@ -1,4 +1,5 @@
 import cssnano from 'cssnano';
+import { HtmlBasePlugin } from '@11ty/eleventy';
 import eleventyImage from '@11ty/eleventy-img';
 import { transform as esbuildTransform } from 'esbuild';
 import { minify } from 'html-minifier-terser';
@@ -141,6 +142,11 @@ export default function configureEleventy(eleventyConfig) {
       };
     },
   });
+
+  // Rewrite every root-relative URL to include the pathPrefix so the site
+  // works when served from a GitHub Pages subpath. Registered before htmlmin
+  // so the rewrite runs before minification.
+  eleventyConfig.addPlugin(HtmlBasePlugin);
 
   // Minify HTML
   eleventyConfig.addTransform('htmlmin', async (content, outputPath) => {
@@ -290,5 +296,6 @@ export default function configureEleventy(eleventyConfig) {
       input: 'www/src',
       output: 'www/dist',
     },
+    pathPrefix: '/roaming-holiday-podcast-transcriptions/',
   };
 }

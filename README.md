@@ -81,7 +81,13 @@ pnpm www:build
 
 # Serve the site locally and watch
 pnpm www:dev
+
+# Build and publish www/dist to the gh-pages branch (GitHub Pages)
+pnpm www:deploy
 ```
+
+The deployed site is served under the `/roaming-holiday-podcast-transcriptions/`
+subpath on GitHub Pages.
 
 Upload Cloudflare
 --------------------------------------------------------------------------------

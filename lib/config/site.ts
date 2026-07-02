@@ -1,4 +1,4 @@
-export const BASE_URL = 'https://example.com';
+export const BASE_URL = 'https://dmkishi.github.io/roaming-holiday-podcast-transcriptions';
 
 export interface Site {
   title: string;
