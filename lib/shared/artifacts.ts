@@ -85,6 +85,8 @@ export const writeTranscript = (n: number, data: TranscriptFile): string =>
  * outputs directory.
  */
 export function listEpisodeNumbers(): number[] {
+  if (!existsSync(OUTPUTS_DIR)) return [];
+
   const numbers: number[] = [];
   for (const file of readdirSync(OUTPUTS_DIR)) {
     if (!file.endsWith(SUFFIX.rss)) continue;
