@@ -1,3 +1,11 @@
+/**
+ * Fire an Umami event, or silently no-op if `umami` isn't available (ad-blocked
+ * or not yet loaded.)
+ */
+function track(name: string, data?: Record<string, unknown>): void {
+  globalThis.umami?.track(name, data);
+}
+
 (function initYouTube() {
   'use strict';
 
@@ -51,6 +59,7 @@
     closeBtn.addEventListener('click', () => {
       isDismissed = true;
       updateMiniPlayer();
+      track('mini-player-dismiss');
     });
 
     videoEl.parentElement!.append(closeBtn);
@@ -80,6 +89,7 @@
     let player: YT.Player | undefined;
     let intervalId: ReturnType<typeof setInterval> | undefined;
     let currentWordIndex = -1;
+    let lastPlaybackState: number | undefined;
 
     globalThis.onYouTubeIframeAPIReady = () => {
       player = new YT.Player(videoEl, {
@@ -103,11 +113,24 @@
                 player.seekTo(Number(span.dataset['start'] ?? ''), true);
                 player.playVideo();
                 globalThis.getSelection()?.removeAllRanges(); // Deselect text.
+                track('transcript-seek');
               });
             }
             initKeyboardControls();
           },
           onStateChange: (evt) => {
+            // Track video play/pause/complete, deduped against the previous
+            // *meaningful* state. Transient BUFFERING/CUED states are ignored
+            // so an in-playback seek (PLAYING → BUFFERING → PLAYING) doesn't
+            // re-fire `video-play`.
+            const state = evt.data;
+            if (state === YT.PlayerState.PLAYING && lastPlaybackState !== YT.PlayerState.PLAYING) track('video-play');
+            else if (state === YT.PlayerState.PAUSED && lastPlaybackState !== YT.PlayerState.PAUSED) track('video-pause');
+            else if (state === YT.PlayerState.ENDED) track('video-complete');
+            if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
+              lastPlaybackState = state;
+            }
+
             if (evt.data === YT.PlayerState.PLAYING) {
               updateActiveWord();
               intervalId ??= setInterval(updateActiveWord, 250);
@@ -154,42 +177,49 @@
         if (evt.ctrlKey || evt.metaKey || evt.altKey) return;
         if (isEditableTarget(evt.target)) return;
 
+        let action: string | undefined;
         switch (evt.key) {
           case ' ':
           case 'k': {
             if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
             else player.playVideo();
             animateKeyIcon('js-key-icon-space');
+            action = 'play-pause';
             break;
           }
           case 'ArrowLeft':
           case 'j': {
             player.seekTo(Math.max(0, player.getCurrentTime() - 5), true);
             animateKeyIcon('js-key-icon-left');
+            action = 'seek-back';
             break;
           }
           case 'ArrowRight':
           case 'l': {
             player.seekTo(player.getCurrentTime() + 5, true);
             animateKeyIcon('js-key-icon-right');
+            action = 'seek-forward';
             break;
           }
           case 'm': {
             if (player.isMuted()) player.unMute();
             else player.mute();
             animateKeyIcon('js-key-icon-m');
+            action = 'mute';
             break;
           }
           case 'ArrowUp': {
             player.unMute();
             player.setVolume(Math.min(100, player.getVolume() + 5));
             animateKeyIcon('js-key-icon-up');
+            action = 'volume-up';
             break;
           }
           case 'ArrowDown': {
             player.unMute();
             player.setVolume(Math.max(0, player.getVolume() - 5));
             animateKeyIcon('js-key-icon-down');
+            action = 'volume-down';
             break;
           }
           default: {
@@ -197,6 +227,7 @@
           }
         }
         evt.preventDefault();
+        if (action) track('keyboard-shortcut', { action });
       });
     }
   }

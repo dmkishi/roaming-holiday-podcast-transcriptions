@@ -3,9 +3,15 @@ export {};
 
 declare global {
   var onYouTubeIframeAPIReady: (() => void) | undefined;
+  var umami: {
+    track: (eventName: string, eventData?: Record<string, unknown>) => void;
+  } | undefined;
 
   interface Window {
     onYouTubeIframeAPIReady?: () => void;
+    umami?: {
+      track: (eventName: string, eventData?: Record<string, unknown>) => void;
+    };
   }
 
   // `@types/youtube` omits the (undocumented) module option methods. Augment
