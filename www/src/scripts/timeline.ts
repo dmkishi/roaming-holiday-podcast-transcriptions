@@ -34,7 +34,7 @@
       tooltip.hidden = true;
       return;
     }
-    tooltip.textContent = formatTime(parseFloat(segment.dataset['start'] ?? ''));
+    tooltip.textContent = formatTime(Number(segment.dataset['start'] ?? ''));
     tooltip.hidden = false;
     tooltip.style.left = evt.clientX + 12 + 'px';
     tooltip.style.top = evt.clientY - 28 + 'px';

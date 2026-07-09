@@ -19,6 +19,7 @@ const RssItemSchema = z.object({
 const RssFeedSchema = z.object({
   rss: z.object({
     channel: z.object({
+      // oxlint-disable-next-line unicorn/max-nested-calls
       item: z.array(RssItemSchema),
     }),
   }),

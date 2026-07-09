@@ -23,6 +23,13 @@
         "typescript/consistent-return": "off",
         "typescript/strict-boolean-expressions": "off"
       }
+    },
+    {
+      // Zod schemas nest a lot of builder calls, so allow deeper nesting here.
+      "files": ["lib/shared/schemas.ts"],
+      "rules": {
+        "unicorn/max-nested-calls": ["error", { "max": 4 }]
+      }
     }
   ]
 }

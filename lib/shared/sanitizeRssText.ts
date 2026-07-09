@@ -22,7 +22,7 @@ export function sanitizeRssText(input: string): string {
         return Number.isFinite(code) ? String.fromCodePoint(code) : match;
       }
       if (entity.startsWith('#')) {
-        const code = parseInt(entity.slice(1), 10);
+        const code = Math.trunc(Number(entity.slice(1)));
         return Number.isFinite(code) ? String.fromCodePoint(code) : match;
       }
       return NAMED_ENTITIES[entity] ?? match;

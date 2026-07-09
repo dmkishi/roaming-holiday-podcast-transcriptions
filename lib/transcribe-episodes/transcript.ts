@@ -63,7 +63,7 @@ print(len(t.encode(${JSON.stringify(text)})))
   `.trim();
 
   const { stdout } = await execFileAsync(VENV_PYTHON, ['-c', script]);
-  return parseInt(stdout.trim(), 10);
+  return Math.trunc(Number(stdout.trim()));
 }
 
 /**

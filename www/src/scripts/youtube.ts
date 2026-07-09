@@ -72,7 +72,7 @@
       ? [...transcript.querySelectorAll<HTMLElement>('.word')].map((el) => (
           {
             el,
-            start: parseFloat(el.dataset['start'] ?? ''),
+            start: Number(el.dataset['start'] ?? ''),
           }
         ))
       : [];
@@ -92,7 +92,7 @@
                 if (!(evt.target instanceof Element)) return;
                 const span = evt.target.closest('.word, .segment');
                 if (!(span instanceof HTMLElement)) return;
-                player.seekTo(parseFloat(span.dataset['start'] ?? ''), true);
+                player.seekTo(Number(span.dataset['start'] ?? ''), true);
                 player.playVideo();
                 globalThis.getSelection()?.removeAllRanges(); // Deselect text.
               });
