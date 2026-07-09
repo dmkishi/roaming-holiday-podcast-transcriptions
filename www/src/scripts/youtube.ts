@@ -84,6 +84,14 @@
     globalThis.onYouTubeIframeAPIReady = () => {
       player = new YT.Player(videoEl, {
         events: {
+          onApiChange: () => {
+            // Force captions off, ignoring the viewer's account preference.
+            // (The user can still re-enable it.)
+            if (!player) return;
+            if (player.getOptions().includes('captions')) {
+              player.setOption('captions', 'track', {});
+            }
+          },
           onReady: () => {
             enableMiniPlayerToggling();
             if (transcript) {
