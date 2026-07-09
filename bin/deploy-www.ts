@@ -35,12 +35,28 @@ try {
     message: 'chore: Deploy site',
     beforeAdd(git) {
       // Make the published branch tree exactly equal to `www/dist`.
-      const keep = new Set([...fs.readdirSync(distDir), '.git', '.nojekyll']);
-      for (const entry of fs.readdirSync(git.cwd)) {
-        if (!keep.has(entry)) {
-          fs.rmSync(path.join(git.cwd, entry), { recursive: true, force: true });
+      //
+      // gh-pages copies `www/dist` on top of the existing branch checkout but
+      // never deletes files, so recursively prune any path that no longer
+      // exists in `www/dist`. `.git` (the repo) and `.nojekyll` (created by
+      // gh-pages after the copy) live only at the root and must be preserved.
+      const preserved = new Set(['.git', '.nojekyll']);
+
+      (function prune(relDir: string): void {
+        for (const entry of fs.readdirSync(path.join(git.cwd, relDir))) {
+          if (relDir === '' && preserved.has(entry)) {
+            continue;
+          }
+          const rel = path.join(relDir, entry);
+          const branchPath = path.join(git.cwd, rel);
+          if (!fs.existsSync(path.join(distDir, rel))) {
+            fs.rmSync(branchPath, { recursive: true, force: true });
+          } else if (fs.statSync(branchPath).isDirectory()) {
+            prune(rel);
+          }
         }
-      }
+      })('');
+
       return Promise.resolve(git);
     },
   });
