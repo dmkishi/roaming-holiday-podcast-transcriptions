@@ -8,6 +8,8 @@
  * the per-item byte limit, are skipped. Exits non-zero on env, listing, or any
  * upload failure.
  *
+ * Transcript Markdown is rendered in memory and uploaded one episode at a time.
+ *
  * Usage: `upload-cloudflare [<episode-numbers...>] [--force]`
  *        Episode numbers accept ranges, e.g. `100 101 120-129`. When omitted,
  *        every episode with RSS + transcript artifacts is uploaded.
