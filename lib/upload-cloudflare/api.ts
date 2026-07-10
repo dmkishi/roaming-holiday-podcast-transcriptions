@@ -3,6 +3,9 @@ import { errorMessage } from '#lib/shared/errors.ts';
 import { CLOUDFLARE_API_BASE } from '#lib/config/cloudflare.ts';
 import type { CloudflareEnv } from '#lib/upload-cloudflare/env.ts';
 
+// Cloudflare's max items-list page size.
+const MAX_PER_PAGE = 50;
+
 const CfErrorSchema = z.object({ code: z.number(), message: z.string() });
 const CfItemSchema = z.object({ id: z.string(), key: z.string() });
 const CfListEnvelopeSchema = z.object({
@@ -65,11 +68,10 @@ type ListResult =
 
 export async function listItemKeys(env: CloudflareEnv): Promise<ListResult> {
   const keys = new Set<string>();
-  const perPage = 50;
   let page = 1;
 
   while (true) {
-    const url = `${itemsUrl(env)}?per_page=${perPage}&page=${page}`;
+    const url = `${itemsUrl(env)}?per_page=${MAX_PER_PAGE}&page=${page}`;
     let res: Response;
     try {
       res = await fetch(url, { headers: authHeaders(env) });
@@ -87,7 +89,7 @@ export async function listItemKeys(env: CloudflareEnv): Promise<ListResult> {
 
     for (const item of body.result) keys.add(item.key);
 
-    if (body.result.length < perPage) break;
+    if (body.result.length < MAX_PER_PAGE) break;
     page += 1;
   }
 
