@@ -19,6 +19,7 @@ import {
   readRss,
   readTranscript,
 } from '#lib/shared/artifacts.ts';
+import { errorMessage } from '#lib/shared/errors.ts';
 import { renderEpisodeMarkdown } from '#lib/upload-cloudflare/markdown.ts';
 import { loadSupplements } from '#lib/shared/supplements.ts';
 import { print, printLog } from '#lib/shared/print.ts';
@@ -106,41 +107,47 @@ for (const n of episodeNumbers) {
     skipped += 1;
     continue;
   }
-  const transcript = readTranscript(n);
-  if (transcript.paragraphGroups.length === 0) {
-    printLog.warn(`#${n}: No paragraph groups in transcript - skipping`);
-    skipped += 1;
-    continue;
-  }
 
-  const key = `${n}.md`;
+  try {
+    const transcript = readTranscript(n);
+    if (transcript.paragraphGroups.length === 0) {
+      printLog.warn(`#${n}: No paragraph groups in transcript - skipping`);
+      skipped += 1;
+      continue;
+    }
 
-  if (!opts.force && existingKeys.has(key)) {
-    printLog.warn(`#${n}: Already indexed - skipping (use --force to overwrite)`);
-    skipped += 1;
-    continue;
-  }
+    const key = `${n}.md`;
 
-  const rss = readRss(n);
-  const md = renderEpisodeMarkdown({ ...rss, episodeNumber: n }, transcript.paragraphGroups);
-  const bytes = Buffer.from(md, 'utf8');
-  if (bytes.length > MAX_ITEM_BYTES) {
-    printLog.warn(`#${n}: ${bytes.length} bytes exceeds ${MAX_ITEM_BYTES} byte limit - skipping`);
-    skipped += 1;
-    continue;
-  }
+    if (!opts.force && existingKeys.has(key)) {
+      printLog.warn(`#${n}: Already indexed - skipping (use --force to overwrite)`);
+      skipped += 1;
+      continue;
+    }
 
-  const metadata = buildItemMetadata(rss, supplements.get(n));
+    const rss = readRss(n);
+    const md = renderEpisodeMarkdown({ ...rss, episodeNumber: n }, transcript.paragraphGroups);
+    const bytes = Buffer.from(md, 'utf8');
+    if (bytes.length > MAX_ITEM_BYTES) {
+      printLog.warn(`#${n}: ${bytes.length} bytes exceeds ${MAX_ITEM_BYTES} byte limit - skipping`);
+      skipped += 1;
+      continue;
+    }
 
-  const res = await uploadItem(env, key, bytes, metadata);
-  if (!res.ok) {
-    printLog.warn(`#${n}: Failed - ${res.error}`);
+    const metadata = buildItemMetadata(rss, supplements.get(n));
+
+    const res = await uploadItem(env, key, bytes, metadata);
+    if (!res.ok) {
+      printLog.warn(`#${n}: Failed - ${res.error}`);
+      failed += 1;
+      continue;
+    }
+
+    printLog.info(`#${n}: Uploaded (id: ${res.id})`);
+    uploaded += 1;
+  } catch (error) {
+    printLog.warn(`#${n}: Failed - ${errorMessage(error)}`);
     failed += 1;
-    continue;
   }
-
-  printLog.info(`#${n}: Uploaded (id: ${res.id})`);
-  uploaded += 1;
 }
 
 print.emptyLine();
