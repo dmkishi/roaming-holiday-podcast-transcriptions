@@ -108,18 +108,17 @@ for (const n of episodeNumbers) {
     continue;
   }
 
+  const key = `${n}.md`;
+  if (!opts.force && existingKeys.has(key)) {
+    printLog.warn(`#${n}: Already indexed - skipping (use --force to overwrite)`);
+    skipped += 1;
+    continue;
+  }
+
   try {
     const transcript = readTranscript(n);
     if (transcript.paragraphGroups.length === 0) {
       printLog.warn(`#${n}: No paragraph groups in transcript - skipping`);
-      skipped += 1;
-      continue;
-    }
-
-    const key = `${n}.md`;
-
-    if (!opts.force && existingKeys.has(key)) {
-      printLog.warn(`#${n}: Already indexed - skipping (use --force to overwrite)`);
       skipped += 1;
       continue;
     }
