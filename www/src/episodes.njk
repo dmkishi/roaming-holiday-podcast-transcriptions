@@ -16,7 +16,7 @@ eleventyComputed:
 ---
 {% from "macros/episodeMeta.njk" import episodeMeta %}
 
-<article class="episode">
+<article class="episode" data-pagefind-body>
   <header>
     {% if episode.supplement.youtubeUrl %}
       <div class="js-video-sentinel episode--video-container">
@@ -28,7 +28,7 @@ eleventyComputed:
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         ></iframe>
 
-        <aside class="episode--video-shortcuts">
+        <aside class="episode--video-shortcuts" data-pagefind-ignore>
           <dl class="episode--video-shortcuts-list">
             <dt>
               <kbd class="key-icon key-icon__space js-key-icon-space" title="Space key">Space</kbd>
@@ -83,7 +83,7 @@ eleventyComputed:
   </header>
 
   <div class="episode--content wrapper">
-    <p class="episode--content-warning">All transcripts are machine generated.</p>
+    <p class="episode--content-warning" data-pagefind-ignore>All transcripts are machine generated.</p>
 
     <section class="episode--transcript" data-transcript>
       <h2>Transcript</h2>

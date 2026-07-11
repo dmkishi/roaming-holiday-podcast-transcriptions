@@ -17,6 +17,15 @@
     </title>
     <link rel="canonical" href="{{ baseUrl }}{{ page.url }}">
 
+    <link rel="stylesheet" href="/pagefind/pagefind-ui.css">
+    <script src="/pagefind/pagefind-ui.js" defer></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        if (typeof PagefindUI === 'undefined') return; // dev: no bundle built
+        new PagefindUI({ element: '#search', showImages: false });
+      });
+    </script>
+
     <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
   </head>
 
@@ -38,6 +47,8 @@
           <a href="/about.html" class="site-header--about-link">About this site</a>
         </p>
       {% endif %}
+
+      <div id="search"></div>
     </header>
 
     <main>

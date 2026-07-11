@@ -9,7 +9,7 @@
   "scripts": {
     "transcribe": "node bin/transcribe-episodes.ts",
     "www:dev": "eleventy --serve --incremental",
-    "www:build": "eleventy",
+    "www:build": "eleventy && pagefind --site www/dist",
     "www:deploy": "pnpm www:build && node bin/deploy-www.ts",
     "upload-cloudflare": "node --env-file=.env bin/upload-cloudflare.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
@@ -40,6 +40,7 @@
     "minimist": "^1.2.8",
     "oxlint": "^1.71.0",
     "oxlint-tsgolint": "^0.23.0",
+    "pagefind": "^1.5.2",
     "picocolors": "^1.1.1",
     "postcss": "^8.5.16",
     "postcss-import": "^16.1.1",

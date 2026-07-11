@@ -78,13 +78,16 @@ Build
 --------------------------------------------------------------------------------
 Builds the static site from the transcription output at `episodes/`. Reads
 episode metadata and transcripts from `episodes/` and compiles the Eleventy site
-in `www/src` into static output in `www/dist` (what the deploy publishes).
+in `www/src` into static output in `www/dist` (what the deploy publishes). After
+Eleventy runs, Pagefind indexes `www/dist` to power the site's client-side
+full-text search.
 
 ```sh
-# Build the static site from the transcription output
+# Build the static site (Eleventy) and index it (Pagefind).
 pnpm www:build
 
-# Serve the site locally and watch
+# Serve the site locally and watch. (Skips the Pagefind index, so search reflects
+# the last `www:build` or is absent entirely until the first build.
 pnpm www:dev
 ```
 
