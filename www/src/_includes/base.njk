@@ -17,14 +17,8 @@
     </title>
     <link rel="canonical" href="{{ baseUrl }}{{ page.url }}">
 
-    <link rel="stylesheet" href="/pagefind/pagefind-ui.css">
-    <script src="/pagefind/pagefind-ui.js" defer></script>
-    <script>
-      window.addEventListener('DOMContentLoaded', () => {
-        if (typeof PagefindUI === 'undefined') return; // dev: no bundle built
-        new PagefindUI({ element: '#search', showImages: false });
-      });
-    </script>
+    <link rel="stylesheet" href="/pagefind/pagefind-component-ui.css">
+    <script src="/pagefind/pagefind-component-ui.js" type="module"></script>
 
     <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
   </head>
@@ -48,7 +42,8 @@
         </p>
       {% endif %}
 
-      <div id="search"></div>
+      <pagefind-config bundle-path="{{ '/pagefind/' | url }}"></pagefind-config>
+      <pagefind-searchbox placeholder="Search transcripts…"></pagefind-searchbox>
     </header>
 
     <main>
