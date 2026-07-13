@@ -8,6 +8,13 @@
       <script src="{{ src | hashUrl }}" defer></script>
     {% endfor %}
 
+    {# Pagefind search #}
+    <link rel="stylesheet" href="/pagefind/pagefind-component-ui.css">
+    <script src="/pagefind/pagefind-component-ui.js" type="module"></script>
+
+    {# Umami analytics #}
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
+
     <title>
       {% if title %}
         {{ title }} — {{ site.title }}
@@ -16,11 +23,6 @@
       {% endif %}
     </title>
     <link rel="canonical" href="{{ baseUrl }}{{ page.url }}">
-
-    <link rel="stylesheet" href="/pagefind/pagefind-component-ui.css">
-    <script src="/pagefind/pagefind-component-ui.js" type="module"></script>
-
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
   </head>
 
   <body>
