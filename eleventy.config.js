@@ -26,6 +26,18 @@ function pluralize(word, count) {
 }
 
 /**
+ * Bundle, polyfill, and minify CSS files.
+ * @param {string} cssPath
+ * @returns {Promise<string>} Compiled CSS
+ */
+async function compileCss(cssPath) {
+  const css = await readFile(cssPath, 'utf8');
+  const plugins = [postcssImport, postcssPresetEnv, cssnano];
+  const result = await postcss(plugins).process(css, { from: cssPath });
+  return result.css;
+}
+
+/**
  * Bundles, polyfills, and minifies CSS.
  *
  * - Prod (`pnpm www:build`, runMode `build`): emits cache-busting hashed URLs.
@@ -34,14 +46,6 @@ function pluralize(word, count) {
 function setupCss(eleventyConfig) {
   let isProd = true;
   const cssOutputCache = new Map(); // url (e.g. "/index.css") -> compiled css
-
-  // Bundle, polyfill, and minify.
-  async function compileCss(inputPath) {
-    const css = await readFile(inputPath, 'utf8');
-    const plugins = [postcssImport, postcssPresetEnv, cssnano];
-    const result = await postcss(plugins).process(css, { from: inputPath });
-    return result.css;
-  }
 
   eleventyConfig.on('eleventy.before', async ({ runMode }) => {
     isProd = runMode === 'build';
