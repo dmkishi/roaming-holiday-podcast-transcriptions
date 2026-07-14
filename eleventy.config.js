@@ -19,7 +19,8 @@ import { collectStats } from './lib/eleventy/stats.ts';
 import { formatLongDate, pluralize as pluralizeShared } from './lib/shared/strings.ts';
 import { BASE_URL, SITE } from './lib/config/site.ts';
 
-const CSS_DIR = 'www/src/css';
+const SRC_DIR = 'www/src';
+const SRC_CSS_DIR = `${SRC_DIR}/css`;
 
 function pluralize(word, count) {
   return pluralizeShared(count, word);
@@ -35,6 +36,14 @@ async function compileCss(cssPath) {
   const plugins = [postcssImport, postcssPresetEnv, cssnano];
   const result = await postcss(plugins).process(css, { from: cssPath });
   return result.css;
+}
+
+/**
+ * @param {string} cssFilePath
+ * @returns {string} Public CSS URL
+ */
+function cssCacheKey(cssFilePath) {
+  return `/${path.relative(SRC_DIR, cssFilePath)}`;
 }
 
 /**
@@ -55,12 +64,11 @@ function setupCss(eleventyConfig) {
     // Precompile CSS so hashUrl can hash the resolved output (source-file
     // hashing misses changes inside imported partials.)
     const cssFiles =
-      (await readdir(CSS_DIR)).filter((file) => file.endsWith('.css') && !file.startsWith('_'));
+      (await readdir(SRC_CSS_DIR)).filter((file) => file.endsWith('.css') && !file.startsWith('_'));
     await Promise.all(cssFiles.map(async (file) => {
-      const cssUrl = `/css/${file}`;
-      const cssFilePath = path.join(CSS_DIR, file);
+      const cssFilePath = path.join(SRC_CSS_DIR, file);
       const compiledCss = await compileCss(cssFilePath);
-      compiledCssCache.set(cssUrl, compiledCss);
+      compiledCssCache.set(cssCacheKey(cssFilePath), compiledCss);
     }));
   });
 
@@ -71,7 +79,7 @@ function setupCss(eleventyConfig) {
       if (path.basename(cssFilePath).startsWith('_')) return;
 
       return async () => {
-        const cssUrl = `/${path.relative('www/src', cssFilePath)}`;
+        const cssUrl = cssCacheKey(cssFilePath);
         return compiledCssCache.get(cssUrl) ?? await compileCss(cssFilePath);
       };
     },
