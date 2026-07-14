@@ -21,7 +21,9 @@ import { BASE_URL, SITE } from './lib/config/site.ts';
 
 const CSS_DIR = 'www/src/css';
 
-const pluralize = (word, count) => pluralizeShared(count, word);
+function pluralize(word, count) {
+  return pluralizeShared(count, word);
+}
 
 /**
  * Bundles, polyfills, and minifies CSS.
