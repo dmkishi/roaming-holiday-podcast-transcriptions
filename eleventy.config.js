@@ -42,7 +42,7 @@ async function compileCss(cssSrcPath) {
  * @param {string} cssSrcPath
  * @returns {string} Public CSS URL
  */
-function cssCacheKey(cssSrcPath) {
+function cssPublicUrl(cssSrcPath) {
   return `/${path.relative(SRC_DIR, cssSrcPath)}`;
 }
 
@@ -68,7 +68,7 @@ function setupCss(eleventyConfig) {
     await Promise.all(cssSrcFiles.map(async (file) => {
       const cssSrcPath = path.join(SRC_CSS_DIR, file);
       const compiledCss = await compileCss(cssSrcPath);
-      compiledCssCache.set(cssCacheKey(cssSrcPath), compiledCss);
+      compiledCssCache.set(cssPublicUrl(cssSrcPath), compiledCss);
     }));
   });
 
@@ -79,7 +79,7 @@ function setupCss(eleventyConfig) {
       if (path.basename(cssSrcPath).startsWith('_')) return;
 
       return async () => {
-        const cssUrl = cssCacheKey(cssSrcPath);
+        const cssUrl = cssPublicUrl(cssSrcPath);
         return compiledCssCache.get(cssUrl) ?? await compileCss(cssSrcPath);
       };
     },
