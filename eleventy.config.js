@@ -27,13 +27,35 @@ function pluralize(word, count) {
 }
 
 /**
+ * The Pagefind Component UI CSS must remain raw and unpolyfilled, especially
+ * due to its prodigious use of :is(*, #\#) hacks.
+ *
+ * The string must exactly match the authored @import (see _base.css): the
+ * postcss-import filter compares against it, and the preserved @import must
+ * resolve to the same URL in the browser.
+ */
+const RAW_IMPORTS = new Set(['../pagefind/pagefind-component-ui.css']);
+
+/**
+ * Disable preset-env's @layer polyfill. The native @layer is needed for the
+ * Pagefind Component UI CSS to be overridable by our unlayered styles. Native
+ * @layer is widely supported since 2022, so leaving it unpolyfilled is safe
+ * under .browserslistrc (`defaults`).
+ */
+const presetEnv = postcssPresetEnv({ features: { 'cascade-layers': false } });
+
+/**
  * Bundle, polyfill, and minify CSS files.
  * @param {string} cssSrcPath
  * @returns {Promise<string>} Compiled CSS
  */
 async function compileCss(cssSrcPath) {
   const css = await readFile(cssSrcPath, 'utf8');
-  const plugins = [postcssImport, postcssPresetEnv, cssnano];
+  const plugins = [
+    postcssImport({ filter: (spec) => !RAW_IMPORTS.has(spec) }),
+    presetEnv,
+    cssnano,
+  ];
   const result = await postcss(plugins).process(css, { from: cssSrcPath });
   return result.css;
 }

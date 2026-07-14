@@ -1,5 +1,6 @@
+@layer reset, pagefind;
 @import url('@dmkishi/css-reset/dist/reset.css') layer(reset);
-@import url('@pagefind/component-ui/css/pagefind-component-ui.css');
+@import url('../pagefind/pagefind-component-ui.css') layer(pagefind);
 
 :root {
   --max-width: 700px;

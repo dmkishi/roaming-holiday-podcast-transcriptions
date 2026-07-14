@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "browserslistrc",
     "eleventy",
     "enablejsapi",
     "Essentia",
@@ -13,6 +14,8 @@
     "Timecode",
     "tsgolint",
     "Umami",
+    "unlayered",
+    "unpolyfilled",
     "venv"
   ]
 }
