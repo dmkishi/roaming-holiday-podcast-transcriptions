@@ -24,20 +24,19 @@ const CSS_DIR = 'www/src/css';
 const pluralize = (word, count) => pluralizeShared(count, word);
 
 /**
- * Bundle and minify CSS, precompile entrypoints so `hashUrl` reflects the
- * resolved output, and register the `hashUrl` filter for cache busting.
+ * Bundles, polyfills, and minifies CSS.
  *
- * - isProd = true on `pnpm www:build` (runMode `build`),
- * - isProd = false on `pnpm www:dev` (runMode `serve`).
+ * - Prod (`pnpm www:build`, runMode `build`): emits cache-busting hashed URLs.
+ * - Dev (`pnpm www:dev`, runMode `serve`): emits plain URLs.
  */
 function setupCss(eleventyConfig) {
   let isProd = true;
   const cssOutputCache = new Map(); // url (e.g. "/index.css") -> compiled css
 
-  // Bundle CSS imports and minify. In production, also apply postcss-preset-env.
+  // Bundle, polyfill, and minify.
   async function compileCss(inputPath) {
     const css = await readFile(inputPath, 'utf8');
-    const plugins = [postcssImport, ...(isProd ? [postcssPresetEnv] : []), cssnano];
+    const plugins = [postcssImport, postcssPresetEnv, cssnano];
     const result = await postcss(plugins).process(css, { from: inputPath });
     return result.css;
   }
