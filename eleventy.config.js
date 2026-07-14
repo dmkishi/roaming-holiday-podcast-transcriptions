@@ -28,22 +28,22 @@ function pluralize(word, count) {
 
 /**
  * Bundle, polyfill, and minify CSS files.
- * @param {string} cssPath
+ * @param {string} cssSrcPath
  * @returns {Promise<string>} Compiled CSS
  */
-async function compileCss(cssPath) {
-  const css = await readFile(cssPath, 'utf8');
+async function compileCss(cssSrcPath) {
+  const css = await readFile(cssSrcPath, 'utf8');
   const plugins = [postcssImport, postcssPresetEnv, cssnano];
-  const result = await postcss(plugins).process(css, { from: cssPath });
+  const result = await postcss(plugins).process(css, { from: cssSrcPath });
   return result.css;
 }
 
 /**
- * @param {string} cssFilePath
+ * @param {string} cssSrcPath
  * @returns {string} Public CSS URL
  */
-function cssCacheKey(cssFilePath) {
-  return `/${path.relative(SRC_DIR, cssFilePath)}`;
+function cssCacheKey(cssSrcPath) {
+  return `/${path.relative(SRC_DIR, cssSrcPath)}`;
 }
 
 /**
@@ -63,24 +63,24 @@ function setupCss(eleventyConfig) {
 
     // Precompile CSS so hashUrl can hash the resolved output (source-file
     // hashing misses changes inside imported partials.)
-    const cssFiles =
+    const cssSrcFiles =
       (await readdir(SRC_CSS_DIR)).filter((file) => file.endsWith('.css') && !file.startsWith('_'));
-    await Promise.all(cssFiles.map(async (file) => {
-      const cssFilePath = path.join(SRC_CSS_DIR, file);
-      const compiledCss = await compileCss(cssFilePath);
-      compiledCssCache.set(cssCacheKey(cssFilePath), compiledCss);
+    await Promise.all(cssSrcFiles.map(async (file) => {
+      const cssSrcPath = path.join(SRC_CSS_DIR, file);
+      const compiledCss = await compileCss(cssSrcPath);
+      compiledCssCache.set(cssCacheKey(cssSrcPath), compiledCss);
     }));
   });
 
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
     outputFileExtension: 'css',
-    compile(_content, cssFilePath) {
-      if (path.basename(cssFilePath).startsWith('_')) return;
+    compile(_content, cssSrcPath) {
+      if (path.basename(cssSrcPath).startsWith('_')) return;
 
       return async () => {
-        const cssUrl = cssCacheKey(cssFilePath);
-        return compiledCssCache.get(cssUrl) ?? await compileCss(cssFilePath);
+        const cssUrl = cssCacheKey(cssSrcPath);
+        return compiledCssCache.get(cssUrl) ?? await compileCss(cssSrcPath);
       };
     },
   });
