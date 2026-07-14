@@ -45,32 +45,34 @@ async function compileCss(cssPath) {
  */
 function setupCss(eleventyConfig) {
   let isProd = true;
-  const cssOutputCache = new Map(); // url (e.g. "/index.css") -> compiled css
+  const compiledCssCache = new Map(); // CSS URL → compiled CSS
 
   eleventyConfig.on('eleventy.before', async ({ runMode }) => {
     isProd = runMode === 'build';
-    cssOutputCache.clear();
+    compiledCssCache.clear();
     if (!isProd) return;
 
-    // Precompile CSS so hashUrl can hash the resolved output; source-file
-    // hashing misses changes inside imported partials.
+    // Precompile CSS so hashUrl can hash the resolved output (source-file
+    // hashing misses changes inside imported partials.)
     const cssFiles =
-      (await readdir(CSS_DIR)).filter((f) => f.endsWith('.css') && !f.startsWith('_'));
+      (await readdir(CSS_DIR)).filter((file) => file.endsWith('.css') && !file.startsWith('_'));
     await Promise.all(cssFiles.map(async (file) => {
-      const compiled = await compileCss(path.join(CSS_DIR, file));
-      cssOutputCache.set(`/css/${file}`, compiled);
+      const cssUrl = `/css/${file}`;
+      const cssFilePath = path.join(CSS_DIR, file);
+      const compiledCss = await compileCss(cssFilePath);
+      compiledCssCache.set(cssUrl, compiledCss);
     }));
   });
 
   eleventyConfig.addTemplateFormats('css');
   eleventyConfig.addExtension('css', {
     outputFileExtension: 'css',
-    compile(_content, inputPath) {
-      if (path.basename(inputPath).startsWith('_')) return;
+    compile(_content, cssFilePath) {
+      if (path.basename(cssFilePath).startsWith('_')) return;
 
       return async () => {
-        const url = `/${path.relative('www/src', inputPath)}`;
-        return cssOutputCache.get(url) ?? await compileCss(inputPath);
+        const cssUrl = `/${path.relative('www/src', cssFilePath)}`;
+        return compiledCssCache.get(cssUrl) ?? await compileCss(cssFilePath);
       };
     },
   });
@@ -79,7 +81,7 @@ function setupCss(eleventyConfig) {
   eleventyConfig.addFilter('hashUrl', (/** @type {string} */ url) => {
     if (!isProd) return url;
     const srcFile = url.endsWith('.js') ? url.replace(/\.js$/u, '.ts') : url;
-    const source = cssOutputCache.get(url) ?? readFileSync(path.join('www/src', srcFile), 'utf8');
+    const source = compiledCssCache.get(url) ?? readFileSync(path.join('www/src', srcFile), 'utf8');
     const hash = createHash('md5').update(source).digest('hex').slice(0, 8);
     return `${url}?v=${hash}`;
   });
