@@ -89,7 +89,7 @@ function setupCss(eleventyConfig) {
   eleventyConfig.addFilter('hashUrl', (/** @type {string} */ url) => {
     if (!isProd) return url;
     const srcFile = url.endsWith('.js') ? url.replace(/\.js$/u, '.ts') : url;
-    const source = compiledCssCache.get(url) ?? readFileSync(path.join('www/src', srcFile), 'utf8');
+    const source = compiledCssCache.get(url) ?? readFileSync(path.join(SRC_DIR, srcFile), 'utf8');
     const hash = createHash('md5').update(source).digest('hex').slice(0, 8);
     return `${url}?v=${hash}`;
   });
@@ -182,7 +182,7 @@ export default function configureEleventy(eleventyConfig) {
    * {% imageUrl 'img/cover.jpg', 600 %} // => "/img/cover-600w.webp"
    */
   eleventyConfig.addShortcode('imageUrl', async (src, width) => {
-    const input = path.join('www/src', src);
+    const input = path.join(SRC_DIR, src);
     const subdir = path.relative('img', path.dirname(src));
     const metadata = await eleventyImage(input, {
       widths: [width],
