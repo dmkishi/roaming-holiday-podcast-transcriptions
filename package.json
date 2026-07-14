@@ -26,7 +26,7 @@
     "@11ty/eleventy-img": "^6.0.4",
     "@dmkishi/css-reset": "^1.3.1",
     "@dmkishi/oxlintrc": "^0.3.0",
-    "@dmkishi/stylelint-config": "^0.0.0",
+    "@dmkishi/stylelint-config": "^0.1.0",
     "@js-temporal/polyfill": "^0.5.1",
     "@types/gh-pages": "^6.1.0",
     "@types/minimist": "^1.2.5",

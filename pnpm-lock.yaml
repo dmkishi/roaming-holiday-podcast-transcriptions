@@ -21,8 +21,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@dmkishi/stylelint-config':
-        specifier: ^0.0.0
-        version: 0.0.0(stylelint@17.14.0(typescript@6.0.3))
+        specifier: ^0.1.0
+        version: 0.1.0(stylelint@17.14.0(typescript@6.0.3))
       '@js-temporal/polyfill':
         specifier: ^0.5.1
         version: 0.5.1
@@ -494,8 +494,8 @@ packages:
   '@dmkishi/oxlintrc@0.3.0':
     resolution: {integrity: sha512-i53Mkcd5bKNYkChNbBgCSv9PfithBN1LceoLpO3UusFTdzLO7itfYAqrZg4Mn+7geTUx/7dF2KFyMF/mbBjMQA==}
 
-  '@dmkishi/stylelint-config@0.0.0':
-    resolution: {integrity: sha512-Uj5LC8oHZ1NUxD3/0QmagDLjeaZRJ+SzAVA37LtmUoeOpRMECJ0s8NOZSiRDFsT2Bhl8u0Jeav/rgXyoFlU1pg==}
+  '@dmkishi/stylelint-config@0.1.0':
+    resolution: {integrity: sha512-Xil/W2GJ5dey2pSxHsWj+CVFBq984R8GdZXEW8ftSiv/ZV7ScO0ueDVtrsxQex8biSzg1bXvH+LaGJb4Px5ArQ==}
     peerDependencies:
       stylelint: ^17.0.0
 
@@ -3665,7 +3665,7 @@ snapshots:
 
   '@dmkishi/oxlintrc@0.3.0': {}
 
-  '@dmkishi/stylelint-config@0.0.0(stylelint@17.14.0(typescript@6.0.3))':
+  '@dmkishi/stylelint-config@0.1.0(stylelint@17.14.0(typescript@6.0.3))':
     dependencies:
       stylelint: 17.14.0(typescript@6.0.3)
       stylelint-config-clean-order: 10.0.0(stylelint-order@8.1.1(stylelint@17.14.0(typescript@6.0.3)))(stylelint@17.14.0(typescript@6.0.3))
