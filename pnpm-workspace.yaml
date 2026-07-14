@@ -1,3 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
 # Wait one week before installing a newly published version, giving the
 # ecosystem time to catch compromised releases (10080 minutes = 1 week.)
 minimumReleaseAge: 10080
