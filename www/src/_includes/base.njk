@@ -8,13 +8,13 @@
       <script src="{{ src | hashUrl }}" type="module"></script>
     {% endfor %}
 
+    {# Umami analytics #}
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
+
     {# Pagefind search #}
     {% if not isAboutPage %}
       <script src="/pagefind/pagefind-component-ui.js" type="module"></script>
     {% endif %}
-
-    {# Umami analytics #}
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
 
     <title>
       {% if title %}
