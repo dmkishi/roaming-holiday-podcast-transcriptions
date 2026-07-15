@@ -35,23 +35,6 @@
   --color-tint-1: rgb(from var(--color-black) r g b / 5%);
   --color-tint-2: rgb(from var(--color-black) r g b / 15%);
   --color-warning: #ce5656;
-
-  --pf-text: var(--color-black);
-  --pf-mark: var(--color-black);
-  --pf-background: var(--color-bg);
-  --pf-border: var(--color-tint-2);
-  --pf-border-focus: var(--color-black);
-  --pf-outline-focus: var(--color-black);
-  --pf-hover: var(--color-tint-1);
-  --pf-border-radius: 0;
-  --pf-font: inherit;
-}
-
-/* Hide the searchbox until the web component upgrades. This avoids a flash, or
- * a bare element when the /pagefind/ bundle hasn't been built yet.
- */
-pagefind-searchbox:not(:defined) {
-  display: none;
 }
 
 html {
@@ -209,6 +192,33 @@ a {
     &&::after {
       top: calc(-.2em + var(--click-offset));
     }
+  }
+}
+
+pagefind-searchbox {
+  --pf-text: var(--color-black);
+  --pf-background: var(--color-bg);
+  --pf-border: var(--color-tint-2);
+  --pf-border-focus: var(--color-black);
+  --pf-hover: var(--color-tint-1);
+  --pf-mark: var(--color-black);
+  --pf-outline-focus: var(--color-black);
+  --pf-font: inherit;
+  --pf-border-radius: 0;
+  --pf-searchbox-max-width: auto;
+
+  margin-top: 1em;
+
+  /* Hide the searchbox until the web component upgrades. This avoids a flash or
+   * a bare element when the `/pagefind/` bundle hasn't been built yet.
+   */
+  &:not(:defined) {
+    display: none;
+  }
+
+  mark {
+    font-weight: normal;
+    background-color: yellow;
   }
 }
 

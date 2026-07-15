@@ -45,7 +45,11 @@
         </p>
 
         <pagefind-config bundle-path="{{ '/pagefind/' | url }}"></pagefind-config>
-        <pagefind-searchbox placeholder="Search transcripts…"></pagefind-searchbox>
+        <pagefind-searchbox
+          placeholder="Search transcripts…"
+          hide-shortcut
+          show-keyboard-hints=false
+        ></pagefind-searchbox>
       {% endif %}
     </header>
 
