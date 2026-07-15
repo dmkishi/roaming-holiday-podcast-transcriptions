@@ -10,7 +10,7 @@ isAboutPage: true
 
   <p>{{ site.descriptionHtml | safe }}</p>
 
-  <p>This site was created in order to more easily explore the podcast. While Apple Podcast and YouTube do provide transcripts, as of this writing in 2026, it is not possible to search <i>across</i> episodes.</p>
+  <p>This site aims to be a companion to the podcast: a map, a wayfinder, another way to roam the episodes. Concretely, it is a collection of transcripts made cross-episode searchable (unlike on platforms such as Apple Podcasts or YouTube.)</p>
 
   <p>Listen and follow <b>Roaming Holiday</b> at <a href="https://podcasts.apple.com/us/podcast/roaming-holiday/id1708646675">Apple Podcasts</a>, <a href="https://open.spotify.com/show/3SxMKIOKJwbgUs3fbwSncD">Spotify</a>, <a href="https://www.youtube.com/playlist?list=PLHsvN4hgousAB1aBl-dDwIs_JaBMGMvQd">YouTube</a>, and other platforms.</p>
 
@@ -84,4 +84,12 @@ isAboutPage: true
       </dl>
     </section>
   </aside>
+
+  <h2>Technical Notes</h2>
+
+  <p>Episodes are transcribed by a <a href="https://github.com/linto-ai/whisper-timestamped">Whisper</a> speech-recognition model, run with the base model and word-level timestamps.</p>
+
+  <p>Whisper hears speech but not the shape of a conversation, so paragraphing and sectioning are inferred from the audio itself. Paragraph breaks are identified with the <a href="https://github.com/snakers4/silero-vad">Silero voice-activity model</a> which detects speech intervals and episode sections are identified with <a href="https://github.com/MTG/essentia/tree/master">Essentia's</a> fade detector.</p>
+
+  <p>Finally, the site is statically generated with <a href="https://www.11ty.dev/">Eleventy</a> and hosted on <a href="https://pages.github.com/">GitHub Pages</a>. Indexing of transcripts are by <a href="https://pagefind.app/">Pagefind</a>.</p>
 </div>
