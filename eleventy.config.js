@@ -1,7 +1,7 @@
 import cssnano from 'cssnano';
 import { HtmlBasePlugin } from '@11ty/eleventy';
 import eleventyImage from '@11ty/eleventy-img';
-import { transform as esbuildTransform } from 'esbuild';
+import { stop as esbuildStop, transform as esbuildTransform } from 'esbuild';
 import { minify } from 'html-minifier-terser';
 import postcss from 'postcss';
 import postcssImport from 'postcss-import';
@@ -118,6 +118,18 @@ function setupCss(eleventyConfig) {
 }
 
 export default function configureEleventy(eleventyConfig) {
+  // Hard shutdown guard: a ctrl + c (or SIGTERM) on `eleventy --serve` can
+  // leave orphaned `node` and `esbuild ` processes behind when a rebuild is
+  // mid-flight. This is due to the serve process not exiting on ctrl + c. The
+  // hard shutdown guard bypasses Eleventy's graceful SIGINT handler and calls
+  // `process.exit(0)` to force an immediate exit.
+  for (const signal of ['SIGINT', 'SIGTERM']) {
+    process.once(signal, () => {
+      void esbuildStop(); // fire-and-forget; process.exit below wins the race
+      process.exit(0);
+    });
+  }
+
   // In `--watch` or `--serve` mode, ignore changes to a template's imported
   // JS/TS dependencies. Restart the dev server to pick those up.
   eleventyConfig.setWatchJavaScriptDependencies(false);
