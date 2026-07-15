@@ -9,7 +9,9 @@
     {% endfor %}
 
     {# Pagefind search #}
-    <script src="/pagefind/pagefind-component-ui.js" type="module"></script>
+    {% if not isAboutPage %}
+      <script src="/pagefind/pagefind-component-ui.js" type="module"></script>
+    {% endif %}
 
     {# Umami analytics #}
     <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
@@ -41,10 +43,10 @@
           {{- site.descriptionHtml | safe }}
           <a href="/about.html" class="site-header--about-link">About this site</a>
         </p>
-      {% endif %}
 
-      <pagefind-config bundle-path="{{ '/pagefind/' | url }}"></pagefind-config>
-      <pagefind-searchbox placeholder="Search transcripts…"></pagefind-searchbox>
+        <pagefind-config bundle-path="{{ '/pagefind/' | url }}"></pagefind-config>
+        <pagefind-searchbox placeholder="Search transcripts…"></pagefind-searchbox>
+      {% endif %}
     </header>
 
     <main>
