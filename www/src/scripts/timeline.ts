@@ -3,8 +3,6 @@
  * words.
  */
 (function initTimeline() {
-  'use strict';
-
   const transcript = document.querySelector<HTMLElement>('[data-transcript]');
   if (!transcript) return;
 

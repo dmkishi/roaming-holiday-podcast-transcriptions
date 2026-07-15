@@ -7,8 +7,6 @@ function track(name: string, data?: Record<string, unknown>): void {
 }
 
 (function initYouTube() {
-  'use strict';
-
   const videoElement = document.querySelector('.js-video');
   if (!(videoElement instanceof HTMLElement)) return;
 
