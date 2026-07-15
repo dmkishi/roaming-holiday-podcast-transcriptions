@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {# Site Resources #}
     <link rel="stylesheet" href="{{ stylesheet | hashUrl }}">
     {% for src in scripts %}
       <script src="{{ src | hashUrl }}" type="module"></script>
     {% endfor %}
 
-    {# Umami analytics #}
+    {# Vendor Resources #}
     <script defer src="https://cloud.umami.is/script.js" data-website-id="fd878e03-5c0c-4633-bee0-131855510981"></script>
-
-    {# Pagefind search #}
     {% if not isAboutPage %}
       <script src="/pagefind/pagefind-component-ui.js" type="module"></script>
     {% endif %}
