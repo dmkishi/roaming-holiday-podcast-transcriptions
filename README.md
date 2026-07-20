@@ -50,8 +50,9 @@ pnpm transcribe 101 --only-paragraphs
 # Force transcript-pipeline stages to re-run. Forcing a stage cascades to
 # every downstream stage that consumes its output (rss → download → gaps →
 # transcribe). `--force-rss` is isolated: refetching the feed only refreshes
-# metadata. Fade runs in the paragraph phase, so `--force-fade` is valid in
-# `--only-paragraphs` mode; `--force-download` also cascades into fade.
+# metadata (to refresh sidecars without transcribing, see `pnpm sync-rss`.) Fade
+# runs in the paragraph phase, so `--force-fade` is valid in `--only-paragraphs`
+# mode; `--force-download` also cascades into fade.
 pnpm transcribe 101 --force-rss         # Re-download the RSS feed
 pnpm transcribe 101 --force-download    # Re-download the MP3
 pnpm transcribe 101 --force-gaps        # Re-run gap detection
@@ -73,6 +74,29 @@ pnpm transcribe 101 --force-all
   - `NNN.pcm`
   - `NNN.chunk-NN.mp3`
   - `NNN.chunk-NN.mp3.words.json`
+
+Sync RSS
+--------------------------------------------------------------------------------
+Refreshes the `NNN.rss.json` sidecars from the live feed without running the
+transcribe pipeline (no MP3 download, gap/fade detection, or Whisper.) Use it
+when an episode's upstream title or description changes after it was
+transcribed.
+
+```sh
+# Refresh every committed sidecar from a single feed fetch.
+pnpm sync-rss
+
+# Create-or-update sidecars for specific episodes, or a range.
+pnpm sync-rss 101 [102 103] [120-129]
+
+# Bypass the feed's ETag cache to force a full re-fetch — use when you suspect
+# the upstream metadata changed but the cached copy isn't picking it up.
+pnpm sync-rss 101 --force-rss
+```
+
+Note the asymmetry: naming episodes *creates* a sidecar even for an episode
+that was never transcribed, while the no-arg default only *refreshes* episodes
+that already have one.
 
 Build
 --------------------------------------------------------------------------------

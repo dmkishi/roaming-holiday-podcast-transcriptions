@@ -5,11 +5,11 @@ import type { FailResponse } from '#lib/transcribe-episodes/types.ts';
 import {
   chooseCutPoints, splitMp3IntoChunks, whisperChunk, mergeChunkTranscripts,
 } from '#lib/transcribe-episodes/audioChunk.ts';
-import type { Episode } from '#lib/transcribe-episodes/episode.ts';
 import {
   paths, hasTranscript, hasGaps, readGaps,
 } from '#lib/shared/artifacts.ts';
 import { fromSeconds, type Duration } from '#lib/shared/duration.ts';
+import type { Episode } from '#lib/shared/episode.ts';
 import { errorMessage } from '#lib/shared/errors.ts';
 import { VENV_PYTHON, VENV_WHISPER } from '#lib/shared/paths.ts';
 import type { Segment } from '#lib/shared/schemas.ts';

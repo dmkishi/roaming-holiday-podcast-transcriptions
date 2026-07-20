@@ -8,6 +8,7 @@
   },
   "scripts": {
     "transcribe": "node bin/transcribe-episodes.ts",
+    "sync-rss": "node bin/sync-rss.ts",
     "www:dev": "eleventy --serve --incremental",
     "www:build": "eleventy && pagefind --site www/dist",
     "www:deploy": "pnpm www:build && node bin/deploy-www.ts",

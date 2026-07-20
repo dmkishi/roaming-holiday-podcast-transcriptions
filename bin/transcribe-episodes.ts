@@ -1,6 +1,5 @@
 import pc from 'picocolors';
 import { getTranscribeCliArgs } from '#lib/transcribe-episodes/cli.ts';
-import { findEpisodes } from '#lib/transcribe-episodes/episode.ts';
 import { downloadMp3 } from '#lib/transcribe-episodes/mp3.ts';
 import { detectGaps } from '#lib/transcribe-episodes/audioGaps.ts';
 import { runFade } from '#lib/transcribe-episodes/audioFade.ts';
@@ -10,14 +9,14 @@ import {
 } from '#lib/transcribe-episodes/transcript.ts';
 import { buildParagraphs } from '#lib/transcribe-episodes/paragraph.ts';
 import {
-  paths, hasRss, readRss, writeRss, hasMp3, hasGaps, hasFade,
+  paths, hasRss, readRss, hasMp3, hasGaps, hasFade,
   hasTranscript, readTranscript, writeTranscript,
 } from '#lib/shared/artifacts.ts';
+import { fetchAndWriteRss } from '#lib/shared/fetchAndWriteRss.ts';
 import type { ParagraphSegment } from '#lib/shared/schemas.ts';
 import { formatDate, formatNumber, pluralize } from '#lib/shared/strings.ts';
 import { toRelative } from '#lib/shared/paths.ts';
 import { print, printLog } from '#lib/shared/print.ts';
-import { getAllRssItems } from '#lib/shared/rss.ts';
 import { RSS_FEED_URL } from '#lib/config/rss.ts';
 
 // =============================================================================
@@ -54,38 +53,30 @@ if (cli.runParagraph) await buildTranscripts();
  * Fill `segmentsByEpisode` via the full pipeline: feed, MP3s, gaps, Whisper.
  */
 async function transcribeFromFeed(): Promise<void> {
-  // Get RSS feed --------------------------------------------------------------
+  // Fetch RSS feed and write RSS sidecar file(s) ------------------------------
   print.info('Fetching RSS feed...');
-  const feed = await getAllRssItems(RSS_FEED_URL, cli.forceRss);
-  if (feed.status === 'failed') {
+  const rss = await fetchAndWriteRss(cli.episodeNums, cli.forceRss);
+  if (rss.status === 'failed') {
     printLog.error(`Failed to fetch RSS feed <${RSS_FEED_URL}>`);
     process.exit(1);
   }
-  printLog.info(`RSS feed: ${feed.items.length} items (${pc.blue(feed.status)})`);
+  printLog.info(`RSS feed: ${rss.itemCount} items (${pc.blue(rss.feedStatus)})`);
 
-  // Write episode RSS sidecar file(s)------------------------------------------
-  const episodes = findEpisodes(feed.items, cli.episodeNums);
-  const foundEpisodeNums = episodes.map((e) => e.episodeNumber);
-  if (episodes.length < cli.episodeNums.size) {
-    if (episodes.length === 0) {
+  if (rss.missing.length > 0) {
+    if (rss.written.length === 0) {
       printLog.error('No episodes found');
       process.exit(1);
     }
-    const missingEpisodeNums = [...cli.episodeNums].filter((num) => !foundEpisodeNums.includes(num));
     printLog.warn(
-      `${pluralize(missingEpisodeNums.length, 'Episode')} NOT found: ${missingEpisodeNums.map((num) => pc.red(num)).join(', ')}`,
+      `${pluralize(rss.missing.length, 'Episode')} NOT found: ${rss.missing.map((num) => pc.red(num)).join(', ')}`,
     );
   } else {
     printLog.info(
-      `Found all requested ${pluralize(foundEpisodeNums.length, 'episode')}: ${foundEpisodeNums.join(', ')}`,
+      `Found all requested ${pluralize(rss.written.length, 'episode')}: ${rss.written.map((w) => w.episode.episodeNumber).join(', ')}`,
     );
   }
 
-  for (const episode of episodes) {
-    const filepath = writeRss(episode.episodeNumber, {
-      ...episode,
-      pubDate: episode.pubDate.toISOString(),
-    });
+  for (const { episode, filepath } of rss.written) {
     printLog.info([
       `#${episode.episodeNumber}: Saved "${toRelative(filepath)}"`,
       `  Title:        "${episode.title}"`,
@@ -93,6 +84,8 @@ async function transcribeFromFeed(): Promise<void> {
     ]);
   }
   print.emptyLine();
+
+  const episodes = rss.written.map((w) => w.episode);
 
   // Make transcription requests -----------------------------------------------
   print.info('Preparing for transcription...');

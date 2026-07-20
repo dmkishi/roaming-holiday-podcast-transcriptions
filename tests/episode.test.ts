@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { findEpisodes } from '#lib/transcribe-episodes/episode.ts';
+import { findEpisodes } from '#lib/shared/episode.ts';
 import type { RssItem } from '#lib/shared/rss.ts';
 
 function makeItem(overrides: Partial<RssItem> & { guid: string }): RssItem {
