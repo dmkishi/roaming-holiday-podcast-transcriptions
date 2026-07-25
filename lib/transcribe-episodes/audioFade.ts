@@ -30,7 +30,7 @@ export async function runFade(
     const pcmPath = await decodePcm(mp3Path);
     const fades = await detectFades(pcmPath);
     const fadePairs = pairFades(fades, FADE_PAIR_MAX_GAP_SECONDS);
-    const fadePath = writeFade(episodeNumber, { fades: fadePairs });
+    const { path: fadePath } = writeFade(episodeNumber, { fades: fadePairs });
 
     return {
       ok: true,

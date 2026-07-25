@@ -44,7 +44,7 @@ export async function detectGaps(
     const pcmPath = await decodePcm(mp3Path);
     const { pcmSeconds, speechIntervals } = await detectSpeechIntervals(pcmPath);
 
-    const gapsPath = writeGaps(episodeNumber, {
+    const { path: gapsPath } = writeGaps(episodeNumber, {
       // Measured PCM length, the source of truth for chunk math. The RSS
       // `itunes:duration` (whole-second, sometimes inaccurate) can disagree
       // with the actual audio and isn't consistent with the gaps below.

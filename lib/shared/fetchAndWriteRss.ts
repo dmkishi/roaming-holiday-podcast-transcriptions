@@ -38,7 +38,7 @@ export async function fetchAndWriteRss(
     filepath: writeRss(episode.episodeNumber, {
       ...episode,
       pubDate: episode.pubDate.toISOString(),
-    }),
+    }).path,
   }));
 
   return {

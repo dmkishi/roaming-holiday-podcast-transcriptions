@@ -266,7 +266,7 @@ async function buildTranscripts(): Promise<void> {
     }
     const { paragraphGroups, stats } = paragraphsRes;
 
-    const path = writeTranscript(episodeNumber, { paragraphGroups });
+    const { path } = writeTranscript(episodeNumber, { paragraphGroups });
     printLog.info([
       `#${episodeNumber}: Saved "${toRelative(path)}"`,
       `  Paragraphs: ${formatNumber(stats.paragraphs)}`,

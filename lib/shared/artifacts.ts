@@ -15,6 +15,12 @@ type GapsFile = z.infer<typeof GapsFileSchema>;
 type FadeFile = z.infer<typeof FadeFileSchema>;
 export type TranscriptFile = z.infer<typeof TranscriptFileSchema>;
 
+/** Outcome of a sidecar write: its path and whether the file was rewritten. */
+interface WriteResult {
+  path: string;
+  changed: boolean;
+}
+
 const SUFFIX = {
   rss: '.rss.json',
   gaps: '.audio-gaps.json',
@@ -56,10 +62,26 @@ function readJson<S extends z.ZodType>(path: string, schema: S): z.infer<S> {
   return schema.parse(JSON.parse(readFileSync(path, 'utf8')));
 }
 
-function writeJson<S extends z.ZodType>(path: string, schema: S, data: z.infer<S>): string {
+export function writeJson<S extends z.ZodType>(
+  path: string,
+  schema: S,
+  data: z.infer<S>,
+): WriteResult {
+  const next = toPrettyJson(schema.parse(data));
+  // Raw string comparison: a corrupt or hand-edited file simply fails the
+  // equality check and gets rewritten, rather than throwing on JSON.parse.
+  if (existsSync(path) && readFileSync(path, 'utf8') === next) {
+    return {
+      path,
+      changed: false,
+    };
+  }
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, toPrettyJson(schema.parse(data)));
-  return path;
+  writeFileSync(path, next);
+  return {
+    path,
+    changed: true,
+  };
 }
 
 export const readRss = (n: number): RssFile =>
@@ -71,13 +93,13 @@ export const readFade = (n: number): FadeFile =>
 export const readTranscript = (n: number): TranscriptFile =>
   readJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema);
 
-export const writeRss = (n: number, data: RssFile): string =>
+export const writeRss = (n: number, data: RssFile): WriteResult =>
   writeJson(pathFor(n, SUFFIX.rss), RssFileSchema, data);
-export const writeGaps = (n: number, data: GapsFile): string =>
+export const writeGaps = (n: number, data: GapsFile): WriteResult =>
   writeJson(pathFor(n, SUFFIX.gaps), GapsFileSchema, data);
-export const writeFade = (n: number, data: FadeFile): string =>
+export const writeFade = (n: number, data: FadeFile): WriteResult =>
   writeJson(pathFor(n, SUFFIX.fade), FadeFileSchema, data);
-export const writeTranscript = (n: number, data: TranscriptFile): string =>
+export const writeTranscript = (n: number, data: TranscriptFile): WriteResult =>
   writeJson(pathFor(n, SUFFIX.transcript), TranscriptFileSchema, data);
 
 /**
