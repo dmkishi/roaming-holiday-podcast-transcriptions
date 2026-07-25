@@ -1,10 +1,10 @@
 Roaming Holiday Podcast Transcriptions
 ================================================================================
 An end-to-end toolchain for the Roaming Holiday Podcast Transcription website.
-It fetches episodes from the podcast RSS feed, transcribes them with Whisper
-(word-level timestamps, speech-gap and fade detection for paragraphing), and
-builds an Eleventy static site deployed to GitHub Pages at
-<https://dmkishi.github.io/roaming-holiday-podcast-transcriptions/>.
+It fetches episodes from the [podcast RSS feed](https://keithcourage.com/rh/rss/rss.xml),
+transcribes them with Whisper (word-level timestamps, speech-gap and fade
+detection for paragraphing), and builds an Eleventy static site deployed to
+GitHub Pages at <https://dmkishi.github.io/roaming-holiday-podcast-transcriptions/>.
 
 Install
 --------------------------------------------------------------------------------
@@ -38,14 +38,14 @@ pnpm transcribe 101 [102 103] [120-129]
 # Select Whisper model (default: `base`)
 pnpm transcribe 101 --model small
 
-# Skip the transcript pipeline and only re-run tail stages from existing
-# transcripts. Tail stages (paragraphs, paragraph groups) always regenerate
-# when they run, so they have no force flags.
+# Skip the transcript pipeline and only rebuild paragraphs and paragraph groups
+# from the existing transcript. It also runs the fade stage (and will download
+# the MP3 if needed for the fade.)
 #
 # Note: Combining this with a transcript-stage force flag (--force-all/rss/
 # download/gaps/transcribe) is rejected as a contradiction; only --force-fade is
 # valid here.
-pnpm transcribe 101 --only-paragraphs  # Rebuild paragraphs + groups only
+pnpm transcribe 101 --only-paragraphs
 
 # Force transcript-pipeline stages to re-run. Forcing a stage cascades to
 # every downstream stage that consumes its output (rss → download → gaps →
