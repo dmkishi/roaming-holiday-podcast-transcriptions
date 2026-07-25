@@ -3,9 +3,10 @@ import { findEpisodes, type Episode } from '#lib/shared/episode.ts';
 import { getAllRssItems } from '#lib/shared/rss.ts';
 import { RSS_FEED_URL } from '#lib/config/rss.ts';
 
-interface WrittenSidecar {
+interface FoundSidecar {
   episode: Episode;
   filepath: string;
+  changed: boolean;
 }
 
 type FetchAndWriteRssResult =
@@ -14,7 +15,7 @@ type FetchAndWriteRssResult =
       status: 'ok';
       feedStatus: 'downloaded' | 'cached';
       itemCount: number;
-      written: WrittenSidecar[];
+      found: FoundSidecar[];
       missing: number[];
     };
 
@@ -30,22 +31,22 @@ export async function fetchAndWriteRss(
   if (feed.status === 'failed') return { status: 'failed' };
 
   const episodes = findEpisodes(feed.items, episodeNums);
-  const found = new Set(episodes.map((e) => e.episodeNumber));
-  const missing = [...episodeNums].filter((num) => !found.has(num));
+  const foundNums = new Set(episodes.map((e) => e.episodeNumber));
+  const missing = [...episodeNums].filter((num) => !foundNums.has(num));
 
-  const written = episodes.map((episode) => ({
-    episode,
-    filepath: writeRss(episode.episodeNumber, {
+  const found = episodes.map((episode) => {
+    const { path, changed } = writeRss(episode.episodeNumber, {
       ...episode,
       pubDate: episode.pubDate.toISOString(),
-    }).path,
-  }));
+    });
+    return { episode, filepath: path, changed };
+  });
 
   return {
     status: 'ok',
     feedStatus: feed.status,
     itemCount: feed.items.length,
-    written,
+    found,
     missing,
   };
 }

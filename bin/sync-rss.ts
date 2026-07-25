@@ -51,7 +51,7 @@ if (rss.status === 'failed') {
 printLog.info(`RSS feed: ${rss.itemCount} items (${pc.blue(rss.feedStatus)})`);
 
 if (rss.missing.length > 0) {
-  if (rss.written.length === 0) {
+  if (rss.found.length === 0) {
     printLog.error('No episodes found');
     process.exit(1);
   }
@@ -60,14 +60,23 @@ if (rss.missing.length > 0) {
   );
 } else {
   printLog.info(
-    `Found all requested ${pluralize(rss.written.length, 'episode')}: ${rss.written.map((w) => w.episode.episodeNumber).join(', ')}`,
+    `Found all requested ${pluralize(rss.found.length, 'episode')}: ${rss.found.map((f) => f.episode.episodeNumber).join(', ')}`,
   );
 }
 
-for (const { episode, filepath } of rss.written) {
+const written = rss.found.filter((f) => f.changed);
+const unchanged = rss.found.filter((f) => !f.changed);
+
+for (const { episode, filepath } of written) {
   printLog.info([
     `#${episode.episodeNumber}: Saved "${toRelative(filepath)}"`,
     `  Title:        "${episode.title}"`,
     `  Publish date: ${formatDate(episode.pubDate)}`,
   ]);
+}
+
+if (unchanged.length > 0) {
+  printLog.info(
+    `${pluralize(unchanged.length, 'Episode')} unchanged (skipped): ${unchanged.map((f) => f.episode.episodeNumber).join(', ')}`,
+  );
 }
