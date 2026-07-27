@@ -17,6 +17,7 @@
 
 .episode--video {
   aspect-ratio: 16/9;
+  width: 100%;
   max-width: var(--max-width-video);
   transition: width .2s ease, box-shadow .2s ease;
 }
