@@ -147,10 +147,18 @@ Upload Cloudflare
 --------------------------------------------------------------------------------
 Upload episode markdown files to Cloudflare.
 
+```sh
+pnpm upload-cloudflare 101 [102 103] [120-129] [--force]
+```
+
 Website
 --------------------------------------------------------------------------------
 ### Analytics
-<https://cloud.umami.is/analytics/us/websites/fd878e03-5c0c-4633-bee0-131855510981>
+Traffic is tracked with [Umami Analytics](https://cloud.umami.is/analytics/us/websites/fd878e03-5c0c-4633-bee0-131855510981). To [exclude a browser](https://docs.umami.is/docs/exclude-my-own-visits), enter the following into the console:
+
+```js
+localStorage.setItem('umami.disabled', 1);
+```
 
 Models
 --------------------------------------------------------------------------------
