@@ -43,7 +43,8 @@
           {{- site.descriptionHtml | safe }}
           <a href="/about.html" class="site-header--about-link">About this site</a>
         </p>
-
+      {% endif %}
+      {% if not isAboutPage and not isAiChatPage %}
         <pagefind-config bundle-path="{{ '/pagefind/' | url }}"></pagefind-config>
         <pagefind-searchbox
           placeholder="Search transcripts…"
@@ -57,11 +58,13 @@
       {{ content | safe }}
     </main>
 
-    <footer class="site-footer wrapper">
-      <nav class="site-footer-nav">
-        <a href="#" class="site-footer--top-link no-highlight">Return to top</a>
-      </nav>
-    </footer>
+    {% if not isAiChatPage %}
+      <footer class="site-footer wrapper">
+        <nav class="site-footer-nav">
+          <a href="#" class="site-footer--top-link no-highlight">Return to top</a>
+        </nav>
+      </footer>
+    {% endif %}
 
     {% if isIndexPage %}
       <script type="application/ld+json">

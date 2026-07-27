@@ -1,0 +1,22 @@
+---
+layout: base.njk
+permalink: /ai-chat.html
+stylesheet: /css/ai-chat.css
+title: AI Chat
+noindex: true
+isAiChatPage: true
+---
+<div class="wrapper">
+  <header>
+    <h1>AI Chat</h1>
+    <p>Ask a question and get answers drawn from episode transcripts.</p>
+  </header>
+
+  <script
+    type="module"
+    src="https://aca947a7-84c8-4dfc-9ca0-9c0f744e7a46.search.ai.cloudflare.com/assets/v0.0.40/search-snippet.es.js"
+  ></script>
+  <chat-page-snippet
+    api-url="https://aca947a7-84c8-4dfc-9ca0-9c0f744e7a46.search.ai.cloudflare.com/"
+  ></chat-page-snippet>
+</div>

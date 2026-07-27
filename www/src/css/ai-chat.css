@@ -1,0 +1,6 @@
+@import url('./_base.css');
+
+chat-page-snippet {
+  max-height: 1050px;
+  margin-top: 1.25em;
+}
