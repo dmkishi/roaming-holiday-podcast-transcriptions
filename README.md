@@ -6,6 +6,16 @@ transcribes them with Whisper (word-level timestamps, speech-gap and fade
 detection for paragraphing), and builds an Eleventy static site deployed to
 GitHub Pages at <https://dmkishi.github.io/roaming-holiday-podcast-transcriptions/>.
 
+- [Install](#install)
+- [Transcribe](#transcribe)
+- [Sync RSS](#sync-rss)
+- [Build](#build)
+- [Deploy](#deploy)
+- [Upload Cloudflare](#upload-cloudflare)
+- [Website](#website)
+- [New Episodes](#new-episodes)
+- [Models](#models)
+
 Install
 --------------------------------------------------------------------------------
 ```sh
