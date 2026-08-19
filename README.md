@@ -160,6 +160,27 @@ Traffic is tracked with [Umami Analytics](https://cloud.umami.is/analytics/us/we
 localStorage.setItem('umami.disabled', 1);
 ```
 
+New Episodes
+--------------------------------------------------------------------------------
+Add a new property in [episode-supplements.yaml](episode-supplements.yaml) with
+metadata.
+
+```yaml
+1: # Episode number, no leading zeros
+  isInterlude: false # Occasionally there is an out-of-chronology episode
+  location: 'CITY, COUNTRY' # Try to keep consistent with others
+  youtube: https://www.youtube.com/watch?v=EPISODE_ID
+```
+
+Then run the script below which does everything else. It fetches the new RSS
+feed, transcribes new episode N, builds the new episode page with a refreshed
+Pagefind search index, deploys it, and uploads the episode markdown to
+Cloudflare for the AI-LLM chat.
+
+```sh
+pnpm new-episode N
+```
+
 Models
 --------------------------------------------------------------------------------
 ### Transcription Models (OpenAI Whisper)

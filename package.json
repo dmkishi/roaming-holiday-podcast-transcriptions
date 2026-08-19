@@ -7,6 +7,7 @@
     "#lib/*": "./lib/*"
   },
   "scripts": {
+    "new-episode": "sh -c 'pnpm transcribe \"$@\" && pnpm www:deploy' --",
     "transcribe": "node bin/transcribe-episodes.ts",
     "sync-rss": "node bin/sync-rss.ts",
     "www:dev": "eleventy --serve --incremental",
