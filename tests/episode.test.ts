@@ -2,6 +2,9 @@ import { describe, expect, test } from 'vitest';
 import { findEpisodes } from '#lib/shared/episode.ts';
 import type { RssItem } from '#lib/shared/rss.ts';
 
+const SELF_LINK =
+  'https://dmkishi.github.io/roaming-holiday-podcast-transcriptions/';
+
 function makeItem(overrides: Partial<RssItem> & { guid: string }): RssItem {
   return {
     title: 'Test Episode',
@@ -19,6 +22,11 @@ const items: RssItem[] = [
   makeItem({ guid: 'RH002', title: 'Episode Two', description: 'Second' }),
   makeItem({ guid: 'RH010', title: 'Episode Ten' }),
   makeItem({ guid: 'no-match', title: 'Bonus' }),
+  makeItem({
+    guid: 'RH003',
+    title: `Episode Three ${SELF_LINK}`,
+    description: `Areas discussed: Tokyo. Transcripts: ${SELF_LINK}`,
+  }),
 ];
 
 function getSingleEpisode(episodes: ReturnType<typeof findEpisodes>) {
@@ -45,6 +53,16 @@ describe('findEpisodes', () => {
     const episode = getSingleEpisode(findEpisodes(items, new Set([1])));
     expect(episode.title).toBe('Episode One');
     expect(episode.description).toBe('First');
+  });
+
+  test('strips this site\'s back-link from the description', () => {
+    const episode = getSingleEpisode(findEpisodes(items, new Set([3])));
+    expect(episode.description).toBe('Areas discussed: Tokyo.');
+  });
+
+  test('leaves the title untouched', () => {
+    const episode = getSingleEpisode(findEpisodes(items, new Set([3])));
+    expect(episode.title).toBe(`Episode Three ${SELF_LINK}`);
   });
 
   test('defaults description to empty string when undefined', () => {
