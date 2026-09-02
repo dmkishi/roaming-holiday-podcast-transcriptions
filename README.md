@@ -118,6 +118,9 @@ full-text search.
 
 ```sh
 # Build the static site (Eleventy) and index it (Pagefind).
+pnpm www:build-only
+
+# Check first, then build.
 pnpm www:build
 
 # Serve the site locally and watch. (Skips the Pagefind index, so search reflects
